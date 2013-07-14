@@ -1,23 +1,3 @@
-# http://stackoverflow.com/questions/9735449/how-to-verify-whether-the-share-has-write-access
-function Test-Write {
-    [CmdletBinding()]
-    param (
-        [parameter()] [ValidateScript({[IO.Directory]::Exists($_.FullName)})]
-        [IO.DirectoryInfo] $Path
-    )
-    try {
-        $testPath = Join-Path $Path ([IO.Path]::GetRandomFileName())
-        [IO.File]::Create($testPath, 1, 'DeleteOnClose') > $null
-        # Or...
-        <# New-Item -Path $testPath -ItemType File -ErrorAction Stop > $null #>
-        return $true
-    } catch {
-        return $false
-    } finally {
-        Remove-Item $testPath -ErrorAction SilentlyContinue
-    }
-}
-
 Write-Host "Testing User environment variable %PRGS%"
 $prgsInstallVariableName="prgs"
 $prgsDefaultPath="C:\prgs"
