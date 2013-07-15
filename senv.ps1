@@ -64,8 +64,12 @@ if ( ! (Test-Path "$gowDir\bin") ) {
   Write-Host "Must install '$prog' for %PROG%"
   if ( ! (Test-Path "$gowExe") ) {
     Write-Host "Downloading  $gowUrl to $gowExe"
-    $downloader.DownloadFile($gowUrl, $gowFile)
+    if ( Test-Path "$Env:homedrive/$gowExe" ) {
+      Copy-Item -Path "$Env:homedrive/$gowExe" -Destination "gowFile"
+    } else {
+      $downloader.DownloadFile($gowUrl, $gowFile)
+    }
   }
   # http://unattended.sourceforge.net/installers.php
-  $gowFile /S /D=c:\prgs\$gowVer
+  invoke-expression "$gowFile /S /D=c:\prgs\$gowVer"
 }
