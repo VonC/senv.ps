@@ -36,7 +36,7 @@ if ($progPath -eq $null) {
 } 
 else { $prog=$progPath }
 if ( ! (Test-Path "$prog") ) {
-  New-Item -ItemType Directory -Force -Path $progs > $null
+  New-Item -ItemType Directory -Force -Path $prog > $null
   if ( ! (Test-Path "$prog") ) {
     Write-Host "No right to create '$prog' for %PROG%"
     Exit
