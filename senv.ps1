@@ -46,3 +46,26 @@ if ($progPath -eq $null) {
   [Environment]::SetEnvironmentVariable($progInstallVariableName, $prog, "User")
 }
 Write-Host "User environment variable %PROG% set to '$prog'"
+
+$gowVer="Gow-0.7.0"
+$gowExe="$gowVer.exe"
+$gowFile="$prgs\$gowExe"
+$gowDir="$prgs\$gowVer"
+$gowUrl="https://github.com/downloads/bmatzelle/gow/$gowExe"
+
+# http://stackoverflow.com/questions/571429/powershell-web-requests-and-proxies
+$proxy = [System.Net.WebRequest]::GetSystemWebProxy()
+$proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
+$downloader = new-object System.Net.WebClient
+$downloader.proxy = $proxy
+
+
+if ( ! (Test-Path "$gowDir\bin") ) {
+  Write-Host "Must install '$prog' for %PROG%"
+  if ( ! (Test-Path "$gowExe") ) {
+    Write-Host "Downloading  $gowUrl to $gowExe"
+    $downloader.DownloadFile($gowUrl, $gowFile)
+  }
+  # http://unattended.sourceforge.net/installers.php
+  $gowFile /S /D=c:\prgs\$gowVer
+}
