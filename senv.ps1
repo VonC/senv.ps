@@ -1,3 +1,6 @@
+# @powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('file://c:/users/vonc/prog/dwn.ps1'))"
+# @powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('https://gist.github.com/VonC/5995144/raw/senv.ps1'))"
+
 $prgsInstallVariableName="prgs"
 $prgsDefaultPath="C:\prgs"
 $prgsPath = [Environment]::GetEnvironmentVariable($prgsInstallVariableName, [System.EnvironmentVariableTarget]::User)
