@@ -1,5 +1,3 @@
-# @powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('file://c:/users/vonc/prog/dwn.ps1'))"
-# @powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('https://gist.github.com/VonC/5995144/raw/senv.ps1'))"
 
 $prgsInstallVariableName="prgs"
 $prgsDefaultPath="C:\prgs"
@@ -64,7 +62,7 @@ $downloader.proxy = $proxy
 
 
 if ( ! (Test-Path "$gowDir\bin") ) {
-  Write-Host "Must install '$prog' for %PROG%"
+  Write-Host "Must install '$gowVer' in $gowDir"
   if ( ! (Test-Path "$gowExe") ) {
     Write-Host "Downloading  $gowUrl to $gowExe"
     if ( Test-Path "$Env:homedrive/$gowExe" ) {
@@ -76,3 +74,17 @@ if ( ! (Test-Path "$gowDir\bin") ) {
   # http://unattended.sourceforge.net/installers.php
   invoke-expression "$gowFile /S /D=c:\prgs\$gowVer"
 }
+
+# http://technet.microsoft.com/en-us/library/ff730964.aspx
+# http://support.microsoft.com/kb/104011
+# http://blogs.technet.com/b/heyscriptingguy/archive/2011/07/23/use-powershell-to-modify-your-environmental-path.aspx
+# http://stackoverflow.com/questions/714877/setting-windows-powershell-path-variable
+# http://wprogramming.wordpress.com/2011/07/18/appending-to-path-with-powershell/
+
+<#
+PS Env:\> $a=(Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH).path.split(';')
+PS Env:\> $b=$a | where { $_ -notmatch "\\H" }
+PS Env:\> $b -join ";"
+
+PS Env:\> ( (Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH).path.split(';') | where { $_ -notmatch "\\H" } ) -join ";"
+#>
