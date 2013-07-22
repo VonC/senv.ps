@@ -1,3 +1,6 @@
+# C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('%userprofile%/prog/senv.ps1'))"
+# C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('%homedrive%/prog/senv.ps1'))"
+# C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('http://gist.github.com/VonC/5995144/raw/e0d69ae979556cd302c86934afaf686b1a39c1c7/senv.ps1'))"
 
 $prgsInstallVariableName="prgs"
 $prgsDefaultPath="C:\prgs"
@@ -75,8 +78,25 @@ if ( ! (Test-Path "$gowDir\bin") ) {
   invoke-expression "$gowFile /S /D=c:\prgs\$gowVer"
 }
 
+function cleanAddPath([String]$cleanPattern, [String]$addPath) {
+  Write-Host "cleanPattern '$cleanPattern'`r`naddPath '$addPath'"
+  # System and user registry keys: http://support.microsoft.com/kb/104011
+  $systemPath=(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).path
+  $newSystemPath=( $systemPath.split(';') | where { $_ -notmatch "$cleanPattern" } ) -join ";"
+  # '`r`n' http://stackoverflow.com/questions/1639291/how-do-i-add-a-newline-to-command-output-in-powershell
+  Write-Host "systemPath    '$systemPath'`r`nnewSystemPath '$newSystemPath'"
+
+  $userPath=(Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH).path
+  # '-or' http://www.powershellpro.com/powershell-tutorial-introduction/powershell-tutorial-conditional-logic/
+  $newUserPath=( $userPath.split(';') | where { $_ -notmatch "$cleanPattern" -or $_ -eq "$addPath" } ) -join ";"
+  Write-Host "userPath    '$userPath'`r`nnewuserPath '$newuserPath'"
+}
+
+# http://weblogs.asp.net/soever/archive/2006/11/29/powershell-calling-a-function-with-parameters.aspx
+cleanAddPath "\\Gow-" "$gowDir\bin"
+
+
 # http://technet.microsoft.com/en-us/library/ff730964.aspx
-# http://support.microsoft.com/kb/104011
 # http://blogs.technet.com/b/heyscriptingguy/archive/2011/07/23/use-powershell-to-modify-your-environmental-path.aspx
 # http://stackoverflow.com/questions/714877/setting-windows-powershell-path-variable
 # http://wprogramming.wordpress.com/2011/07/18/appending-to-path-with-powershell/
