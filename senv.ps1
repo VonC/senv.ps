@@ -76,16 +76,23 @@ if ( ! (Test-Path "$gowDir\bin") ) {
   invoke-expression "$gowFile /S /D=c:\prgs\$gowVer"
 }
 
+# http://serverfault.com/questions/95431/in-a-powershell-script-how-can-i-check-if-im-running-with-administrator-privli
+function Test-Administrator {  
+    $user = [Security.Principal.WindowsIdentity]::GetCurrent();
+    (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
+}
+
 # Modify Path http://blogs.technet.com/b/heyscriptingguy/archive/2011/07/23/use-powershell-to-modify-your-environmental-path.aspx
 # SetEnvironmentVariable http://stackoverflow.com/questions/714877/setting-windows-powershell-path-variable
 # http://wprogramming.wordpress.com/2011/07/18/appending-to-path-with-powershell/
 function cleanAddPath([String]$cleanPattern, [String]$addPath) {
+  $isadmin=Test-Administrator
   Write-Host "cleanPattern '$cleanPattern'`r`naddPath '$addPath'"
   # System and user registry keys: http://support.microsoft.com/kb/104011
   $systemPath=(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).path
   $newSystemPath=( $systemPath.split(';') | where { $_ -notmatch "$cleanPattern" } ) -join ";"
   # '`r`n' http://stackoverflow.com/questions/1639291/how-do-i-add-a-newline-to-command-output-in-powershell
-  if ( $systemPath -ne $newSystemPath ) {
+  if ( $systemPath -ne $newSystemPath -and $isadmin -eq $true ) {
     Write-Host "`r`nsystemPath    '$systemPath'`r`n`r`nnewSystemPath '$newSystemPath'"
     Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name "Path" -Value "$newSystemPath"
   }
