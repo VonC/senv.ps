@@ -1,3 +1,4 @@
+
 # C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('%userprofile%/prog/senv.ps1'))"
 # C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('%homedrive%/prog/senv.ps1'))"
 # C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('http://gist.github.com/VonC/5995144/raw/e0d69ae979556cd302c86934afaf686b1a39c1c7/senv.ps1'))"
@@ -112,4 +113,6 @@ md2 "$prgs\peazip" "peazip"
 $url="http://peazip.sourceforge.net/peazip-portable.html"
 $wc = New-Object System.Net.WebClient 
 $result=$wc.DownloadString($url) 
-Write-Host "result='$result'"
+# http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
+$links = ( $result.split("`"") | where { $_ -match "zip/download" } )
+Write-Host "result='$links'" 
