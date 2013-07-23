@@ -82,6 +82,22 @@ function Test-Administrator {
     (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
 }
 
+# http://stackoverflow.com/questions/8588960/determine-if-current-powershell-process-is-32-bit-or-64-bit
+# Is this a Wow64 powershell host
+function Test-Wow64() {
+    return (Test-Win32) -and (test-path env:\PROCESSOR_ARCHITEW6432)
+}
+
+# Is this a 64 bit process
+function Test-Win64() {
+    return [IntPtr]::size -eq 8
+}
+
+# Is this a 32 bit process
+function Test-Win32() {
+    return [IntPtr]::size -eq 4
+}
+
 # Modify Path http://blogs.technet.com/b/heyscriptingguy/archive/2011/07/23/use-powershell-to-modify-your-environmental-path.aspx
 # SetEnvironmentVariable http://stackoverflow.com/questions/714877/setting-windows-powershell-path-variable
 # http://wprogramming.wordpress.com/2011/07/18/appending-to-path-with-powershell/
@@ -121,5 +137,11 @@ $url="http://peazip.sourceforge.net/peazip-portable.html"
 $wc = New-Object System.Net.WebClient 
 $result=$wc.DownloadString($url) 
 # http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
-$links = ( $result.split("`"") | where { $_ -match "zip/download" } )
+$links = ( $result.split("`"") | where { $_ -match "zip/download" } ) # "
 Write-Host "result='$links'" 
+if ( Test-Win64 ) {
+$alinkl = ( $links.split(" ") | where { $_ -match "WIN64" } ) # "
+} else {
+ $alinkl = ( $links.split("`"") | where { $_ -match "WINDOWS" } ) # "
+}
+Write-Host "result='$alinkl'" 
