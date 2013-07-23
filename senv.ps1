@@ -4,9 +4,9 @@
 
 $prgsInstallVariableName="prgs"
 $prgsDefaultPath="C:\prgs"
+# GetEnvironmentVariable SetEnvironmentVariable http://technet.microsoft.com/en-us/library/ff730964.aspx
 $prgsPath = [Environment]::GetEnvironmentVariable($prgsInstallVariableName, [System.EnvironmentVariableTarget]::User)
 if ($prgsPath -eq $null) {
-  # http://technet.microsoft.com/en-us/library/ff730964.aspx
   Write-Host "%PRGS% (for installing programming tools) isn't defined."
   # http://social.technet.microsoft.com/Forums/exchange/en-US/3fc59659-c9fe-41e3-9d02-fc41e3bc63f4/asking-for-input-in-powershell
   $prgs = Read-Host "Please enter %PRGS% path (default [$prgsDefaultPath])"
@@ -78,33 +78,34 @@ if ( ! (Test-Path "$gowDir\bin") ) {
   invoke-expression "$gowFile /S /D=c:\prgs\$gowVer"
 }
 
+# Modify Path http://blogs.technet.com/b/heyscriptingguy/archive/2011/07/23/use-powershell-to-modify-your-environmental-path.aspx
+# SetEnvironmentVariable http://stackoverflow.com/questions/714877/setting-windows-powershell-path-variable
+# http://wprogramming.wordpress.com/2011/07/18/appending-to-path-with-powershell/
 function cleanAddPath([String]$cleanPattern, [String]$addPath) {
   Write-Host "cleanPattern '$cleanPattern'`r`naddPath '$addPath'"
   # System and user registry keys: http://support.microsoft.com/kb/104011
   $systemPath=(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).path
   $newSystemPath=( $systemPath.split(';') | where { $_ -notmatch "$cleanPattern" } ) -join ";"
   # '`r`n' http://stackoverflow.com/questions/1639291/how-do-i-add-a-newline-to-command-output-in-powershell
-  Write-Host "systemPath    '$systemPath'`r`nnewSystemPath '$newSystemPath'"
-
+  if ( $systemPath -ne $newSystemPath ) {
+    Write-Host "`r`nsystemPath    '$systemPath'`r`n`r`nnewSystemPath '$newSystemPath'"
+    Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name "Path" -Value "$newSystemPath"
+  }
+  
+  $pathAlreadyThere=$false
   $userPath=(Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH).path
   # '-or' http://www.powershellpro.com/powershell-tutorial-introduction/powershell-tutorial-conditional-logic/
-  $newUserPath=( $userPath.split(';') | where { $_ -notmatch "$cleanPattern" -or $_ -eq "$addPath" } ) -join ";"
-  Write-Host "userPath    '$userPath'`r`nnewuserPath '$newuserPath'"
+  $newUserPath=( $userPath.split(';') | where { $_ -notmatch "$cleanPattern" -or ( $_ -eq "$addPath" -and ($pathAlreadyThere=$true) -eq $true ) } ) -join ";"
+  # ( $pathAlreadyThere -eq $false -and ($newSystemPath=$newSystemPath+";ddddddee") -eq $false)
+  if( $pathAlreadyThere -eq $false ) {
+    $newUserPath=$newUserPath+";"+$addPath
+  }
+  if ( $userPath -ne $newUserPath ) {
+    Write-Host "userPath    '$userPath'`r`nnewuserPath '$newuserPath': pathAlreadyThere='$pathAlreadyThere'"
+    Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name "Path" -Value "$newuserPath"
+  }
+
 }
 
 # http://weblogs.asp.net/soever/archive/2006/11/29/powershell-calling-a-function-with-parameters.aspx
 cleanAddPath "\\Gow-" "$gowDir\bin"
-
-
-# http://technet.microsoft.com/en-us/library/ff730964.aspx
-# http://blogs.technet.com/b/heyscriptingguy/archive/2011/07/23/use-powershell-to-modify-your-environmental-path.aspx
-# http://stackoverflow.com/questions/714877/setting-windows-powershell-path-variable
-# http://wprogramming.wordpress.com/2011/07/18/appending-to-path-with-powershell/
-
-<#
-PS Env:\> $a=(Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH).path.split(';')
-PS Env:\> $b=$a | where { $_ -notmatch "\\H" }
-PS Env:\> $b -join ";"
-
-PS Env:\> ( (Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH).path.split(';') | where { $_ -notmatch "\\H" } ) -join ";"
-#>
