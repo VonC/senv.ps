@@ -3,8 +3,8 @@
 # C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('http://gist.github.com/VonC/5995144/raw/e0d69ae979556cd302c86934afaf686b1a39c1c7/senv.ps1'))"
 
 # http://technet.microsoft.com/en-us/library/ff730955.aspx
-function md([string]$apath, [string]$afor){
-  if ( ! (Tes2t-Path "$apath") ) {
+function md2([String]$apath, [String]$afor) {
+  if ( ! (Test-Path "$apath") ) {
     # http://stackoverflow.com/questions/16906170/powershell-create-directory-if-it-does-not-exist
     New-Item -ItemType Directory -Force -Path $apath > $null
     if ( ! (Test-Path "$apath") ) {
@@ -28,7 +28,7 @@ if ($prgsPath -eq $null) {
 } else {
   $prgs=$prgsPath
 }
-md "$prgs" "%PRGS%"
+md2 "$prgs" "PRGS"
 if ($prgsPath -eq $null) {
   [Environment]::SetEnvironmentVariable($prgsInstallVariableName, $prgs, "User")
 }
@@ -42,7 +42,7 @@ if ($progPath -eq $null) {
   if ($prog -eq "") { $prog=$progDefaultPath }
 } 
 else { $prog=$progPath }
-md "$prog" "%PROG%"
+md2 "$prog" "%PROG%"
 if ($progPath -eq $null) {
   [Environment]::SetEnvironmentVariable($progInstallVariableName, $prog, "User")
 }
@@ -107,4 +107,9 @@ function cleanAddPath([String]$cleanPattern, [String]$addPath) {
 # http://weblogs.asp.net/soever/archive/2006/11/29/powershell-calling-a-function-with-parameters.aspx
 cleanAddPath "\\Gow-" "$gowDir\bin"
 
-md "$prgs\peazip" "peazip"
+md2 "$prgs\peazip" "peazip"
+# http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
+$url="http://peazip.sourceforge.net/peazip-portable.html"
+$wc = New-Object System.Net.WebClient 
+$result=$wc.DownloadString($url) 
+Write-Host "result='$result'"
