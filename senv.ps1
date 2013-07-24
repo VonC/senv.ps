@@ -172,3 +172,7 @@ if ( ! (Test-Path "$peazipDir\peazip.exe") ) {
     unzip "$peazipFile" -d "$peazip"
   }
 }
+invoke-expression 'doskey pzx=$peazipDir\res\7z\7z.exe x -aos -o"$2" -pdefault -sccUTF-8 `"`$1`"'
+invoke-expression 'doskey pzc=$peazipDir\res\7z\7z.exe a -tzip -mm=Deflate -mmt=on -mx5 -w `"`$2`" `"`$1`"'
+invoke-expression 'doskey 7z=$peazipDir\res\7z\7z.exe `$*'
+invoke-expression 'doskey alias=doskey /macros'
