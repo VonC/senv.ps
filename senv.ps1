@@ -131,17 +131,32 @@ function cleanAddPath([String]$cleanPattern, [String]$addPath) {
 # http://weblogs.asp.net/soever/archive/2006/11/29/powershell-calling-a-function-with-parameters.aspx
 cleanAddPath "\\Gow-" "$gowDir\bin"
 
-md2 "$prgs\peazip" "peazip"
+$peazipDir="$prgs\peazip"
+md2 "$peazipDir" "peazip"
 # http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
 $url="http://peazip.sourceforge.net/peazip-portable.html"
 $wc = New-Object System.Net.WebClient 
 $result=$wc.DownloadString($url) 
 # http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
 $links = ( $result.split("`"") | where { $_ -match "zip/download" } ) # "
-Write-Host "result='$links'" 
+Write-Host "links='$links'" 
 if ( Test-Win64 ) {
-$alinkl = ( $links.split(" ") | where { $_ -match "WIN64" } ) # "
+$alinkl = ( $links -split " " | where { $_ -match "WIN64" } ) # "
 } else {
- $alinkl = ( $links.split("`"") | where { $_ -match "WINDOWS" } ) # "
+ $alinkl = ( $links -split " " | where { $_ -match "WINDOWS" } ) # "
 }
 Write-Host "result='$alinkl'" 
+
+$peazipArc= $alinkl -split "/" | where { $_ -match "portable" } 
+$peazipArc = "$peazipDir\$peazipArc"
+Write-Host "peazipArc='$peazipArc'" 
+<#
+if ( ! (Test-Path "$gowExe") ) {
+    Write-Host "Downloading  $gowUrl to $gowExe"
+    if ( Test-Path "$Env:homedrive/$gowExe" ) {
+      Copy-Item -Path "$Env:homedrive/$gowExe" -Destination "gowFile"
+    } else {
+      $downloader.DownloadFile($gowUrl, $gowFile)
+    }
+  }
+#>
