@@ -1,3 +1,4 @@
+
 # C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('%userprofile%/prog/senv.ps1'))"
 # C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('%homedrive%/prog/senv.ps1'))"
 # C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('http://gist.github.com/VonC/5995144/raw/e0d69ae979556cd302c86934afaf686b1a39c1c7/senv.ps1'))"
@@ -145,16 +146,29 @@ $peazipUrl = ( $links -split " " | where { $_ -match "WIN64" } ) # "
 }
 Write-Host "result='$peazipUrl'" 
 
-$peazipArc= $peazipUrl -split "/" | where { $_ -match "portable" } 
+$peazipArc  = $peazipUrl -split "/" | where { $_ -match "portable" } 
+# http://technet.microsoft.com/en-us/library/ee692804.aspx The String’s the Thing
+$peazipVer  = $peazipArc.TrimEnd(".zip")
 $peazipFile = "$peazip\$peazipArc"
-$peazipDir = $peazipFile.TrimEnd(".zip")
+$peazipDir  = "$peazip\$peazipVer"
 
 Write-Host "peazipArc='$peazipArc', peazipFile='$peazipFile', peazipDir='$peazipDir', peazipUrl='$peazipUrl'" 
 if ( ! (Test-Path "$peazipFile") ) {
-    Write-Host "Downloading  $peazipUrl to $peazipFile"
-    if ( Test-Path "$Env:homedrive/$peazipArc" ) {
-      Copy-Item -Path "$Env:homedrive/$peazipArc" -Destination "peazipFile"
-    } else {
-      $downloader.DownloadFile($peazipUrl, $peazipFile)
-    }
+  Write-Host "Downloading  $peazipUrl to $peazipFile"
+  if ( Test-Path "$Env:homedrive/$peazipArc" ) {
+    Copy-Item -Path "$Env:homedrive/$peazipArc" -Destination "peazipFile"
+  } else {
+    $downloader.DownloadFile($peazipUrl, $peazipFile)
+  }
+}
+if ( ! (Test-Path "$peazipDir\peazip.exe") ) {
+  $arcHasDir = (unzip -l $peazipFile) -split "`r`n" | where { $_ -match " 0  .*$peazipVer/" }
+  Write-Host "arcHasDir='$arcHasDir'" 
+  # http://techibee.com/powershell/check-if-a-string-is-null-or-empty-using-powershell/1889 : Check if a string is NULL or EMPTY using PowerShell
+  if ( [string]::IsNullOrEmpty($arcHasDir) ) {
+    md2 "$peazipDir" "peazip extract folder"
+    unzip "$peazipFile" -d "$peazipDir"
+  } else {
+    unzip "$peazipFile" -d "$peazip"
+  }
 }
