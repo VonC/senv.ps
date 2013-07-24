@@ -14,40 +14,36 @@ function md2([String]$apath, [String]$afor) {
     }
   }
 }
+function mdEnvPath([String]$aVariableName, [String]$afor, [String]$aDefaultPath)
+{
+  # GetEnvironmentVariable SetEnvironmentVariable http://technet.microsoft.com/en-us/library/ff730964.aspx
+  $aPath = [Environment]::GetEnvironmentVariable($aVariableName, [System.EnvironmentVariableTarget]::User)
+  if ($aPath -eq $null) {
+    Write-Host "%$aVariableName% ($afor) isn't defined."
+    # http://social.technet.microsoft.com/Forums/exchange/en-US/3fc59659-c9fe-41e3-9d02-fc41e3bc63f4/asking-for-input-in-powershell
+    $actualPath = Read-Host "Please enter %$aVariableName% path (default [$aDefaultPath])"
+    $actualPath = $actualPath.Trim()
+    if ($actualPath -eq "") {
+      $actualPath=$aDefaultPath
+    }
+  } else {
+    $actualPath=$aPath
+  }
+  md2 "$actualPath" "$aVariableName"
+  if ($aPath -eq $null) {
+    [Environment]::SetEnvironmentVariable($aVariableName, $actualPath, "User")
+  }
+  Write-Host "User environment variable %$aVariableName% set to '$actualPath'"
+  return $actualPath
+}
+
 $prgsInstallVariableName="prgs"
 $prgsDefaultPath="C:\prgs"
-# GetEnvironmentVariable SetEnvironmentVariable http://technet.microsoft.com/en-us/library/ff730964.aspx
-$prgsPath = [Environment]::GetEnvironmentVariable($prgsInstallVariableName, [System.EnvironmentVariableTarget]::User)
-if ($prgsPath -eq $null) {
-  Write-Host "%PRGS% (for installing programming tools) isn't defined."
-  # http://social.technet.microsoft.com/Forums/exchange/en-US/3fc59659-c9fe-41e3-9d02-fc41e3bc63f4/asking-for-input-in-powershell
-  $prgs = Read-Host "Please enter %PRGS% path (default [$prgsDefaultPath])"
-  $prgs = $prgs.Trim()
-  if ($prgs -eq "") {
-    $prgs=$prgsDefaultPath
-  }
-} else {
-  $prgs=$prgsPath
-}
-md2 "$prgs" "PRGS"
-if ($prgsPath -eq $null) {
-  [Environment]::SetEnvironmentVariable($prgsInstallVariableName, $prgs, "User")
-}
-Write-Host "User environment variable %PRGS% set to '$prgs'"
+$prgs=mdEnvPath "$prgsInstallVariableName" "for installing programming tools" "$prgsDefaultPath"
+
 $progInstallVariableName="prog"
 $progDefaultPath="$Env:userprofile\prog"
-$progPath = [Environment]::GetEnvironmentVariable($progInstallVariableName, [System.EnvironmentVariableTarget]::User)
-if ($progPath -eq $null) {
-  Write-Host "%PROG% (for programming data) isn't defined."
-  $prog = (Read-Host "Please enter %PRGS% path (default [$progDefaultPath])").Trim()
-  if ($prog -eq "") { $prog=$progDefaultPath }
-} 
-else { $prog=$progPath }
-md2 "$prog" "%PROG%"
-if ($progPath -eq $null) {
-  [Environment]::SetEnvironmentVariable($progInstallVariableName, $prog, "User")
-}
-Write-Host "User environment variable %PROG% set to '$prog'"
+$prog=mdEnvPath "$progInstallVariableName" "for programming data" "$progDefaultPath"
 
 $gowVer="Gow-0.7.0"
 $gowExe="$gowVer.exe"
