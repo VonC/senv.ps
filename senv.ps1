@@ -130,7 +130,8 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
 installPrg "Gow" "https://github.com/bmatzelle/gow/downloads" "gow/.*.exe" "" "bin" "@FILE@ /S /D=@DEST@"
 
 exit 0
-
+# "C:\Program Files\PeaZip\res\7z\7z.exe" a -t7z -m0=LZMA -mmt=on -mx5 -md=16m -mfb=32 -ms=2g -sccUTF-8 -sfx7z.sfx -wC:\prgs\ C:\prgs\Gow-0.7.0-1.exe C:\prgs\Gow-0.7.0
+# Gow-0.7.0-1.exe -gm2 -oc:\temp2 -y
 # https://github.com/bmatzelle/gow/downloads
 $gowVer="Gow-0.7.0"
 $gowExe="$gowVer.exe"
