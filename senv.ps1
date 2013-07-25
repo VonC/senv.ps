@@ -64,11 +64,22 @@ $proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
 $downloader = new-object System.Net.WebClient
 $downloader.proxy = $proxy
 
-function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]$urlmatchArc="") {
+function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]$urlmatchArc="", [String]$test) {
   # Make sure c:\prgs\xxx exists for application 'xxx'
   $prgdir="$prgs\$aprgname"
   md2 "$prgdir" "$aprgname"
-  if($update){
+  # http://stackoverflow.com/questions/10550128/powershell-test-if-folder-empty
+  # http://social.technet.microsoft.com/wiki/contents/articles/2286.understanding-booleans-in-powershell.aspx
+  $mustupdate=-not (Test-Path "$prgdir\*")
+  if(-not $mustupdate) {
+    $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer } | sort CreationTime  | select -l 1
+    Write-Host "afolder='$afolder'" 
+    if ( -not (Test-Path "$prgdir/$afolder/$test") ) {
+      $mustupdate = $true
+    }
+  }
+  Write-Host "mustupdate='$mustupdate'" 
+  if($update -or $mustupdate){
     # http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
     $result=$downloader.DownloadString($url) 
     # http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
@@ -95,7 +106,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   }
 }
 
-installPrg "Gow" "https://github.com/bmatzelle/gow/downloads" "gow/.*.exe"
+installPrg "Gow" "https://github.com/bmatzelle/gow/downloads" "gow/.*.exe" "" "bin"
 
 exit 0
 
