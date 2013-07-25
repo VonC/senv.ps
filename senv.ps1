@@ -1,6 +1,7 @@
 # C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "(New-Object System.Net.WebClient).DownloadFile('%userprofile%/prog/senv.ps1','c:/temp/senv.ps1') ; & c:/temp/senv.ps1 -u"
 # C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "(New-Object System.Net.WebClient).DownloadFile('%homedrive%/prog/senv.ps1','c:/temp/senv.ps1') ; & c:/temp/senv.ps1 -u"
 # C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "(New-Object System.Net.WebClient).DownloadFile('http://gist.github.com/VonC/5995144/raw/senv.ps1','c:/temp/senv.ps1') ; & c:/temp/senv.ps1 -u"
+# http://technet.microsoft.com/en-us/library/ee176949.aspx : Running Windows PowerShell Scripts
 
 # http://stackoverflow.com/questions/2157554/how-to-handle-command-line-arguments-in-powershell
 param(
@@ -63,13 +64,38 @@ $proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
 $downloader = new-object System.Net.WebClient
 $downloader.proxy = $proxy
 
-function installPrg([String]$aprgname) {
+function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]$urlmatchArc="") {
   # Make sure c:\prgs\xxx exists for application 'xxx'
   $prgdir="$prgs\$aprgname"
   md2 "$prgdir" "$aprgname"
+  if($update){
+    # http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
+    $result=$downloader.DownloadString($url) 
+    # http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
+    $links = ( $result.split("`"") | where { $_ -match "$urlmatch" } ) # "
+    Write-Host "links='$links'" 
+    if ( $urlmatchArc -ne "" ) {
+      $dwnUrl = ( $links -split " " | where { $_ -match "$urlmatchArc" } ) # "
+    } else {
+      $dwnUrl = $links
+    }
+    $dwnUrl = $dwnUrl[0]
+    if ( $dwnUrl.StartsWith("/") ) {
+      # http://stackoverflow.com/questions/14363214/get-domain-from-url-in-powershell
+      $localpath = ([System.Uri]$url).LocalPath
+      # http://blogs.technet.com/b/heyscriptingguy/archive/2011/09/21/two-simple-powershell-methods-to-remove-the-last-letter-of-a-string.aspx
+      $domain = $url -replace "$localpath$"
+      # Write-Host "lp='$url', localpath='$localpath', domain='$domain'"
+      $dwnUrl = $domain + $dwnUrl
+    }
+    # http://stackoverflow.com/questions/4546567/get-last-element-of-pipeline-in-powershell
+    $prgver = $dwnUrl.Split('/') | Select-Object -Last 1
+    $prgver = $prgver.Substring(0,$prgver.LastIndexOf('.'))
+    Write-Host "result='$dwnUrl': prgver='$prgver'" 
+  }
 }
 
-installPrg("Gow")
+installPrg "Gow" "https://github.com/bmatzelle/gow/downloads" "gow/.*.exe"
 
 exit 0
 
