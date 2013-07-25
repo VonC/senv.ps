@@ -100,9 +100,18 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
       $dwnUrl = $domain + $dwnUrl
     }
     # http://stackoverflow.com/questions/4546567/get-last-element-of-pipeline-in-powershell
-    $prgver = $dwnUrl.Split('/') | Select-Object -Last 1
-    $prgver = $prgver.Substring(0,$prgver.LastIndexOf('.'))
-    Write-Host "result='$dwnUrl': prgver='$prgver'" 
+    $prgfile = $dwnUrl.Split('/') | Select-Object -Last 1
+    $prgver = $prgfile.Substring(0,$prgfile.LastIndexOf('.'))
+    Write-Host "result='$dwnUrl': prgver='$prgver', prgfile='$prgfile'" 
+  }
+  if(-not (Test-Path "$prgdir/$prgfile")) {
+    if ( Test-Path "$Env:homedrive/$prgfile" ) {
+      Write-Host "Copy '$prgfile' from '$Env:homedrive/$prgfile'" 
+      Copy-Item -Path "$Env:homedrive/$prgfile" -Destination "$prgdir/$prgfile"
+    } else {
+      Write-Host "Download '$prgfile' from '$dwnUrl'" 
+      $downloader.DownloadFile($dwnUrl, "$prgdir/$prgfile")
+    }
   }
 }
 
