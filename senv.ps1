@@ -64,7 +64,7 @@ $proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
 $downloader = new-object System.Net.WebClient
 $downloader.proxy = $proxy
 
-function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]$urlmatchArc="", [String]$test) {
+function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]$urlmatchArc="", [String]$test, [String]$invoke) {
   # Make sure c:\prgs\xxx exists for application 'xxx'
   $prgdir="$prgs\$aprgname"
   md2 "$prgdir" "$aprgname"
@@ -113,9 +113,15 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
       $downloader.DownloadFile($dwnUrl, "$prgdir/$prgfile")
     }
   }
+  if ( -not [string]::IsNullOrEmpty($invoke) ) {
+    $invoke = $invoke -replace "@FILE@", "$prgdir\$prgfile"
+    $invoke = $invoke -replace "@DEST@", "$prgdir\$prgver"
+    Write-Host "$prgname: Invoke '$invoke'"
+    invoke-expression "$invoke"
+  }
 }
 
-installPrg "Gow" "https://github.com/bmatzelle/gow/downloads" "gow/.*.exe" "" "bin"
+installPrg "Gow" "https://github.com/bmatzelle/gow/downloads" "gow/.*.exe" "" "bin" "@FILE@ /S /D=@DEST@"
 
 exit 0
 
