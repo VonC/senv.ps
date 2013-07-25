@@ -103,21 +103,27 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     $prgfile = $dwnUrl.Split('/') | Select-Object -Last 1
     $prgver = $prgfile.Substring(0,$prgfile.LastIndexOf('.'))
     Write-Host "result='$dwnUrl': prgver='$prgver', prgfile='$prgfile'" 
-  }
-  if(-not (Test-Path "$prgdir/$prgfile")) {
-    if ( Test-Path "$Env:homedrive/$prgfile" ) {
-      Write-Host "Copy '$prgfile' from '$Env:homedrive/$prgfile'" 
-      Copy-Item -Path "$Env:homedrive/$prgfile" -Destination "$prgdir/$prgfile"
-    } else {
-      Write-Host "Download '$prgfile' from '$dwnUrl'" 
-      $downloader.DownloadFile($dwnUrl, "$prgdir/$prgfile")
+
+    if ( -not (Test-Path "$prgdir/$prgver/$test") ) {
+
+      if(-not (Test-Path "$prgdir/$prgfile")) {
+        if ( Test-Path "$Env:homedrive/$prgfile" ) {
+          Write-Host "Copy '$prgfile' from '$Env:homedrive/$prgfile'" 
+          Copy-Item -Path "$Env:homedrive/$prgfile" -Destination "$prgdir/$prgfile"
+        } else {
+          Write-Host "Download '$prgfile' from '$dwnUrl'" 
+          $downloader.DownloadFile($dwnUrl, "$prgdir/$prgfile")
+        }
+      }
+
+      if ( -not [string]::IsNullOrEmpty($invoke) ) {
+        $invoke = $invoke -replace "@FILE@", "$prgdir\$prgfile"
+        $invoke = $invoke -replace "@DEST@", "$prgdir\$prgver"
+        Write-Host "$prgname: Invoke '$invoke'"
+        invoke-expression "$invoke"
+      }
+
     }
-  }
-  if ( -not [string]::IsNullOrEmpty($invoke) ) {
-    $invoke = $invoke -replace "@FILE@", "$prgdir\$prgfile"
-    $invoke = $invoke -replace "@DEST@", "$prgdir\$prgver"
-    Write-Host "$prgname: Invoke '$invoke'"
-    invoke-expression "$invoke"
   }
 }
 
