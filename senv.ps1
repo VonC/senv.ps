@@ -1,8 +1,18 @@
+# C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "(New-Object System.Net.WebClient).DownloadFile('%userprofile%/prog/senv.ps1','c:/temp/senv.ps1') ; & c:/temp/senv.ps1 -u"
+# C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "(New-Object System.Net.WebClient).DownloadFile('%homedrive%/prog/senv.ps1','c:/temp/senv.ps1') ; & c:/temp/senv.ps1 -u"
+# C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "(New-Object System.Net.WebClient).DownloadFile('http://gist.github.com/VonC/5995144/raw/senv.ps1','c:/temp/senv.ps1') ; & c:/temp/senv.ps1 -u"
 
-# C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('%userprofile%/prog/senv.ps1'))"
-# C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('%homedrive%/prog/senv.ps1'))"
-# C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('http://gist.github.com/VonC/5995144/raw/e0d69ae979556cd302c86934afaf686b1a39c1c7/senv.ps1'))"
-
+# http://stackoverflow.com/questions/2157554/how-to-handle-command-line-arguments-in-powershell
+param(
+    [alias("u")]
+    [switch]
+    $update = $false
+)
+Write-Host "update=$update, Num Args:" $args.Length;
+foreach ($arg in $args)
+{
+  Write-Host "Arg: $arg";
+}
 # http://technet.microsoft.com/en-us/library/ff730955.aspx
 function md2([String]$apath, [String]$afor) {
   if ( ! (Test-Path "$apath") ) {
@@ -47,17 +57,29 @@ $prog=mdEnvPath "$progInstallVariableName" "for programming data" "$progDefaultP
 
 Write-Host "prgs '$prgs', prog '$prog'"
 
+# http://stackoverflow.com/questions/571429/powershell-web-requests-and-proxies
+$proxy = [System.Net.WebRequest]::GetSystemWebProxy()
+$proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
+$downloader = new-object System.Net.WebClient
+$downloader.proxy = $proxy
+
+function installPrg([String]$aprgname) {
+  # Make sure c:\prgs\xxx exists for application 'xxx'
+  $prgdir="$prgs\$aprgname"
+  md2 "$prgdir" "$aprgname"
+}
+
+installPrg("Gow")
+
+exit 0
+
+# https://github.com/bmatzelle/gow/downloads
 $gowVer="Gow-0.7.0"
 $gowExe="$gowVer.exe"
 $gowFile="$prgs\$gowExe"
 $gowDir="$prgs\$gowVer"
 $gowUrl="https://github.com/downloads/bmatzelle/gow/$gowExe"
 
-# http://stackoverflow.com/questions/571429/powershell-web-requests-and-proxies
-$proxy = [System.Net.WebRequest]::GetSystemWebProxy()
-$proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
-$downloader = new-object System.Net.WebClient
-$downloader.proxy = $proxy
 
 
 if ( ! (Test-Path "$gowDir\bin") ) {
