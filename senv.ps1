@@ -45,6 +45,8 @@ $progInstallVariableName="prog"
 $progDefaultPath="$Env:userprofile\prog"
 $prog=mdEnvPath "$progInstallVariableName" "for programming data" "$progDefaultPath"
 
+Write-Host "prgs '$prgs', prog '$prog'"
+
 $gowVer="Gow-0.7.0"
 $gowExe="$gowVer.exe"
 $gowFile="$prgs\$gowExe"
