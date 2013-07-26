@@ -142,7 +142,10 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   }
   $dwnUrl = ( $dwnUrl -split " "  )[0]
   Write-Host "dwnUrl3='$dwnUrl'"
-  if ( $dwnUrl.StartsWith("/") ) {
+  if ( $dwnUrl.StartsWith("//") ) {
+    $dwnUrl = ([System.Uri]$url).Scheme + ":" + $dwnUrl
+  }
+  elseif ( $dwnUrl.StartsWith("/") ) {
     # http://stackoverflow.com/questions/14363214/get-domain-from-url-in-powershell
     $localpath = ([System.Uri]$url).LocalPath
     # http://blogs.technet.com/b/heyscriptingguy/archive/2011/09/21/two-simple-powershell-methods-to-remove-the-last-letter-of-a-string.aspx
@@ -177,16 +180,22 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     }
 
     if ( $unzip ) {
-      $shellApplication = new-object -com shell.application
-      $zipPackage = $shellApplication.NameSpace("$prgdir\$prgfile")
-      md2 "$prgdir\tmp" "tmp dir '$prgdir\tmp' for unzipping $prgfile"
-      $destination = $shellApplication.NameSpace("$prgdir\tmp")
-      Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => unzipping..."
-      # http://social.technet.microsoft.com/Forums/windowsserver/en-US/bb65afa5-3eff-4a5d-aabb-5d7f1bd3259f/powershell-script-extracting-a-zipped
-      # http://www.howtogeek.com/tips/how-to-extract-zip-files-using-powershell/
-      # http://serverfault.com/questions/18872/how-to-zip-unzip-files-in-powershell#201604
-      # http://serverfault.com/questions/18872/how-to-zip-unzip-files-in-powershell#comment240131_201604
-      $destination.Copyhere($zipPackage.items(), 0x14)
+      if ( $prgfile.EndsWith(".zip") ) {
+        $shellApplication = new-object -com shell.application
+        $zipPackage = $shellApplication.NameSpace("$prgdir\$prgfile")
+        md2 "$prgdir\tmp" "tmp dir '$prgdir\tmp' for unzipping $prgfile"
+        $destination = $shellApplication.NameSpace("$prgdir\tmp")
+        Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => unzipping..."
+        # http://social.technet.microsoft.com/Forums/windowsserver/en-US/bb65afa5-3eff-4a5d-aabb-5d7f1bd3259f/powershell-script-extracting-a-zipped
+        # http://www.howtogeek.com/tips/how-to-extract-zip-files-using-powershell/
+        # http://serverfault.com/questions/18872/how-to-zip-unzip-files-in-powershell#201604
+        # http://serverfault.com/questions/18872/how-to-zip-unzip-files-in-powershell#comment240131_201604
+        $destination.Copyhere($zipPackage.items(), 0x14)
+      }
+      elseif ( $prgfile.EndsWith(".7z") ) {
+        Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => 7z..."
+        invoke-expression "pzx `"$prgdir\$prgfile`" `"$prgdir\tmp`""
+      }
       $afolder=Get-ChildItem  "$prgdir\tmp" | Where { $_.PSIsContainer -and $_.Name -eq "$prgver" } | sort CreationTime | select -l 1
       Write-Host "zip afolder='$afolder', vs. prgver='$prgdir\tmp\$prgver'"
       if ( $afolder ) {
