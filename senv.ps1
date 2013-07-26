@@ -223,7 +223,6 @@ invoke-expression 'doskey 7z=$peazipDir\res\7z\7z.exe `$*'
 }
 
 $gow = {
-#installPrg "Gow" "https://github.com/bmatzelle/gow/downloads" "gow/.*.exe" "" "Gow-" "bin" "@FILE@ /S /D=@DEST@"
 $gow_dir   = installPrg -aprgname     "Gow"                      -url          "https://github.com/VonC/gow/releases" `
                         -urlmatch     "gow/releases/download/.*.zip"           -urlmatch_arc "" `
                         -urlmatch_ver "Gow.*.zip"                -test         "bin\gow.bat" `
@@ -231,6 +230,15 @@ $gow_dir   = installPrg -aprgname     "Gow"                      -url          "
 
 cleanAddPath "\\Gow-" "$gow_dir\bin"
 }
-iex ('&$peazip')
+
+$git = {
+$git_dir   = installPrg -aprgname     "git"                      -url          "https://code.google.com/p/msysgit/downloads/list?can=2&q=portable&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount" `
+                        -urlmatch     "msysgit.googlecode.com/files/Portable.*.7z"            -urlmatch_arc "" `
+                        -urlmatch_ver "Portable.*.7z"            -test         "git-cmd.bat" `
+                        -invoke       ""                         -unzip
+}
+
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
-iex ('&$gow')
+# iex ('&$peazip')
+# iex ('&$gow')
+iex ('&$git')
