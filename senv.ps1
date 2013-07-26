@@ -70,6 +70,7 @@ function cleanAddPath([String]$cleanPattern, [String]$addPath) {
   $isadmin=Test-Administrator
   # System and user registry keys: http://support.microsoft.com/kb/104011
   $systemPath=(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).path
+  Write-Host "systemPath='$systemPath'"
   $newSystemPath=( $systemPath.split(';') | where { $_ -notmatch "$cleanPattern" } ) -join ";"
   # '`r`n' http://stackoverflow.com/questions/1639291/how-do-i-add-a-newline-to-command-output-in-powershell
   if ( $systemPath -ne $newSystemPath -and $isadmin -eq $true ) {
@@ -79,6 +80,7 @@ function cleanAddPath([String]$cleanPattern, [String]$addPath) {
 
   $pathAlreadyThere=$false
   $userPath=(Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH).path
+  Write-Host "userPath='$userPath'"
   # '-or' http://www.powershellpro.com/powershell-tutorial-introduction/powershell-tutorial-conditional-logic/
   $newUserPath=( $userPath.split(';') | where { $_ -notmatch "$cleanPattern" -or ( $_ -eq "$addPath" -and ($pathAlreadyThere=$true) -eq $true ) } ) -join ";"
   # ( $pathAlreadyThere -eq $false -and ($newSystemPath=$newSystemPath+";ddddddee") -eq $false)
@@ -89,27 +91,15 @@ function cleanAddPath([String]$cleanPattern, [String]$addPath) {
     Write-Host "userPath    '$userPath'`r`nnewuserPath '$newuserPath': pathAlreadyThere='$pathAlreadyThere'"
     Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name "Path" -Value "$newuserPath"
   }
-
+  $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($False)
+  [System.IO.File]::WriteAllLines("$prgs\setpath.bat", "set PATH=$newSystemPath;$newUserPath", $Utf8NoBomEncoding)
+  invoke-expression "$prgs\setpath.bat"
 }
 
 # http://stackoverflow.com/questions/8588960/determine-if-current-powershell-process-is-32-bit-or-64-bit
 # Is this a 64 bit process
 function Test-Win64() {
     return [IntPtr]::size -eq 8
-}
-
-# http://social.technet.microsoft.com/Forums/windowsserver/en-US/bb65afa5-3eff-4a5d-aabb-5d7f1bd3259f/my-first-powershell-script-also-my-first-c-code-extracting-a-zipped-file
-# http://www.howtogeek.com/tips/how-to-extract-zip-files-using-powershell/
-# http://serverfault.com/questions/18872/how-to-zip-unzip-files-in-powershell#201604
-function Extract-Zip {
-   param([string]$zipfilename, [string] $destination)
-   $shellApplication = new-object -com shell.application
-
-   $zipPackage = $shellApplication.NameSpace($zipfilename)
-   $destinationFolder = $shellApplication.NameSpace($destination)
-
-   $myfile = $destinationFolder.CopyHere($zipPackage.Items())
-   Write-Host $myfile
 }
 
 # http://stackoverflow.com/questions/571429/powershell-web-requests-and-proxies
@@ -144,13 +134,13 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   Write-Host "links='$links'"
   if ( $urlmatch_arc -ne "" ) {
     $dwnUrl = ( $links -split " " | where { $_ -match "$urlmatch_arc" } ) # "
-    # Write-Host "dwnUrl1='$dwnUrl'"
+    Write-Host "dwnUrl1='$dwnUrl'"
   } else {
     $dwnUrl = $links
-    # Write-Host "dwnUrl2='$dwnUrl'"
+    Write-Host "dwnUrl2='$dwnUrl'"
   }
   $dwnUrl = ( $dwnUrl -split " "  )[0]
-  # Write-Host "dwnUrl3='$dwnUrl'"
+  Write-Host "dwnUrl3='$dwnUrl'"
   if ( $dwnUrl.StartsWith("/") ) {
     # http://stackoverflow.com/questions/14363214/get-domain-from-url-in-powershell
     $localpath = ([System.Uri]$url).LocalPath
@@ -191,8 +181,11 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
       md2 "$prgdir\tmp" "tmp dir '$prgdir\tmp' for unzipping $prgfile"
       $destination = $shellApplication.NameSpace("$prgdir\tmp")
       Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => unzipping..."
+      # http://social.technet.microsoft.com/Forums/windowsserver/en-US/bb65afa5-3eff-4a5d-aabb-5d7f1bd3259f/powershell-script-extracting-a-zipped
+      # http://www.howtogeek.com/tips/how-to-extract-zip-files-using-powershell/
+      # http://serverfault.com/questions/18872/how-to-zip-unzip-files-in-powershell#201604
       # http://serverfault.com/questions/18872/how-to-zip-unzip-files-in-powershell#comment240131_201604
-      # $destination.Copyhere($zipPackage.items(), 0x14)
+      $destination.Copyhere($zipPackage.items(), 0x14)
       $afolder=Get-ChildItem  "$prgdir\tmp" | Where { $_.PSIsContainer -and $_.Name -eq "$prgver" } | sort CreationTime | select -l 1
       Write-Host "zip afolder='$afolder', vs. prgver='$prgdir\tmp\$prgver'"
       if ( $afolder ) {
@@ -211,8 +204,9 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
 }
 
 invoke-expression 'doskey alias=doskey /macros'
+invoke-expression 'doskey sc=$prgs\setpath.bat'
 
-#installPrg "Gow" "https://github.com/bmatzelle/gow/downloads" "gow/.*.exe" "" "Gow-" "bin" "@FILE@ /S /D=@DEST@"
+$peazip = {
 # http://scriptinghell.blogspot.fr/2012/10/ternary-operator-support-in-powershell.html (second comment)
 $peazip_urlmatch_arc = if ( Test-Win64 ) { "WIN64" } else { "WINDOWS" }
 $peazipDir = installPrg -aprgname     "peazip"                   -url          "http://peazip.sourceforge.net/peazip-portable.html" `
@@ -225,5 +219,17 @@ cleanAddPath -cleanPattern "\\peazip" -addPath ""
 invoke-expression 'doskey pzx=$peazipDir\res\7z\7z.exe x -aos -o"$2" -pdefault -sccUTF-8 `"`$1`"'
 invoke-expression 'doskey pzc=$peazipDir\res\7z\7z.exe a -tzip -mm=Deflate -mmt=on -mx5 -w `"`$2`" `"`$1`"'
 invoke-expression 'doskey 7z=$peazipDir\res\7z\7z.exe `$*'
-invoke-expression "pzx"
-# cleanAddPath "\\Gow-" "$gowDir\bin"
+}
+
+$gow = {
+#installPrg "Gow" "https://github.com/bmatzelle/gow/downloads" "gow/.*.exe" "" "Gow-" "bin" "@FILE@ /S /D=@DEST@"
+$gow_dir   = installPrg -aprgname     "Gow"                      -url          "https://github.com/VonC/gow/releases" `
+                        -urlmatch     "gow/releases/download/.*.zip"           -urlmatch_arc "" `
+                        -urlmatch_ver "Gow.*.zip"                -test         "bin\gow.bat" `
+                        -invoke       ""                         -unzip
+
+cleanAddPath "\\Gow-" "$gow_dir\bin"
+}
+#iex ('&$peazip')
+# http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
+iex ('&$gow')
