@@ -93,7 +93,7 @@ function cleanAddPath([String]$cleanPattern, [String]$addPath) {
   }
   $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($False)
   [System.IO.File]::WriteAllLines("$prgs\setpath.bat", "set PATH=$newSystemPath;$newUserPath", $Utf8NoBomEncoding)
-  invoke-expression "$prgs\setpath.bat"
+  # invoke-expression "$prgs\setpath.bat"
 }
 
 # http://stackoverflow.com/questions/8588960/determine-if-current-powershell-process-is-32-bit-or-64-bit
@@ -230,6 +230,6 @@ $gow_dir   = installPrg -aprgname     "Gow"                      -url          "
 
 cleanAddPath "\\Gow-" "$gow_dir\bin"
 }
-#iex ('&$peazip')
+iex ('&$peazip')
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 iex ('&$gow')
