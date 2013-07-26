@@ -58,13 +58,33 @@ $prog=mdEnvPath "$progInstallVariableName" "for programming data" "$progDefaultP
 
 Write-Host "prgs '$prgs', prog '$prog'"
 
+# Is this a 64 bit process
+function Test-Win64() {
+    return [IntPtr]::size -eq 8
+}
+
+# http://social.technet.microsoft.com/Forums/windowsserver/en-US/bb65afa5-3eff-4a5d-aabb-5d7f1bd3259f/my-first-powershell-script-also-my-first-c-code-extracting-a-zipped-file
+# http://www.howtogeek.com/tips/how-to-extract-zip-files-using-powershell/
+# http://serverfault.com/questions/18872/how-to-zip-unzip-files-in-powershell#201604
+function Extract-Zip {
+   param([string]$zipfilename, [string] $destination)
+   $shellApplication = new-object -com shell.application
+
+   $zipPackage = $shellApplication.NameSpace($zipfilename)
+   $destinationFolder = $shellApplication.NameSpace($destination)
+
+   $myfile = $destinationFolder.CopyHere($zipPackage.Items())
+   Write-Host $myfile
+}
+
 # http://stackoverflow.com/questions/571429/powershell-web-requests-and-proxies
 $proxy = [System.Net.WebRequest]::GetSystemWebProxy()
 $proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
 $downloader = new-object System.Net.WebClient
 $downloader.proxy = $proxy
 
-function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]$urlmatchArc="", [String]$test, [String]$invoke) {
+function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]$urlmatch_arc="", [String]$urlmatch_ver,
+                    [String]$test, [String]$invoke, [switch][alias("z")]$unzip) {
   # Make sure c:\prgs\xxx exists for application 'xxx'
   $prgdir="$prgs\$aprgname"
   md2 "$prgdir" "$aprgname"
@@ -72,7 +92,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   # http://social.technet.microsoft.com/wiki/contents/articles/2286.understanding-booleans-in-powershell.aspx
   $mustupdate=-not (Test-Path "$prgdir\*")
   if(-not $mustupdate) {
-    $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer } | sort CreationTime  | select -l 1
+    $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$urlmatch_ver" } | sort CreationTime | select -l 1
     Write-Host "afolder='$afolder'" 
     if ( -not (Test-Path "$prgdir/$afolder/$test") ) {
       $mustupdate = $true
@@ -85,12 +105,15 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     # http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
     $links = ( $result.split("`"") | where { $_ -match "$urlmatch" } ) # "
     Write-Host "links='$links'" 
-    if ( $urlmatchArc -ne "" ) {
-      $dwnUrl = ( $links -split " " | where { $_ -match "$urlmatchArc" } ) # "
+    if ( $urlmatch_arc -ne "" ) {
+      $dwnUrl = ( $links -split " " | where { $_ -match "$urlmatch_arc" } ) # "
+      # Write-Host "dwnUrl1='$dwnUrl'"
     } else {
       $dwnUrl = $links
+      # Write-Host "dwnUrl2='$dwnUrl'"
     }
-    $dwnUrl = $dwnUrl[0]
+    $dwnUrl = ( $dwnUrl -split " "  )[0]
+    # Write-Host "dwnUrl3='$dwnUrl'"
     if ( $dwnUrl.StartsWith("/") ) {
       # http://stackoverflow.com/questions/14363214/get-domain-from-url-in-powershell
       $localpath = ([System.Uri]$url).LocalPath
@@ -100,8 +123,10 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
       $dwnUrl = $domain + $dwnUrl
     }
     # http://stackoverflow.com/questions/4546567/get-last-element-of-pipeline-in-powershell
-    $prgfile = $dwnUrl.Split('/') | Select-Object -Last 1
-    $prgver = $prgfile.Substring(0,$prgfile.LastIndexOf('.'))
+    $prgfile = $dwnUrl -split "/" | where { $_ -match "$urlmatch_ver" }
+    $prgfile_dotindex = $prgfile.LastIndexOf('.')
+    Write-Host "prgfile_dotindex='$prgfile_dotindex', " ( $prgfile_dotindex -gt 0 )
+    $prgver = if ( $prgfile_dotindex -gt 0 ) { $prgfile.Substring(0,$prgfile_dotindex) } else { $prgfile }
     Write-Host "result='$dwnUrl': prgver='$prgver', prgfile='$prgfile'" 
 
     if ( -not (Test-Path "$prgdir/$prgver/$test") ) {
@@ -123,11 +148,35 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
         invoke-expression "$invoke"
       }
 
+      if ( $unzip ) {
+        $shellApplication = new-object -com shell.application
+        $zipPackage = $shellApplication.NameSpace("$prgdir\$prgfile")
+        md2 "$prgdir\tmp" "tmp dir '$prgdir\tmp' for unzipping $prgfile"
+        $destination = $shellApplication.NameSpace("$prgdir\tmp")
+        Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => unzipping..."
+        # http://serverfault.com/questions/18872/how-to-zip-unzip-files-in-powershell#comment240131_201604
+        # $destination.Copyhere($zipPackage.items(), 0x14)
+        $afolder=Get-ChildItem  "$prgdir\tmp" | Where { $_.PSIsContainer -and $_.Name -eq "$prgver" } | sort CreationTime | select -l 1
+        Write-Host "zip afolder='$afolder', vs. prgver='$prgdir\tmp\$prgver'"
+        if ( $afolder ) {
+          Write-Host "Move '$prgdir\tmp\$prgver' up to '$prgdir\$prgver'"
+          Move-Item "$prgdir\tmp\$prgver" "$prgdir"
+          Write-Host "Deleting '$prgdir\tmp'"
+          Remove-Item "$prgdir\tmp"
+        } else {
+          Write-Host "Renaming '$prgdir\tmp' to '$prgdir\$prgver'"
+          Rename-Item -Path "$prgdir\tmp" -NewName "$prgdir\$prgver"
+        }
+      }
+
     }
   }
 }
 
-installPrg "Gow" "https://github.com/bmatzelle/gow/downloads" "gow/.*.exe" "" "bin" "@FILE@ /S /D=@DEST@"
+#installPrg "Gow" "https://github.com/bmatzelle/gow/downloads" "gow/.*.exe" "" "Gow-" "bin" "@FILE@ /S /D=@DEST@"
+# http://scriptinghell.blogspot.fr/2012/10/ternary-operator-support-in-powershell.html (second comment)
+$peazip_urlmatch_arc = if ( Test-Win64 ) { "WIN64" } else { "WINDOWS" }
+installPrg -aprgname "peazip" "http://peazip.sourceforge.net/peazip-portable.html" "zip/download" "$peazip_urlmatch_arc" "$peazip_urlmatch_arc.zip" "peazip.exe" "" -unzip
 
 exit 0
 # "C:\Program Files\PeaZip\res\7z\7z.exe" a -t7z -m0=LZMA -mmt=on -mx5 -md=16m -mfb=32 -ms=2g -sccUTF-8 -sfx7z.sfx -wC:\prgs\ C:\prgs\Gow-0.7.0-1.exe C:\prgs\Gow-0.7.0
@@ -167,10 +216,6 @@ function Test-Wow64() {
     return (Test-Win32) -and (test-path env:\PROCESSOR_ARCHITEW6432)
 }
 
-# Is this a 64 bit process
-function Test-Win64() {
-    return [IntPtr]::size -eq 8
-}
 
 # Is this a 32 bit process
 function Test-Win32() {
