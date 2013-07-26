@@ -9,11 +9,7 @@ param(
     [switch]
     $update = $false
 )
-Write-Host "update=$update, Num Args:" $args.Length;
-foreach ($arg in $args)
-{
-  Write-Host "Arg: $arg";
-}
+
 # http://technet.microsoft.com/en-us/library/ff730955.aspx
 function md2([String]$apath, [String]$afor) {
   if ( ! (Test-Path "$apath") ) {
@@ -58,6 +54,45 @@ $prog=mdEnvPath "$progInstallVariableName" "for programming data" "$progDefaultP
 
 Write-Host "prgs '$prgs', prog '$prog'"
 
+
+# http://serverfault.com/questions/95431/in-a-powershell-script-how-can-i-check-if-im-running-with-administrator-privli
+function Test-Administrator {
+    $user = [Security.Principal.WindowsIdentity]::GetCurrent();
+    (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
+}
+
+# Modify Path http://blogs.technet.com/b/heyscriptingguy/archive/2011/07/23/use-powershell-to-modify-your-environmental-path.aspx
+# SetEnvironmentVariable http://stackoverflow.com/questions/714877/setting-windows-powershell-path-variable
+# http://wprogramming.wordpress.com/2011/07/18/appending-to-path-with-powershell/
+function cleanAddPath([String]$cleanPattern, [String]$addPath) {
+  Write-Host "cleanPattern '$cleanPattern'`r`naddPath '$addPath'"
+
+  $isadmin=Test-Administrator
+  # System and user registry keys: http://support.microsoft.com/kb/104011
+  $systemPath=(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).path
+  $newSystemPath=( $systemPath.split(';') | where { $_ -notmatch "$cleanPattern" } ) -join ";"
+  # '`r`n' http://stackoverflow.com/questions/1639291/how-do-i-add-a-newline-to-command-output-in-powershell
+  if ( $systemPath -ne $newSystemPath -and $isadmin -eq $true ) {
+    Write-Host "`r`nsystemPath    '$systemPath'`r`n`r`nnewSystemPath '$newSystemPath'"
+    Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name "Path" -Value "$newSystemPath"
+  }
+
+  $pathAlreadyThere=$false
+  $userPath=(Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH).path
+  # '-or' http://www.powershellpro.com/powershell-tutorial-introduction/powershell-tutorial-conditional-logic/
+  $newUserPath=( $userPath.split(';') | where { $_ -notmatch "$cleanPattern" -or ( $_ -eq "$addPath" -and ($pathAlreadyThere=$true) -eq $true ) } ) -join ";"
+  # ( $pathAlreadyThere -eq $false -and ($newSystemPath=$newSystemPath+";ddddddee") -eq $false)
+  if( $pathAlreadyThere -eq $false ) {
+    $newUserPath=$newUserPath+";"+$addPath
+  }
+  if ( $addPath -and $userPath -ne $newUserPath ) {
+    Write-Host "userPath    '$userPath'`r`nnewuserPath '$newuserPath': pathAlreadyThere='$pathAlreadyThere'"
+    Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name "Path" -Value "$newuserPath"
+  }
+
+}
+
+# http://stackoverflow.com/questions/8588960/determine-if-current-powershell-process-is-32-bit-or-64-bit
 # Is this a 64 bit process
 function Test-Win64() {
     return [IntPtr]::size -eq 8
@@ -85,6 +120,7 @@ $downloader.proxy = $proxy
 
 function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]$urlmatch_arc="", [String]$urlmatch_ver,
                     [String]$test, [String]$invoke, [switch][alias("z")]$unzip) {
+  Write-Host "Install aprgname='$aprgname' from url='$url'`r`nurlmatch='$urlmatch', urlmatch_arc='$urlmatch_arc', urlmatch_ver='$urlmatch_ver'`r`ntest='$test', invoke='$invoke' and unzip='$unzip'"
   # Make sure c:\prgs\xxx exists for application 'xxx'
   $prgdir="$prgs\$aprgname"
   md2 "$prgdir" "$aprgname"
@@ -92,7 +128,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   # http://social.technet.microsoft.com/wiki/contents/articles/2286.understanding-booleans-in-powershell.aspx
   $mustupdate=-not (Test-Path "$prgdir\*")
   if(-not $mustupdate) {
-    $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$urlmatch_ver" } | sort CreationTime | select -l 1
+    $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$urlmatch_arc" } | sort CreationTime | select -l 1
     Write-Host "afolder='$afolder'" 
     if ( -not (Test-Path "$prgdir/$afolder/$test") ) {
       $mustupdate = $true
@@ -173,130 +209,16 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   }
 }
 
+invoke-expression 'doskey alias=doskey /macros'
+
 #installPrg "Gow" "https://github.com/bmatzelle/gow/downloads" "gow/.*.exe" "" "Gow-" "bin" "@FILE@ /S /D=@DEST@"
 # http://scriptinghell.blogspot.fr/2012/10/ternary-operator-support-in-powershell.html (second comment)
 $peazip_urlmatch_arc = if ( Test-Win64 ) { "WIN64" } else { "WINDOWS" }
-installPrg -aprgname "peazip" "http://peazip.sourceforge.net/peazip-portable.html" "zip/download" "$peazip_urlmatch_arc" "$peazip_urlmatch_arc.zip" "peazip.exe" "" -unzip
-
-exit 0
-# "C:\Program Files\PeaZip\res\7z\7z.exe" a -t7z -m0=LZMA -mmt=on -mx5 -md=16m -mfb=32 -ms=2g -sccUTF-8 -sfx7z.sfx -wC:\prgs\ C:\prgs\Gow-0.7.0-1.exe C:\prgs\Gow-0.7.0
-# Gow-0.7.0-1.exe -gm2 -oc:\temp2 -y
-# https://github.com/bmatzelle/gow/downloads
-$gowVer="Gow-0.7.0"
-$gowExe="$gowVer.exe"
-$gowFile="$prgs\$gowExe"
-$gowDir="$prgs\$gowVer"
-$gowUrl="https://github.com/downloads/bmatzelle/gow/$gowExe"
-
-
-
-if ( ! (Test-Path "$gowDir\bin") ) {
-  Write-Host "Must install '$gowVer' in $gowDir"
-  if ( ! (Test-Path "$gowExe") ) {
-    Write-Host "Downloading  $gowUrl to $gowExe"
-    if ( Test-Path "$Env:homedrive/$gowExe" ) {
-      Copy-Item -Path "$Env:homedrive/$gowExe" -Destination "gowFile"
-    } else {
-      $downloader.DownloadFile($gowUrl, $gowFile)
-    }
-  }
-  # http://unattended.sourceforge.net/installers.php
-  invoke-expression "$gowFile /S /D=c:\prgs\$gowVer"
-}
-
-# http://serverfault.com/questions/95431/in-a-powershell-script-how-can-i-check-if-im-running-with-administrator-privli
-function Test-Administrator {  
-    $user = [Security.Principal.WindowsIdentity]::GetCurrent();
-    (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
-}
-
-# http://stackoverflow.com/questions/8588960/determine-if-current-powershell-process-is-32-bit-or-64-bit
-# Is this a Wow64 powershell host
-function Test-Wow64() {
-    return (Test-Win32) -and (test-path env:\PROCESSOR_ARCHITEW6432)
-}
-
-
-# Is this a 32 bit process
-function Test-Win32() {
-    return [IntPtr]::size -eq 4
-}
-
-# Modify Path http://blogs.technet.com/b/heyscriptingguy/archive/2011/07/23/use-powershell-to-modify-your-environmental-path.aspx
-# SetEnvironmentVariable http://stackoverflow.com/questions/714877/setting-windows-powershell-path-variable
-# http://wprogramming.wordpress.com/2011/07/18/appending-to-path-with-powershell/
-function cleanAddPath([String]$cleanPattern, [String]$addPath) {
-  $isadmin=Test-Administrator
-  Write-Host "cleanPattern '$cleanPattern'`r`naddPath '$addPath'"
-  # System and user registry keys: http://support.microsoft.com/kb/104011
-  $systemPath=(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).path
-  $newSystemPath=( $systemPath.split(';') | where { $_ -notmatch "$cleanPattern" } ) -join ";"
-  # '`r`n' http://stackoverflow.com/questions/1639291/how-do-i-add-a-newline-to-command-output-in-powershell
-  if ( $systemPath -ne $newSystemPath -and $isadmin -eq $true ) {
-    Write-Host "`r`nsystemPath    '$systemPath'`r`n`r`nnewSystemPath '$newSystemPath'"
-    Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name "Path" -Value "$newSystemPath"
-  }
-  
-  $pathAlreadyThere=$false
-  $userPath=(Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH).path
-  # '-or' http://www.powershellpro.com/powershell-tutorial-introduction/powershell-tutorial-conditional-logic/
-  $newUserPath=( $userPath.split(';') | where { $_ -notmatch "$cleanPattern" -or ( $_ -eq "$addPath" -and ($pathAlreadyThere=$true) -eq $true ) } ) -join ";"
-  # ( $pathAlreadyThere -eq $false -and ($newSystemPath=$newSystemPath+";ddddddee") -eq $false)
-  if( $pathAlreadyThere -eq $false ) {
-    $newUserPath=$newUserPath+";"+$addPath
-  }
-  if ( $userPath -ne $newUserPath ) {
-    Write-Host "userPath    '$userPath'`r`nnewuserPath '$newuserPath': pathAlreadyThere='$pathAlreadyThere'"
-    Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name "Path" -Value "$newuserPath"
-  }
-
-}
-
-# http://weblogs.asp.net/soever/archive/2006/11/29/powershell-calling-a-function-with-parameters.aspx
-cleanAddPath "\\Gow-" "$gowDir\bin"
-
-$peazip="$prgs\peazip"
-md2 "$peazip" "peazip"
-# http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
-$url="http://peazip.sourceforge.net/peazip-portable.html"
-$result=$downloader.DownloadString($url) 
-# http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
-$links = ( $result.split("`"") | where { $_ -match "zip/download" } ) # "
-Write-Host "links='$links'" 
-if ( Test-Win64 ) {
-$peazipUrl = ( $links -split " " | where { $_ -match "WIN64" } ) # "
-} else {
- $peazipUrl = ( $links -split " " | where { $_ -match "WINDOWS" } ) # "
-}
-Write-Host "result='$peazipUrl'" 
-
-$peazipArc  = $peazipUrl -split "/" | where { $_ -match "portable" } 
-# http://technet.microsoft.com/en-us/library/ee692804.aspx The String’s the Thing
-$peazipVer  = $peazipArc.TrimEnd(".zip")
-$peazipFile = "$peazip\$peazipArc"
-$peazipDir  = "$peazip\$peazipVer"
-
-Write-Host "peazipArc='$peazipArc', peazipFile='$peazipFile', peazipDir='$peazipDir', peazipUrl='$peazipUrl'" 
-if ( ! (Test-Path "$peazipFile") ) {
-  Write-Host "Downloading  $peazipUrl to $peazipFile"
-  if ( Test-Path "$Env:homedrive/$peazipArc" ) {
-    Copy-Item -Path "$Env:homedrive/$peazipArc" -Destination "peazipFile"
-  } else {
-    $downloader.DownloadFile($peazipUrl, $peazipFile)
-  }
-}
-if ( ! (Test-Path "$peazipDir\peazip.exe") ) {
-  $arcHasDir = (unzip -l $peazipFile) -split "`r`n" | where { $_ -match " 0  .*$peazipVer/" }
-  Write-Host "arcHasDir='$arcHasDir'" 
-  # http://techibee.com/powershell/check-if-a-string-is-null-or-empty-using-powershell/1889 : Check if a string is NULL or EMPTY using PowerShell
-  if ( [string]::IsNullOrEmpty($arcHasDir) ) {
-    md2 "$peazipDir" "peazip extract folder"
-    unzip "$peazipFile" -d "$peazipDir"
-  } else {
-    unzip "$peazipFile" -d "$peazip"
-  }
-}
+installPrg -aprgname "peazip" -url "http://peazip.sourceforge.net/peazip-portable.html" `
+           -urlmatch "zip/download" -urlmatch_arc "$peazip_urlmatch_arc" -urlmatch_ver "$peazip_urlmatch_arc.zip" `
+           -test "peazip.exe" -invoke "" -unzip
+cleanAddPath -cleanPattern "\\peazip" -addPath ""
 invoke-expression 'doskey pzx=$peazipDir\res\7z\7z.exe x -aos -o"$2" -pdefault -sccUTF-8 `"`$1`"'
 invoke-expression 'doskey pzc=$peazipDir\res\7z\7z.exe a -tzip -mm=Deflate -mmt=on -mx5 -w `"`$2`" `"`$1`"'
 invoke-expression 'doskey 7z=$peazipDir\res\7z\7z.exe `$*'
-invoke-expression 'doskey alias=doskey /macros'
+# cleanAddPath "\\Gow-" "$gowDir\bin"
