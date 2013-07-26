@@ -135,78 +135,79 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     }
   }
   Write-Host "mustupdate='$mustupdate'" 
-  if($update -or $mustupdate){
-    # http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
-    $result=$downloader.DownloadString($url) 
-    # http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
-    $links = ( $result.split("`"") | where { $_ -match "$urlmatch" } ) # "
-    Write-Host "links='$links'" 
-    if ( $urlmatch_arc -ne "" ) {
-      $dwnUrl = ( $links -split " " | where { $_ -match "$urlmatch_arc" } ) # "
-      # Write-Host "dwnUrl1='$dwnUrl'"
-    } else {
-      $dwnUrl = $links
-      # Write-Host "dwnUrl2='$dwnUrl'"
+  if( -not $update -and -not $mustupdate){ return "$prgdir\$afolder" }
+
+  # http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
+  $result=$downloader.DownloadString($url)
+  # http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
+  $links = ( $result.split("`"") | where { $_ -match "$urlmatch" } ) # "
+  Write-Host "links='$links'"
+  if ( $urlmatch_arc -ne "" ) {
+    $dwnUrl = ( $links -split " " | where { $_ -match "$urlmatch_arc" } ) # "
+    # Write-Host "dwnUrl1='$dwnUrl'"
+  } else {
+    $dwnUrl = $links
+    # Write-Host "dwnUrl2='$dwnUrl'"
+  }
+  $dwnUrl = ( $dwnUrl -split " "  )[0]
+  # Write-Host "dwnUrl3='$dwnUrl'"
+  if ( $dwnUrl.StartsWith("/") ) {
+    # http://stackoverflow.com/questions/14363214/get-domain-from-url-in-powershell
+    $localpath = ([System.Uri]$url).LocalPath
+    # http://blogs.technet.com/b/heyscriptingguy/archive/2011/09/21/two-simple-powershell-methods-to-remove-the-last-letter-of-a-string.aspx
+    $domain = $url -replace "$localpath$"
+    # Write-Host "lp='$url', localpath='$localpath', domain='$domain'"
+    $dwnUrl = $domain + $dwnUrl
+  }
+  # http://stackoverflow.com/questions/4546567/get-last-element-of-pipeline-in-powershell
+  $prgfile = $dwnUrl -split "/" | where { $_ -match "$urlmatch_ver" }
+  $prgfile_dotindex = $prgfile.LastIndexOf('.')
+  Write-Host "prgfile_dotindex='$prgfile_dotindex', " ( $prgfile_dotindex -gt 0 )
+  $prgver = if ( $prgfile_dotindex -gt 0 ) { $prgfile.Substring(0,$prgfile_dotindex) } else { $prgfile }
+  Write-Host "result='$dwnUrl': prgver='$prgver', prgfile='$prgfile'"
+
+  if ( -not (Test-Path "$prgdir/$prgver/$test") ) {
+
+    if(-not (Test-Path "$prgdir/$prgfile")) {
+      if ( Test-Path "$Env:homedrive/$prgfile" ) {
+        Write-Host "Copy '$prgfile' from '$Env:homedrive/$prgfile'"
+        Copy-Item -Path "$Env:homedrive/$prgfile" -Destination "$prgdir/$prgfile"
+      } else {
+        Write-Host "Download '$prgfile' from '$dwnUrl'"
+        $downloader.DownloadFile($dwnUrl, "$prgdir/$prgfile")
+      }
     }
-    $dwnUrl = ( $dwnUrl -split " "  )[0]
-    # Write-Host "dwnUrl3='$dwnUrl'"
-    if ( $dwnUrl.StartsWith("/") ) {
-      # http://stackoverflow.com/questions/14363214/get-domain-from-url-in-powershell
-      $localpath = ([System.Uri]$url).LocalPath
-      # http://blogs.technet.com/b/heyscriptingguy/archive/2011/09/21/two-simple-powershell-methods-to-remove-the-last-letter-of-a-string.aspx
-      $domain = $url -replace "$localpath$"
-      # Write-Host "lp='$url', localpath='$localpath', domain='$domain'"
-      $dwnUrl = $domain + $dwnUrl
+
+    if ( -not [string]::IsNullOrEmpty($invoke) ) {
+      $invoke = $invoke -replace "@FILE@", "$prgdir\$prgfile"
+      $invoke = $invoke -replace "@DEST@", "$prgdir\$prgver"
+      Write-Host "$prgname: Invoke '$invoke'"
+      invoke-expression "$invoke"
     }
-    # http://stackoverflow.com/questions/4546567/get-last-element-of-pipeline-in-powershell
-    $prgfile = $dwnUrl -split "/" | where { $_ -match "$urlmatch_ver" }
-    $prgfile_dotindex = $prgfile.LastIndexOf('.')
-    Write-Host "prgfile_dotindex='$prgfile_dotindex', " ( $prgfile_dotindex -gt 0 )
-    $prgver = if ( $prgfile_dotindex -gt 0 ) { $prgfile.Substring(0,$prgfile_dotindex) } else { $prgfile }
-    Write-Host "result='$dwnUrl': prgver='$prgver', prgfile='$prgfile'" 
 
-    if ( -not (Test-Path "$prgdir/$prgver/$test") ) {
-
-      if(-not (Test-Path "$prgdir/$prgfile")) {
-        if ( Test-Path "$Env:homedrive/$prgfile" ) {
-          Write-Host "Copy '$prgfile' from '$Env:homedrive/$prgfile'" 
-          Copy-Item -Path "$Env:homedrive/$prgfile" -Destination "$prgdir/$prgfile"
-        } else {
-          Write-Host "Download '$prgfile' from '$dwnUrl'" 
-          $downloader.DownloadFile($dwnUrl, "$prgdir/$prgfile")
-        }
+    if ( $unzip ) {
+      $shellApplication = new-object -com shell.application
+      $zipPackage = $shellApplication.NameSpace("$prgdir\$prgfile")
+      md2 "$prgdir\tmp" "tmp dir '$prgdir\tmp' for unzipping $prgfile"
+      $destination = $shellApplication.NameSpace("$prgdir\tmp")
+      Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => unzipping..."
+      # http://serverfault.com/questions/18872/how-to-zip-unzip-files-in-powershell#comment240131_201604
+      # $destination.Copyhere($zipPackage.items(), 0x14)
+      $afolder=Get-ChildItem  "$prgdir\tmp" | Where { $_.PSIsContainer -and $_.Name -eq "$prgver" } | sort CreationTime | select -l 1
+      Write-Host "zip afolder='$afolder', vs. prgver='$prgdir\tmp\$prgver'"
+      if ( $afolder ) {
+        Write-Host "Move '$prgdir\tmp\$prgver' up to '$prgdir\$prgver'"
+        Move-Item "$prgdir\tmp\$prgver" "$prgdir"
+        Write-Host "Deleting '$prgdir\tmp'"
+        Remove-Item "$prgdir\tmp"
+      } else {
+        Write-Host "Renaming '$prgdir\tmp' to '$prgdir\$prgver'"
+        Rename-Item -Path "$prgdir\tmp" -NewName "$prgdir\$prgver"
       }
-
-      if ( -not [string]::IsNullOrEmpty($invoke) ) {
-        $invoke = $invoke -replace "@FILE@", "$prgdir\$prgfile"
-        $invoke = $invoke -replace "@DEST@", "$prgdir\$prgver"
-        Write-Host "$prgname: Invoke '$invoke'"
-        invoke-expression "$invoke"
-      }
-
-      if ( $unzip ) {
-        $shellApplication = new-object -com shell.application
-        $zipPackage = $shellApplication.NameSpace("$prgdir\$prgfile")
-        md2 "$prgdir\tmp" "tmp dir '$prgdir\tmp' for unzipping $prgfile"
-        $destination = $shellApplication.NameSpace("$prgdir\tmp")
-        Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => unzipping..."
-        # http://serverfault.com/questions/18872/how-to-zip-unzip-files-in-powershell#comment240131_201604
-        # $destination.Copyhere($zipPackage.items(), 0x14)
-        $afolder=Get-ChildItem  "$prgdir\tmp" | Where { $_.PSIsContainer -and $_.Name -eq "$prgver" } | sort CreationTime | select -l 1
-        Write-Host "zip afolder='$afolder', vs. prgver='$prgdir\tmp\$prgver'"
-        if ( $afolder ) {
-          Write-Host "Move '$prgdir\tmp\$prgver' up to '$prgdir\$prgver'"
-          Move-Item "$prgdir\tmp\$prgver" "$prgdir"
-          Write-Host "Deleting '$prgdir\tmp'"
-          Remove-Item "$prgdir\tmp"
-        } else {
-          Write-Host "Renaming '$prgdir\tmp' to '$prgdir\$prgver'"
-          Rename-Item -Path "$prgdir\tmp" -NewName "$prgdir\$prgver"
-        }
-      }
-
     }
   }
+  Write-Host "prgdir\prgver='$prgdir\$prgver'"
+  return "$prgdir\$prgver"
 }
 
 invoke-expression 'doskey alias=doskey /macros'
@@ -214,11 +215,15 @@ invoke-expression 'doskey alias=doskey /macros'
 #installPrg "Gow" "https://github.com/bmatzelle/gow/downloads" "gow/.*.exe" "" "Gow-" "bin" "@FILE@ /S /D=@DEST@"
 # http://scriptinghell.blogspot.fr/2012/10/ternary-operator-support-in-powershell.html (second comment)
 $peazip_urlmatch_arc = if ( Test-Win64 ) { "WIN64" } else { "WINDOWS" }
-installPrg -aprgname "peazip" -url "http://peazip.sourceforge.net/peazip-portable.html" `
-           -urlmatch "zip/download" -urlmatch_arc "$peazip_urlmatch_arc" -urlmatch_ver "$peazip_urlmatch_arc.zip" `
-           -test "peazip.exe" -invoke "" -unzip
+$peazipDir = installPrg -aprgname     "peazip"                   -url          "http://peazip.sourceforge.net/peazip-portable.html" `
+                        -urlmatch     "zip/download"             -urlmatch_arc "$peazip_urlmatch_arc" `
+                        -urlmatch_ver "$peazip_urlmatch_arc.zip" -test         "peazip.exe" `
+                        -invoke       ""                         -unzip
+
 cleanAddPath -cleanPattern "\\peazip" -addPath ""
+
 invoke-expression 'doskey pzx=$peazipDir\res\7z\7z.exe x -aos -o"$2" -pdefault -sccUTF-8 `"`$1`"'
 invoke-expression 'doskey pzc=$peazipDir\res\7z\7z.exe a -tzip -mm=Deflate -mmt=on -mx5 -w `"`$2`" `"`$1`"'
 invoke-expression 'doskey 7z=$peazipDir\res\7z\7z.exe `$*'
+invoke-expression "pzx"
 # cleanAddPath "\\Gow-" "$gowDir\bin"
