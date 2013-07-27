@@ -79,8 +79,9 @@ function cleanAddPath([String]$cleanPattern, [String]$addPath) {
   # http://blogs.technet.com/b/heyscriptingguy/archive/2011/03/21/use-powershell-to-replace-text-in-strings.aspx
   $full_path = ( $newSystemPath + ";" + $newUserPath ) -replace ";;", ";"
   $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($False)
-  [System.IO.File]::WriteAllLines("$prgs\setpath.bat", "set PATH=$full_path", $Utf8NoBomEncoding)
-  # invoke-expression "$prgs\setpath.bat"
+  $sp="set PATH=$full_path`n"
+  $sp=$sp+"set term=msys"
+  [System.IO.File]::WriteAllLines("$prgs\setpath.bat", "$sp", $Utf8NoBomEncoding)
 }
 
 # http://stackoverflow.com/questions/8588960/determine-if-current-powershell-process-is-32-bit-or-64-bit
@@ -214,6 +215,9 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
 
 invoke-expression 'doskey alias=doskey /macros'
 invoke-expression 'doskey sc=$prgs\setpath.bat'
+invoke-expression 'doskey sp=$prgs\setpath.bat'
+invoke-expression 'doskey cdd=cd %PROG%'
+invoke-expression 'doskey cds=cd %PRGS%'
 
 
 $peazip = {
@@ -247,6 +251,10 @@ $git_dir   = installPrg -aprgname     "git"                      -url          "
                         -urlmatch_ver "Portable.*.7z"            -test         "git-cmd.bat" `
                         -invoke       ""                         -unzip
 cleanAddPath "git" "$git_dir\bin"
+invoke-expression 'doskey gl=git lg -20'
+invoke-expression 'doskey gla=git lg -20 --all'
+invoke-expression 'doskey glab=git lg -20 --all --branches'
+invoke-expression 'doskey glba=git lg -20 --branches --all'
 }
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
