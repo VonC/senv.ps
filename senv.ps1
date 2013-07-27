@@ -55,29 +55,17 @@ $prog=mdEnvPath "$progInstallVariableName" "for programming data" "$progDefaultP
 
 Write-Host "prgs '$prgs', prog '$prog'"
 
-
-# http://serverfault.com/questions/95431/in-a-powershell-script-how-can-i-check-if-im-running-with-administrator-privli
-function Test-Administrator {
-    $user = [Security.Principal.WindowsIdentity]::GetCurrent();
-    (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
-}
-
 # Modify Path http://blogs.technet.com/b/heyscriptingguy/archive/2011/07/23/use-powershell-to-modify-your-environmental-path.aspx
 # SetEnvironmentVariable http://stackoverflow.com/questions/714877/setting-windows-powershell-path-variable
 # http://wprogramming.wordpress.com/2011/07/18/appending-to-path-with-powershell/
 function cleanAddPath([String]$cleanPattern, [String]$addPath) {
+  # '`r`n' http://stackoverflow.com/questions/1639291/how-do-i-add-a-newline-to-command-output-in-powershell
   Write-Host "cleanPattern '$cleanPattern'`r`naddPath '$addPath'"
 
-  $isadmin=Test-Administrator
   # System and user registry keys: http://support.microsoft.com/kb/104011
   $systemPath=(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).path
   Write-Host "systemPath='$systemPath'"
   $newSystemPath=( $systemPath.split(';') | where { $_ -notmatch "$cleanPattern" } ) -join ";"
-  # '`r`n' http://stackoverflow.com/questions/1639291/how-do-i-add-a-newline-to-command-output-in-powershell
-  if ( $systemPath -ne $newSystemPath -and $isadmin -eq $true ) {
-    Write-Host "`r`nsystemPath    '$systemPath'`r`n`r`nnewSystemPath '$newSystemPath'"
-    Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name "Path" -Value "$newSystemPath"
-  }
 
   $pathAlreadyThere=$false
   $userPath=(Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH).path
@@ -88,12 +76,10 @@ function cleanAddPath([String]$cleanPattern, [String]$addPath) {
   if( $pathAlreadyThere -eq $false ) {
     $newUserPath=$newUserPath+";"+$addPath
   }
-  if ( $addPath -and $userPath -ne $newUserPath ) {
-    Write-Host "userPath    '$userPath'`r`nnewuserPath '$newuserPath': pathAlreadyThere='$pathAlreadyThere'"
-    Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name "Path" -Value "$newuserPath"
-  }
+  # http://blogs.technet.com/b/heyscriptingguy/archive/2011/03/21/use-powershell-to-replace-text-in-strings.aspx
+  $full_path = ( $newSystemPath + ";" + $newUserPath ) -replace ";;", ";"
   $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($False)
-  [System.IO.File]::WriteAllLines("$prgs\setpath.bat", "set PATH=$newSystemPath;$newUserPath", $Utf8NoBomEncoding)
+  [System.IO.File]::WriteAllLines("$prgs\setpath.bat", "set PATH=$full_path", $Utf8NoBomEncoding)
   # invoke-expression "$prgs\setpath.bat"
 }
 
@@ -109,8 +95,17 @@ $proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
 $downloader = new-object System.Net.WebClient
 $downloader.proxy = $proxy
 
+function post([String]$install_folder,[String]$post) {
+  if ( $post ) {
+    Write-Host "POST called for '$post'"
+    $post = $post -replace "@install_folder", "$install_folder"
+    invoke-expression "$post" -Debug
+    Write-Host "END POST called for '$post'"
+  }
+}
+
 function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]$urlmatch_arc="", [String]$urlmatch_ver,
-                    [String]$test, [String]$invoke, [switch][alias("z")]$unzip) {
+                    [String]$test, [String]$invoke, [switch][alias("z")]$unzip, [String]$post) {
   Write-Host "Install aprgname='$aprgname' from url='$url'`r`nurlmatch='$urlmatch', urlmatch_arc='$urlmatch_arc', urlmatch_ver='$urlmatch_ver'`r`ntest='$test', invoke='$invoke' and unzip='$unzip'"
   # Make sure c:\prgs\xxx exists for application 'xxx'
   $prgdir="$prgs\$aprgname"
@@ -126,7 +121,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     }
   }
   Write-Host "mustupdate='$mustupdate'" 
-  if( -not $update -and -not $mustupdate){ return "$prgdir\$afolder" }
+  if( -not $update -and -not $mustupdate){ Write-Host "Calling POST" ; post -install_folder "$prgdir\$afolder" -post $post ; return "$prgdir\$afolder" }
 
   # http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
   $result=$downloader.DownloadString($url)
@@ -194,7 +189,8 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
       }
       elseif ( $prgfile.EndsWith(".7z") ) {
         Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => 7z..."
-        invoke-expression "pzx `"$prgdir\$prgfile`" `"$prgdir\tmp`""
+        invoke-expression "$prgs\peazip\7z\7z.exe x  -aos -o`"$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
+        Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => 7z... DONE"
       }
       $afolder=Get-ChildItem  "$prgdir\tmp" | Where { $_.PSIsContainer -and $_.Name -eq "$prgver" } | sort CreationTime | select -l 1
       Write-Host "zip afolder='$afolder', vs. prgver='$prgdir\tmp\$prgver'"
@@ -210,11 +206,15 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     }
   }
   Write-Host "prgdir\prgver='$prgdir\$prgver'"
+  if ( -not [string]::IsNullOrEmpty($post) ) {
+    post -install_folder "$prgdir\$prgver" -post $post
+  }
   return "$prgdir\$prgver"
 }
 
 invoke-expression 'doskey alias=doskey /macros'
 invoke-expression 'doskey sc=$prgs\setpath.bat'
+
 
 $peazip = {
 # http://scriptinghell.blogspot.fr/2012/10/ternary-operator-support-in-powershell.html (second comment)
@@ -222,7 +222,8 @@ $peazip_urlmatch_arc = if ( Test-Win64 ) { "WIN64" } else { "WINDOWS" }
 $peazipDir = installPrg -aprgname     "peazip"                   -url          "http://peazip.sourceforge.net/peazip-portable.html" `
                         -urlmatch     "zip/download"             -urlmatch_arc "$peazip_urlmatch_arc" `
                         -urlmatch_ver "$peazip_urlmatch_arc.zip" -test         "peazip.exe" `
-                        -invoke       ""                         -unzip
+                        -invoke       ""                         -unzip        -post "Copy-Item @install_folder\res\7z @install_folder\.. -Force -Recurse"
+# http://superuser.com/questions/544520/how-can-i-copy-a-directory-overwriting-its-contents-if-it-exists-using-powershe
 
 cleanAddPath -cleanPattern "\\peazip" -addPath ""
 
@@ -245,6 +246,7 @@ $git_dir   = installPrg -aprgname     "git"                      -url          "
                         -urlmatch     "msysgit.googlecode.com/files/Portable.*.7z"            -urlmatch_arc "" `
                         -urlmatch_ver "Portable.*.7z"            -test         "git-cmd.bat" `
                         -invoke       ""                         -unzip
+cleanAddPath "git" "$git_dir\bin"
 }
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
