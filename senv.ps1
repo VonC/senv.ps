@@ -257,6 +257,15 @@ invoke-expression 'doskey glab=git lg -20 --all --branches'
 invoke-expression 'doskey glba=git lg -20 --branches --all'
 }
 
+$npp = {
+$npp_dir   = installPrg -aprgname     "npp"                      -url          "http://notepad-plus-plus.org/download/" `
+                        -urlmatch     "npp.*.bin.zip"            -urlmatch_arc "" `
+                        -urlmatch_ver "npp.*.bin.zip"            -test         "notepad++.exe" `
+                        -invoke       ""                         -unzip
+cleanAddPath "\\npp" ""
+Write-Host "prgPathsnpp Length" + $prgPaths.length
+invoke-expression 'doskey npp=$npp_dir\notepad++.exe $*'
+}
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 # iex ('&$peazip')
 # iex ('&$gow')
