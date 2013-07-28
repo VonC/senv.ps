@@ -258,7 +258,6 @@ $npp_dir   = installPrg -aprgname     "npp"                      -url          "
                         -urlmatch_ver "npp.*.bin.zip"            -test         "notepad++.exe" `
                         -invoke       ""                         -unzip
 cleanAddPath "\\npp" ""
-Write-Host "prgPathsnpp Length" + $prgPaths.length
 invoke-expression 'doskey npp=$npp_dir\notepad++.exe $*'
 }
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
@@ -267,12 +266,17 @@ invoke-expression 'doskey npp=$npp_dir\notepad++.exe $*'
 # iex ('&$git')
 # iex ('&$npp')
 
-$h=$env:HOME
-$p=$env:path
-Write-Host "h='$h', p='$p', npp_dir='$npp_dir'"
-Write-Host "prgPathsbef Length" + $prgPaths.length
-
 $path=get-content "$prgs/path.txt"
-$sp="set PATH=$path`n"
-$sp=$sp+"set term=msys"
+$sp="set PATH=$path"
+$sp=$sp+"`nset term=msys"
+
+$homep=$env:HOME
+if ( [string]::IsNullOrEmpty($homep) ) {
+  $homep="$Env:HOMEDRIVE$Env:HOMEPATH"
+  if ( "$Env:HOMEDRIVE" -ne "C:" ) {
+    $homep = "$Env:HOMEDRIVE"
+  }
+}
+$sp=$sp+"`nset HOME=$homep"
+
 [System.IO.File]::WriteAllLines("$prgs\setpath.bat", "$sp", $Utf8NoBomEncoding)
