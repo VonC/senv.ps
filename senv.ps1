@@ -62,20 +62,23 @@ $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($False)
 # http://wprogramming.wordpress.com/2011/07/18/appending-to-path-with-powershell/
 function cleanAddPath([String]$cleanPattern, [String]$addPath) {
   # '`r`n' http://stackoverflow.com/questions/1639291/how-do-i-add-a-newline-to-command-output-in-powershell
-  Write-Host "cleanPattern '$cleanPattern'`r`naddPath '$addPath'"
+  # Write-Host "cleanPattern '$cleanPattern'`r`naddPath '$addPath'"
   # System and user registry keys: http://support.microsoft.com/kb/104011
   $path = $Env:PATH
   if ( (Test-Path "$prgs\path.txt") ) { $path = get-content "$prgs\path.txt" }
   $newPath=$path
   $pathAlreadyThere=$false
   # '-or' http://www.powershellpro.com/powershell-tutorial-introduction/powershell-tutorial-conditional-logic/
-  $newPath=( $newPath.split(';') | where { $_ -notmatch "$cleanPattern" -or ( $_ -eq "$addPath" -and ($pathAlreadyThere=$true) -eq $true ) } ) -join ";"
+  $newPath=( $newPath.split(';') | where { 
+    ( [string]::IsNullOrEmpty($cleanPattern) -or $_ -notmatch "$cleanPattern" ) -or ( [string]::IsNullOrEmpty($addPath) -or ( $_ -eq "$addPath" -and ($pathAlreadyThere=$true) -eq $true ) ) 
+    # Write-Host "....... " + $_ + ": IsNullOrEmpty(cleanPattern)=" + ( [string]::IsNullOrEmpty($cleanPattern) -or $_ -notmatch "$cleanPattern" ) + ", or:" + ( [string]::IsNullOrEmpty($addPath) -or ( $_ -eq "$addPath" -and ($pathAlreadyThere=$true) -eq $true ) ) +", pathAlreadyThere='$pathAlreadyThere' ==> " + ( ( [string]::IsNullOrEmpty($cleanPattern) -or $_ -notmatch "$cleanPattern" ) -or ( [string]::IsNullOrEmpty($addPath) -or ( $_ -eq "$addPath" -and ($pathAlreadyThere=$true) -eq $true ) ) )
+  } ) -join ";"
   if(  -not [string]::IsNullOrEmpty($addPath) -and $pathAlreadyThere -eq $false ) {
     $newPath=$newPath+";"+$addPath
   }
   # http://blogs.technet.com/b/heyscriptingguy/archive/2011/03/21/use-powershell-to-replace-text-in-strings.aspx
   $newPath = $newPath -replace ";;", ";"
-  Write-Host "---> path '$path'`r`n===> newPath '$newPath'"
+  # Write-Host "---> path '$path'`r`n===> newPath '$newPath'"
   [System.IO.File]::WriteAllLines("$prgs\path.txt", "$newPath", $Utf8NoBomEncoding)
 }
 
@@ -260,11 +263,13 @@ $npp_dir   = installPrg -aprgname     "npp"                      -url          "
 cleanAddPath "\\npp" ""
 invoke-expression 'doskey npp=$npp_dir\notepad++.exe $*'
 }
+cleanAddPath "" "$prgs\bin"
+cleanAddPath "" "$prog\bin"
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
-# iex ('&$peazip')
-# iex ('&$gow')
-# iex ('&$git')
-# iex ('&$npp')
+ iex ('&$peazip')
+ iex ('&$gow')
+ iex ('&$git')
+ iex ('&$npp')
 
 $path=get-content "$prgs/path.txt"
 $sp="set PATH=$path"
