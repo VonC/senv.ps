@@ -55,33 +55,28 @@ $prog=mdEnvPath "$progInstallVariableName" "for programming data" "$progDefaultP
 
 Write-Host "prgs '$prgs', prog '$prog'"
 
+$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($False)
+
 # Modify Path http://blogs.technet.com/b/heyscriptingguy/archive/2011/07/23/use-powershell-to-modify-your-environmental-path.aspx
 # SetEnvironmentVariable http://stackoverflow.com/questions/714877/setting-windows-powershell-path-variable
 # http://wprogramming.wordpress.com/2011/07/18/appending-to-path-with-powershell/
 function cleanAddPath([String]$cleanPattern, [String]$addPath) {
   # '`r`n' http://stackoverflow.com/questions/1639291/how-do-i-add-a-newline-to-command-output-in-powershell
   Write-Host "cleanPattern '$cleanPattern'`r`naddPath '$addPath'"
-
   # System and user registry keys: http://support.microsoft.com/kb/104011
-  $systemPath=(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).path
-  Write-Host "systemPath='$systemPath'"
-  $newSystemPath=( $systemPath.split(';') | where { $_ -notmatch "$cleanPattern" } ) -join ";"
-
+  $path = $Env:PATH
+  if ( (Test-Path "$prgs\path.txt") ) { $path = get-content "$prgs\path.txt" }
+  $newPath=$path
   $pathAlreadyThere=$false
-  $userPath=(Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH).path
-  Write-Host "userPath='$userPath'"
   # '-or' http://www.powershellpro.com/powershell-tutorial-introduction/powershell-tutorial-conditional-logic/
-  $newUserPath=( $userPath.split(';') | where { $_ -notmatch "$cleanPattern" -or ( $_ -eq "$addPath" -and ($pathAlreadyThere=$true) -eq $true ) } ) -join ";"
-  # ( $pathAlreadyThere -eq $false -and ($newSystemPath=$newSystemPath+";ddddddee") -eq $false)
-  if( $pathAlreadyThere -eq $false ) {
-    $newUserPath=$newUserPath+";"+$addPath
+  $newPath=( $newPath.split(';') | where { $_ -notmatch "$cleanPattern" -or ( $_ -eq "$addPath" -and ($pathAlreadyThere=$true) -eq $true ) } ) -join ";"
+  if(  -not [string]::IsNullOrEmpty($addPath) -and $pathAlreadyThere -eq $false ) {
+    $newPath=$newPath+";"+$addPath
   }
   # http://blogs.technet.com/b/heyscriptingguy/archive/2011/03/21/use-powershell-to-replace-text-in-strings.aspx
-  $full_path = ( $newSystemPath + ";" + $newUserPath ) -replace ";;", ";"
-  $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($False)
-  $sp="set PATH=$full_path`n"
-  $sp=$sp+"set term=msys"
-  [System.IO.File]::WriteAllLines("$prgs\setpath.bat", "$sp", $Utf8NoBomEncoding)
+  $newPath = $newPath -replace ";;", ";"
+  Write-Host "---> path '$path'`r`n===> newPath '$newPath'"
+  [System.IO.File]::WriteAllLines("$prgs\path.txt", "$newPath", $Utf8NoBomEncoding)
 }
 
 # http://stackoverflow.com/questions/8588960/determine-if-current-powershell-process-is-32-bit-or-64-bit
@@ -269,4 +264,15 @@ invoke-expression 'doskey npp=$npp_dir\notepad++.exe $*'
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 # iex ('&$peazip')
 # iex ('&$gow')
-iex ('&$git')
+# iex ('&$git')
+# iex ('&$npp')
+
+$h=$env:HOME
+$p=$env:path
+Write-Host "h='$h', p='$p', npp_dir='$npp_dir'"
+Write-Host "prgPathsbef Length" + $prgPaths.length
+
+$path=get-content "$prgs/path.txt"
+$sp="set PATH=$path`n"
+$sp=$sp+"set term=msys"
+[System.IO.File]::WriteAllLines("$prgs\setpath.bat", "$sp", $Utf8NoBomEncoding)
