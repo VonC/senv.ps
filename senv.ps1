@@ -150,6 +150,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     # Write-Host "lp='$url', localpath='$localpath', domain='$domain'"
     $dwnUrl = $domain + $dwnUrl
   }
+  # Write-Host "dwnUrl === '$dwnUrl'; urlmatch_ver='$urlmatch_ver'"
   # http://stackoverflow.com/questions/4546567/get-last-element-of-pipeline-in-powershell
   $prgfile = $dwnUrl -split "/" | where { $_ -match "$urlmatch_ver" }
   $prgfile_dotindex = $prgfile.LastIndexOf('.')
@@ -173,7 +174,8 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
       $invoke = $invoke -replace "@FILE@", "$prgdir\$prgfile"
       $invoke = $invoke -replace "@DEST@", "$prgdir\$prgver"
       Write-Host "${aprgname}: Invoke '$invoke'"
-      invoke-expression "$invoke"
+# http://stackoverflow.com/questions/3592851/executing-a-command-stored-in-a-variable-from-powershell
+      invoke-expression "&$invoke"
     }
 
     if ( $unzip ) {
@@ -274,13 +276,28 @@ $npp_dir   = installPrg -aprgname     "npp"                      -url          "
 cleanAddPath "\\npp" ""
 invoke-expression 'doskey npp=$npp_dir\notepad++.exe $*'
 }
+
+$python = {
+$python_urlmatch_arc = if ( Test-Win64 ) { "amd64.msi" } else { "\d\.msi" }
+# http://www.python.org/download/releases/2.4/msi/
+# http://social.technet.microsoft.com/Forums/windowsserver/en-US/3729e9c2-cb1f-42f7-a4ee-91bc6b101d9a/invokeexpression-syntax-issues
+$python_dir   = installPrg -aprgname     "python"                -url          "http://www.python.org/getit/" `
+                        -urlmatch     "python-2.*.msi"         -urlmatch_arc "$python_urlmatch_arc" `
+                        -urlmatch_ver "python-2.*$python_urlmatch_arc"            -test         "python.exe" `
+                        -invoke       "C:\WINDOWS\system32\msiexec.exe /i @FILE@ /l @DEST@.log TARGETDIR=@DEST@ ADDLOCAL=DefaultFeature``,TclTk``,Documentation``,Tools``,Testsuite /qn"
+#                        -invoke       "C:\WINDOWS\system32\msiexec.exe /i @FILE@ /l @DEST@.log TARGETDIR=@DEST@"
+cleanAddPath "\\python" ""
+invoke-expression 'doskey python=$python_dir\python.exe $*'
+}
+
 cleanAddPath "" "$prgs\bin"
 cleanAddPath "" "$prog\bin"
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
- iex ('&$peazip')
- iex ('&$gow')
- iex ('&$git')
- iex ('&$npp')
+# iex ('&$peazip')
+# iex ('&$gow')
+# iex ('&$git')
+# iex ('&$npp')
+ iex ('&$python')
 
 $path=get-content "$prgs/path.txt"
 $sp="set PATH=$path"
