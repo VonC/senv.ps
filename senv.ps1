@@ -190,7 +190,14 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
       }
       elseif ( $prgfile.EndsWith(".7z") ) {
         Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => 7z..."
-        invoke-expression "$prgs\peazip\7z\7z.exe x  -aos -o`"$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
+		# http://social.technet.microsoft.com/Forums/scriptcenter/en-US/65186252-fcf7-4c6c-a11c-697ef0633018/escaping-the-escape-character-in-invokeexpression
+		# http://social.technet.microsoft.com/Forums/windowsserver/en-US/cd08c144-7105-421d-bbce-ab27dcee0fb7/escaping-parameters-for-an-external-program-in-invokeexpression
+		<#
+		$exec = @'
+                   & "C:\Program Files\7-Zip\7z.exe" u -mx5 -tzip -r "$DestFileZip" "$DestFile"
+                '@
+		#>
+        $res=invoke-expression "$prgs\peazip\7z\7z.exe x  -aos -o`"$prgdir\tmp```" -pdefault -sccUTF-8 ```"$prgdir\$prgfile```""
         Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => 7z... DONE"
       }
       $afolder=Get-ChildItem  "$prgdir\tmp" | Where { $_.PSIsContainer -and $_.Name -eq "$prgver" } | sort CreationTime | select -l 1
