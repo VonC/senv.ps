@@ -284,6 +284,7 @@ cleanAddPath "" "$prog\bin"
 $path=get-content "$prgs/path.txt"
 $sp="set PATH=$path"
 $sp=$sp+"`nset term=msys"
+$sp=$sp+"`nif exist `"%HOME%\.proxy.bat`" call `"%HOME%\.proxy.bat`""
 
 $homep=$env:HOME
 if ( [string]::IsNullOrEmpty($homep) ) {
