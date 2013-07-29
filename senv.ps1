@@ -2,6 +2,7 @@
 # C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "(New-Object System.Net.WebClient).DownloadFile('%homedrive%/prog/senv.ps1','c:/temp/senv.ps1') ; & c:/temp/senv.ps1 -u"
 # C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "(New-Object System.Net.WebClient).DownloadFile('http://gist.github.com/VonC/5995144/raw/senv.ps1','c:/temp/senv.ps1') ; & c:/temp/senv.ps1 -u"
 # C:\prgs>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "(New-Object System.Net.WebClient).DownloadFile('%userprofile%/prog/git/5995144/senv.ps1','c:/prgs/senv.ps1'); & c:/prgs/senv.ps1 -u"
+# C:\Users\aUser\prog\git\5995144>@powershell -NoProfile -ExecutionPolicy unrestricted -Command "& %prog%\git\5995144\senv.ps1"
 # http://technet.microsoft.com/en-us/library/ee176949.aspx : Running Windows PowerShell Scripts
 
 # http://stackoverflow.com/questions/2157554/how-to-handle-command-line-arguments-in-powershell
