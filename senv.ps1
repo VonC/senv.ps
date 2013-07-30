@@ -106,6 +106,26 @@ function post([String]$install_folder,[String]$post) {
   }
 }
 
+function install( [String]$invoke, [String]$prgdir, [String]$prgfile, [String]$prgver) {
+  if ( -not [string]::IsNullOrEmpty($invoke) ) {
+    $invoke = $invoke -replace "@FILE@", "$prgdir\$prgfile"
+    $invoke = $invoke -replace "@DEST@", "$prgdir\$prgver"
+    md2 "$prgs\tmp" "temp directory"
+    Write-Host "${aprgname}: Invoke '$invoke'"
+    # http://stackoverflow.com/questions/3592851/executing-a-command-stored-in-a-variable-from-powershell
+    $sp="set TEMP=`"$prgs\tmp`""
+    $sp=$sp+"`nset TMP=`"$prgs\tmp`""
+    $sp=$sp+"`n$invoke"
+    [System.IO.File]::WriteAllLines("$prgs\tmp\invoke.bat", "$sp", $Utf8NoBomEncoding)
+    Write-Host "prgdir\prgver1='$prgdir\$prgver'"
+    # http://stackoverflow.com/a/14606292/6309: make sure to capture the result of the invoke command
+    # or it will pollute the prgdir end result.
+    $res = invoke-expression "$prgs\tmp\invoke.bat"
+    Write-Host "prgdir\prgver2='$prgdir\$prgver'"
+    [System.IO.File]::WriteAllLines("$prgs\tmp\res.bat", "$prgdir\$prgver", $Utf8NoBomEncoding)
+  }
+}
+
 function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]$urlmatch_arc="", [String]$urlmatch_ver,
                     [String]$test, [String]$invoke, [switch][alias("z")]$unzip, [String]$post) {
   Write-Host "Install aprgname='$aprgname' from url='$url'`r`nurlmatch='$urlmatch', urlmatch_arc='$urlmatch_arc', urlmatch_ver='$urlmatch_ver'`r`ntest='$test', invoke='$invoke' and unzip='$unzip'"
@@ -169,20 +189,8 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
         $downloader.DownloadFile($dwnUrl, "$prgdir/$prgfile")
       }
     }
-
-    if ( -not [string]::IsNullOrEmpty($invoke) ) {
-      $invoke = $invoke -replace "@FILE@", "$prgdir\$prgfile"
-      $invoke = $invoke -replace "@DEST@", "$prgdir\$prgver"
-      md2 "$prgs\tmp" "temp directory"
-      Write-Host "${aprgname}: Invoke '$invoke'"
-# http://stackoverflow.com/questions/3592851/executing-a-command-stored-in-a-variable-from-powershell
-      $Env:TEMP = "$prgs\tmp"
-      $sp="set TEMP=`"$prgs\tmp`""
-      $sp=$sp+"`nset TMP=`"$prgs\tmp`""
-      $sp=$sp+"`n$invoke"
-      [System.IO.File]::WriteAllLines("$prgs\tmp\invoke.bat", "$sp", $Utf8NoBomEncoding)
-      invoke-expression "$prgs\tmp\invoke.bat"
-    }
+    
+    install -invoke $invoke -prgdir $prgdir -prgfile $prgfile -prgver $prgver
 
     if ( $unzip ) {
       if ( $prgfile.EndsWith(".zip") ) {
