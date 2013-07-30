@@ -288,12 +288,22 @@ $python_urlmatch_arc = if ( Test-Win64 ) { "amd64.msi" } else { "\d\.msi" }
 # http://www.python.org/download/releases/2.4/msi/
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/3729e9c2-cb1f-42f7-a4ee-91bc6b101d9a/invokeexpression-syntax-issues
 $python_dir   = installPrg -aprgname     "python"                -url          "http://www.python.org/getit/" `
-                        -urlmatch     "python-2.*.msi"         -urlmatch_arc "$python_urlmatch_arc" `
+                        -urlmatch     "python-2.*.msi"           -urlmatch_arc "$python_urlmatch_arc" `
                         -urlmatch_ver "python-2.*$python_urlmatch_arc"            -test         "python.exe" `
                         -invoke       "C:\WINDOWS\system32\msiexec.exe /i @FILE@ /l @DEST@.log TARGETDIR=@DEST@ ADDLOCAL=DefaultFeature``,TclTk``,Documentation``,Tools``,Testsuite /qn"
-#                        -invoke       "C:\WINDOWS\system32\msiexec.exe /i @FILE@ /l @DEST@.log TARGETDIR=@DEST@"
 cleanAddPath "\\python" ""
 invoke-expression 'doskey python=$python_dir\python.exe $*'
+}
+
+$hg = {
+$hg_urlmatch_arc = if ( Test-Win64 ) { "-x64.exe" } else { "\d\.exe" }
+# http://www.jrsoftware.org/ishelp/index.php?topic=setupcmdline
+$hg_dir   = installPrg -aprgname     "hg"                    -url          "http://mercurial.selenic.com/sources.js" `
+                        -urlmatch     "Mercurial-.*.exe"         -urlmatch_arc "$hg_urlmatch_arc" `
+                        -urlmatch_ver "Mercurial.*$hg_urlmatch_arc"            -test         "hg.exe" `
+                        -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
+cleanAddPath "\\Mercurial" ""
+invoke-expression 'doskey hg=$hg_dir\hg.exe $*'
 }
 
 cleanAddPath "" "$prgs\bin"
@@ -303,7 +313,8 @@ cleanAddPath "" "$prog\bin"
 # iex ('&$gow')
 # iex ('&$git')
 # iex ('&$npp')
- iex ('&$python')
+# iex ('&$python')
+ iex ('&$hg')
 
 $path=get-content "$prgs/path.txt"
 $sp="set PATH=$path"
