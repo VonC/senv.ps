@@ -173,9 +173,15 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     if ( -not [string]::IsNullOrEmpty($invoke) ) {
       $invoke = $invoke -replace "@FILE@", "$prgdir\$prgfile"
       $invoke = $invoke -replace "@DEST@", "$prgdir\$prgver"
+      md2 "$prgs\tmp" "temp directory"
       Write-Host "${aprgname}: Invoke '$invoke'"
 # http://stackoverflow.com/questions/3592851/executing-a-command-stored-in-a-variable-from-powershell
-      invoke-expression "&$invoke"
+      $Env:TEMP = "$prgs\tmp"
+      $sp="set TEMP=`"$prgs\tmp`""
+      $sp=$sp+"`nset TMP=`"$prgs\tmp`""
+      $sp=$sp+"`n$invoke"
+      [System.IO.File]::WriteAllLines("$prgs\tmp\invoke.bat", "$sp", $Utf8NoBomEncoding)
+      invoke-expression "$prgs\tmp\invoke.bat"
     }
 
     if ( $unzip ) {
