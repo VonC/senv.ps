@@ -235,6 +235,7 @@ invoke-expression 'doskey sp=$prgs\setpath.bat'
 invoke-expression 'doskey se=$prgs\setpath.bat'
 invoke-expression 'doskey cdd=cd %PROG%'
 invoke-expression 'doskey cds=cd %PRGS%'
+invoke-expression 'doskey cdg=cd %PROG%\git\5995144'
 
 
 $peazip = {
@@ -309,17 +310,16 @@ invoke-expression 'doskey hg=$hg_dir\hg.exe $*'
 cleanAddPath "" "$prgs\bin"
 cleanAddPath "" "$prog\bin"
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
-# iex ('&$peazip')
-# iex ('&$gow')
-# iex ('&$git')
-# iex ('&$npp')
-# iex ('&$python')
+ iex ('&$peazip')
+ iex ('&$gow')
+ iex ('&$git')
+ iex ('&$npp')
+ iex ('&$python')
  iex ('&$hg')
 
 $path=get-content "$prgs/path.txt"
 $sp="set PATH=$path"
 $sp=$sp+"`nset term=msys"
-$sp=$sp+"`nif exist `"%HOME%\.proxy.bat`" call `"%HOME%\.proxy.bat`""
 
 $homep=$env:HOME
 if ( [string]::IsNullOrEmpty($homep) ) {
@@ -329,5 +329,6 @@ if ( [string]::IsNullOrEmpty($homep) ) {
   }
 }
 $sp=$sp+"`nset HOME=$homep"
+$sp=$sp+"`nif exist `"%HOME%\.proxy.bat`" call `"%HOME%\.proxy.bat`""
 
 [System.IO.File]::WriteAllLines("$prgs\setpath.bat", "$sp", $Utf8NoBomEncoding)
