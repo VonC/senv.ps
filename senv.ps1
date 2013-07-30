@@ -315,6 +315,17 @@ cleanAddPath "\\Mercurial" ""
 invoke-expression 'doskey hg=$hg_dir\hg.exe $*'
 }
 
+$bzr = {
+# http://www.jrsoftware.org/ishelp/index.php?topic=setupcmdline: bazzar is dead! (since mid-2012)
+$bzr_dir   = installPrg -aprgname     "bzr"                      -url          "http://wiki.bazaar.canonical.com/WindowsDownloads" `
+                        -urlmatch     "bzr.*-setup.exe"          -urlmatch_arc "$bzr_urlmatch_arc" `
+                        -urlmatch_ver "bzr.*-setup(.exe)?"       -test         "bzr.exe" `
+                        -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
+cleanAddPath "\\Bazaar" ""
+Write-Host "bzr_dir\bzr.exe='$bzr_dir\bzr.exe'"
+invoke-expression 'doskey bzr=$bzr_dir\bzr.exe $*'
+}
+
 cleanAddPath "" "$prgs\bin"
 cleanAddPath "" "$prog\bin"
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
