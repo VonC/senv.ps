@@ -136,7 +136,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   # http://social.technet.microsoft.com/wiki/contents/articles/2286.understanding-booleans-in-powershell.aspx
   $mustupdate=-not (Test-Path "$prgdir\*")
   if(-not $mustupdate) {
-    $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$urlmatch_ver" } | sort CreationTime | select -l 1
+    $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$urlmatch_arc" } | sort CreationTime | select -l 1
     Write-Host "afolder='$afolder'" 
     if ( -not (Test-Path "$prgdir/$afolder/$test") ) {
       $mustupdate = $true
@@ -251,7 +251,7 @@ $peazip = {
 $peazip_urlmatch_arc = if ( Test-Win64 ) { "WIN64" } else { "WINDOWS" }
 $peazipDir = installPrg -aprgname     "peazip"                   -url          "http://peazip.sourceforge.net/peazip-portable.html" `
                         -urlmatch     "zip/download"             -urlmatch_arc "$peazip_urlmatch_arc" `
-                        -urlmatch_ver "$peazip_urlmatch_arc(.zip)?" -test         "peazip.exe" `
+                        -urlmatch_ver "$peazip_urlmatch_arc.zip" -test         "peazip.exe" `
                         -invoke       ""                         -unzip        -post "Copy-Item @install_folder\res\7z @install_folder\.. -Force -Recurse"
 # http://superuser.com/questions/544520/how-can-i-copy-a-directory-overwriting-its-contents-if-it-exists-using-powershe
 
@@ -265,7 +265,7 @@ invoke-expression 'doskey 7z=$peazipDir\res\7z\7z.exe `$*'
 $gow = {
 $gow_dir   = installPrg -aprgname     "Gow"                      -url          "https://github.com/VonC/gow/releases" `
                         -urlmatch     "gow/releases/download/.*.zip"           -urlmatch_arc "" `
-                        -urlmatch_ver "Gow.*(.zip)?"             -test         "bin\gow.bat" `
+                        -urlmatch_ver "Gow.*.zip"                -test         "bin\gow.bat" `
                         -invoke       ""                         -unzip
 
 cleanAddPath "\\Gow-" "$gow_dir\bin"
@@ -274,7 +274,7 @@ cleanAddPath "\\Gow-" "$gow_dir\bin"
 $git = {
 $git_dir   = installPrg -aprgname     "git"                      -url          "https://code.google.com/p/msysgit/downloads/list?can=2&q=portable&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount" `
                         -urlmatch     "msysgit.googlecode.com/files/Portable.*.7z"            -urlmatch_arc "" `
-                        -urlmatch_ver "Portable.*(.7z)?"         -test         "git-cmd.bat" `
+                        -urlmatch_ver "Portable.*.7z"            -test         "git-cmd.bat" `
                         -invoke       ""                         -unzip
 cleanAddPath "git" "$git_dir\bin"
 invoke-expression 'doskey gl=git lg -20'
@@ -286,17 +286,17 @@ invoke-expression 'doskey glba=git lg -20 --branches --all'
 $npp = {
 $npp_dir   = installPrg -aprgname     "npp"                      -url          "http://notepad-plus-plus.org/download/" `
                         -urlmatch     "npp.*.bin.zip"            -urlmatch_arc "" `
-                        -urlmatch_ver "npp.*.bin(.zip)?"            -test         "notepad++.exe" `
+                        -urlmatch_ver "npp.*.bin.zip"            -test         "notepad++.exe" `
                         -invoke       ""                         -unzip
 cleanAddPath "\\npp" ""
 invoke-expression 'doskey npp=$npp_dir\notepad++.exe $*'
 }
 
 $python = {
-$python_urlmatch_arc = if ( Test-Win64 ) { "amd64(.msi)?" } else { "\d\(.msi)?" }
+$python_urlmatch_arc = if ( Test-Win64 ) { "amd64.msi" } else { "\d\.msi" }
 # http://www.python.org/download/releases/2.4/msi/
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/3729e9c2-cb1f-42f7-a4ee-91bc6b101d9a/invokeexpression-syntax-issues
-$python_dir = installPrg -aprgname     "python"                  -url          "http://www.python.org/getit/" `
+$python_dir   = installPrg -aprgname     "python"                -url          "http://www.python.org/getit/" `
                         -urlmatch     "python-2.*.msi"           -urlmatch_arc "$python_urlmatch_arc" `
                         -urlmatch_ver "python-2.*$python_urlmatch_arc"            -test         "python.exe" `
                         -invoke       "C:\WINDOWS\system32\msiexec.exe /i @FILE@ /l @DEST@.log TARGETDIR=@DEST@ ADDLOCAL=DefaultFeature``,TclTk``,Documentation``,Tools``,Testsuite /qn"
@@ -305,11 +305,11 @@ invoke-expression 'doskey python=$python_dir\python.exe $*'
 }
 
 $hg = {
-$hg_urlmatch_arc = if ( Test-Win64 ) { "-x64(.exe)?" } else { "\d\(.exe)?" }
+$hg_urlmatch_arc = if ( Test-Win64 ) { "-x64.exe" } else { "\d\.exe" }
 # http://www.jrsoftware.org/ishelp/index.php?topic=setupcmdline
-$hg_dir    = installPrg -aprgname     "hg"                       -url          "http://mercurial.selenic.com/sources.js" `
-                        -urlmatch     "Mercurial-.*.exe"         -urlmatch_arc "" `
-                        -urlmatch_ver "Mercurial.*$bzr_urlmatch_arc"          -test         "hg.exe" `
+$hg_dir   = installPrg -aprgname     "hg"                    -url          "http://mercurial.selenic.com/sources.js" `
+                        -urlmatch     "Mercurial-.*.exe"         -urlmatch_arc "$hg_urlmatch_arc" `
+                        -urlmatch_ver "Mercurial.*$hg_urlmatch_arc"            -test         "hg.exe" `
                         -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
 cleanAddPath "\\Mercurial" ""
 invoke-expression 'doskey hg=$hg_dir\hg.exe $*'
