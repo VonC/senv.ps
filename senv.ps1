@@ -332,6 +332,17 @@ invoke-expression 'doskey bzr=$bzr_dir\bzr.exe $*'
 cleanAddPath "" "$prgs\bin"
 cleanAddPath "" "$prog\bin"
 
+# iex ('&$bzr')
+# Exit 0
+# http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
+ iex ('&$peazip')
+ iex ('&$gow')
+ iex ('&$git')
+ iex ('&$npp')
+ iex ('&$python')
+ iex ('&$hg')
+ iex ('&$bzr')
+
 $path=get-content "$prgs/path.txt"
 $sp="set PATH=$path"
 $sp=$sp+"`nset term=msys"
@@ -347,14 +358,3 @@ $sp=$sp+"`nset HOME=$homep"
 $sp=$sp+"`nif exist `"%HOME%\.proxy.bat`" call `"%HOME%\.proxy.bat`""
 
 [System.IO.File]::WriteAllLines("$prgs\setpath.bat", "$sp", $Utf8NoBomEncoding)
-
-# iex ('&$bzr')
-# Exit 0
-# http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
- iex ('&$peazip')
- iex ('&$gow')
- iex ('&$git')
- iex ('&$npp')
- iex ('&$python')
- iex ('&$hg')
- iex ('&$bzr')
