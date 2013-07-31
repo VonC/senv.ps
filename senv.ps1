@@ -240,6 +240,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
 }
 
 invoke-expression 'doskey alias=doskey /macros'
+invoke-expression 'doskey h=doskey /history'
 invoke-expression 'doskey sc=$prgs\setpath.bat'
 invoke-expression 'doskey sp=$prgs\setpath.bat'
 invoke-expression 'doskey se=$prgs\setpath.bat'
