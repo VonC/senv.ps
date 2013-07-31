@@ -136,7 +136,9 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   # http://social.technet.microsoft.com/wiki/contents/articles/2286.understanding-booleans-in-powershell.aspx
   $mustupdate=-not (Test-Path "$prgdir\*")
   if(-not $mustupdate) {
-    $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$urlmatch_arc" } | sort CreationTime | select -l 1
+    $folder_pattern=$urlmatch_ver -replace '\.(7z|7Z|zip|exe|msi)$',''
+	Write-Host "folder_pattern='$folder_pattern'"
+    $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$folder_pattern" } | sort CreationTime | select -l 1
     Write-Host "afolder='$afolder'" 
     if ( -not (Test-Path "$prgdir/$afolder/$test") ) {
       $mustupdate = $true
@@ -307,7 +309,7 @@ invoke-expression 'doskey python=$python_dir\python.exe $*'
 $hg = {
 $hg_urlmatch_arc = if ( Test-Win64 ) { "-x64.exe" } else { "\d\.exe" }
 # http://www.jrsoftware.org/ishelp/index.php?topic=setupcmdline
-$hg_dir   = installPrg -aprgname     "hg"                    -url          "http://mercurial.selenic.com/sources.js" `
+$hg_dir   = installPrg -aprgname     "hg"                        -url          "http://mercurial.selenic.com/sources.js" `
                         -urlmatch     "Mercurial-.*.exe"         -urlmatch_arc "$hg_urlmatch_arc" `
                         -urlmatch_ver "Mercurial.*$hg_urlmatch_arc"            -test         "hg.exe" `
                         -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
@@ -318,8 +320,8 @@ invoke-expression 'doskey hg=$hg_dir\hg.exe $*'
 $bzr = {
 # http://www.jrsoftware.org/ishelp/index.php?topic=setupcmdline: bazzar is dead! (since mid-2012)
 $bzr_dir   = installPrg -aprgname     "bzr"                      -url          "http://wiki.bazaar.canonical.com/WindowsDownloads" `
-                        -urlmatch     "bzr.*-setup.exe"          -urlmatch_arc "$bzr_urlmatch_arc" `
-                        -urlmatch_ver "bzr.*-setup(.exe)?"       -test         "bzr.exe" `
+                        -urlmatch     "bzr.*-setup.exe"          -urlmatch_arc "" `
+                        -urlmatch_ver "bzr.*-setup.exe"          -test         "bzr.exe" `
                         -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
 cleanAddPath "\\Bazaar" ""
 Write-Host "bzr_dir\bzr.exe='$bzr_dir\bzr.exe'"
