@@ -329,12 +329,29 @@ Write-Host "bzr_dir\bzr.exe='$bzr_dir\bzr.exe'"
 invoke-expression 'doskey bzr=$bzr_dir\bzr.exe $*'
 }
 
+$go = {
+$go_urlmatch_arc = if ( Test-Win64 ) { "-amd64.zip" } else { "-386.zip" }
+$go_dir   = installPrg -aprgname     "go"                      -url          "https://code.google.com/p/go/downloads/list?can=2&q=windows+zip&sort=-uploaded&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount" `
+                        -urlmatch     "go.*$go_urlmatch_arc"          -urlmatch_arc "$go_urlmatch_arc" `
+                        -urlmatch_ver "go.*$go_urlmatch_arc"          -test         "go\bin\go.exe" `
+                        -unzip
+cleanAddPath "\\Bazaar" ""
+Write-Host "go_dir\go.exe='$go_dir\go.exe'"
+invoke-expression 'doskey go=$go_dir\go\bin\go.exe $*'
+invoke-expression 'doskey godoc=$go_dir\go\bin\godoc.exe $*'
+invoke-expression 'doskey gofmt=$go_dir\go\bin\gofmt.exe $*'
+}
+
+
+
 cleanAddPath "" "$prgs\bin"
 cleanAddPath "" "$prog\bin"
 
 # iex ('&$bzr')
 # Exit 0
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
+<#
+#>
  iex ('&$peazip')
  iex ('&$gow')
  iex ('&$git')
@@ -342,6 +359,7 @@ cleanAddPath "" "$prog\bin"
  iex ('&$python')
  iex ('&$hg')
  iex ('&$bzr')
+ iex ('&$go')
 
 $path=get-content "$prgs/path.txt"
 $sp="set PATH=$path"
