@@ -331,11 +331,11 @@ invoke-expression 'doskey bzr=$bzr_dir\bzr.exe $*'
 
 $go = {
 $go_urlmatch_arc = if ( Test-Win64 ) { "-amd64.zip" } else { "-386.zip" }
-$go_dir   = installPrg -aprgname     "go"                      -url          "https://code.google.com/p/go/downloads/list?can=2&q=windows+zip&sort=-uploaded&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount" `
-                        -urlmatch     "go.*$go_urlmatch_arc"          -urlmatch_arc "$go_urlmatch_arc" `
-                        -urlmatch_ver "go.*$go_urlmatch_arc"          -test         "go\bin\go.exe" `
+$go_dir   = installPrg -aprgname     "go"                        -url          "https://code.google.com/p/go/downloads/list?can=2&q=windows+zip&sort=-uploaded&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount" `
+                        -urlmatch     "go.*$go_urlmatch_arc"     -urlmatch_arc "$go_urlmatch_arc" `
+                        -urlmatch_ver "go.*$go_urlmatch_arc"     -test         "go\bin\go.exe" `
                         -unzip
-cleanAddPath "\\Bazaar" ""
+cleanAddPath "\\go.*" ""
 Write-Host "go_dir\go.exe='$go_dir\go.exe'"
 invoke-expression 'doskey go=$go_dir\go\bin\go.exe $*'
 invoke-expression 'doskey godoc=$go_dir\go\bin\godoc.exe $*'
