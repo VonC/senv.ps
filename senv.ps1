@@ -150,16 +150,17 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   # http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
   $result=$downloader.DownloadString($url)
   # http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
-  $links = ( $result.split("`"") | where { $_ -match "$urlmatch" } ) # "
+  $result = $result.split("`"") -join "^`""
+  $links = ( $result.split("`"") | where { $_ -match "$urlmatch" }  )  # "
   Write-Host "links='$links'"
   if ( $urlmatch_arc -ne "" ) {
-    $dwnUrl = ( $links -split " " | where { $_ -match "$urlmatch_arc" } ) # "
+    $dwnUrl = ( $links -split "^" | where { $_ -match "$urlmatch_arc" } ) # "
     Write-Host "dwnUrl1='$dwnUrl'"
   } else {
     $dwnUrl = $links
     Write-Host "dwnUrl2='$dwnUrl'"
   }
-  $dwnUrl = ( $dwnUrl -split " "  )[0]
+  $dwnUrl = ( $dwnUrl.split('^')  )[0]
   Write-Host "dwnUrl3='$dwnUrl'"
   if ( $dwnUrl.StartsWith("//") ) {
     $dwnUrl = ([System.Uri]$url).Scheme + ":" + $dwnUrl
