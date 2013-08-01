@@ -353,7 +353,14 @@ $sbt_dir   = installPrg -aprgname     "sbt"                       -url          
                         -urlmatch_ver "Sublime.*$sbt_urlmatch_arc"    -test         "sublime_text.exe" `
                         -unzip
 cleanAddPath "\\Sublime.*" ""
-invoke-expression 'doskey sbt=$sbt_dir\sublime_text.exe $*'
+invoke-expression 'doskey sbt=start "Sublime Text 3" "$sbt_dir\sublime_text.exe" $*'
+
+$gosublime="$sbt_dir\Data\Packages\GoSublime"
+if ( -not ( Test-Path "$gosublime" ) ) {
+  git clone https://github.com/DisposaBoy/GoSublime "$gosublime"
+} else {
+  git --git-dir="$gosublime\.git" --work-tree="$gosublime" pull origin master
+}
 }
 
 
