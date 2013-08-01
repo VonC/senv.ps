@@ -342,6 +342,15 @@ invoke-expression 'doskey godoc=$go_dir\go\bin\godoc.exe $*'
 invoke-expression 'doskey gofmt=$go_dir\go\bin\gofmt.exe $*'
 }
 
+$sbt = {
+$sbt_urlmatch_arc = if ( Test-Win64 ) { "x64.zip" } else { "\d\d\d\d.zip" }
+$sbt_dir   = installPrg -aprgname     "sbt"                       -url          "http://www.sublimetext.com/3" `
+                        -urlmatch     "Sublime.*$sbt_urlmatch_arc"    -urlmatch_arc "$sbt_urlmatch_arc" `
+                        -urlmatch_ver "Sublime.*$sbt_urlmatch_arc"    -test         "sublime_text.exe" `
+                        -unzip
+cleanAddPath "\\Sublime.*" ""
+invoke-expression 'doskey sbt=$sbt_dir\sublime_text.exe $*'
+}
 
 
 cleanAddPath "" "$prgs\bin"
@@ -351,7 +360,6 @@ cleanAddPath "" "$prog\bin"
 # Exit 0
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
-#>
  iex ('&$peazip')
  iex ('&$gow')
  iex ('&$git')
@@ -360,6 +368,8 @@ cleanAddPath "" "$prog\bin"
  iex ('&$hg')
  iex ('&$bzr')
  iex ('&$go')
+#>
+ iex ('&$sbt')
 
 $path=get-content "$prgs/path.txt"
 $sp="set PATH=$path"
