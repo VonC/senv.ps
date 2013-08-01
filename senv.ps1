@@ -178,7 +178,9 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   $prgfile = $dwnUrl -split "/" | where { $_ -match "$urlmatch_ver" }
   $prgfile_dotindex = $prgfile.LastIndexOf('.')
   Write-Host "prgfile_dotindex='$prgfile_dotindex', " ( $prgfile_dotindex -gt 0 )
-  $prgver = if ( $prgfile_dotindex -gt 0 ) { $prgfile.Substring(0,$prgfile_dotindex) } else { $prgfile }
+  $prgver_space = if ( $prgfile_dotindex -gt 0 ) { $prgfile.Substring(0,$prgfile_dotindex) } else { $prgfile }
+  $prgver = $prgver_space -replace " ", "_"
+  $prgfile = $prgfile -replace " ", "_"
   Write-Host "result='$dwnUrl': prgver='$prgver', prgfile='$prgfile'"
 
   if ( -not (Test-Path "$prgdir/$prgver/$test") ) {
@@ -220,11 +222,12 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
         $res=invoke-expression "$prgs\peazip\7z\7z.exe x  -aos -o`"$prgdir\tmp```" -pdefault -sccUTF-8 ```"$prgdir\$prgfile```""
         Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => 7z... DONE"
       }
-      $afolder=Get-ChildItem  "$prgdir\tmp" | Where { $_.PSIsContainer -and $_.Name -eq "$prgver" } | sort CreationTime | select -l 1
+      $afolder=Get-ChildItem  "$prgdir\tmp" | Where { $_.PSIsContainer -and $_.Name -eq "$prgver_space" } | sort CreationTime | select -l 1
       Write-Host "zip afolder='$afolder', vs. prgver='$prgdir\tmp\$prgver'"
       if ( $afolder ) {
         Write-Host "Move '$prgdir\tmp\$prgver' up to '$prgdir\$prgver'"
-        Move-Item "$prgdir\tmp\$prgver" "$prgdir"
+        Move-Item "$prgdir\tmp\$prgver_space" "$prgdir"
+        Rename-Item "$prgdir\$prgver_space" "$prgdir\$prgver"
         Write-Host "Deleting '$prgdir\tmp'"
         Remove-Item "$prgdir\tmp"
       } else {
