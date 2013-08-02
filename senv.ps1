@@ -12,6 +12,41 @@ param(
     $update = $false
 )
 
+function addbin([String]$filename, [String]$command) {
+  Write-Host "WRITE to $filename the command $command"
+  if ( Test-Path "$filename" ) {
+    Write-Host "Clear $filename"
+    Clear-Content "$filename"
+  }
+  Add-Content "$filename" $command
+}
+function addenvs([String]$variable, [String]$value) {
+  # http://www.pavleck.net/powershell-cookbook/ch07.html
+  $envs=@{}
+  Write-Host "WRITE variable $variable the value $value"
+  if( Test-Path "$prgs\envs.txt" ) {
+    # http://stackoverflow.com/questions/4192072/how-to-process-a-file-in-powershell-line-by-line-as-a-stream
+    $reader = [System.IO.File]::OpenText("$prgs\envs.txt")
+    try {
+      for(;;) {
+        $line = $reader.ReadLine()
+        if ($line -eq $null) { break }
+        # http://www.regular-expressions.info/powershell.html
+        if ( $line -match "set ([^`"]+)=([^`"]+)" ) {
+          Write-Host "Line '$line' match"
+          $envs[$matches[1]] = $matches[2]
+        }
+      }
+    }
+    finally {
+      $reader.Close()
+    }
+  }
+  $envs[$variable] = $value
+  # http://stackoverflow.com/questions/5954503/powershell-hashtable-does-not-write-to-file-as-expected-receive-only-system-c
+  Clear-Content "$prgs/envs.txt"
+  $envs.GetEnumerator() | Sort-Object Name | ForEach-Object { "set {0}={1}" -f $_.Name,$_.Value } | Add-Content "$prgs\envs.txt"
+}
 # http://technet.microsoft.com/en-us/library/ff730955.aspx
 function md2([String]$apath, [String]$afor) {
   if ( ! (Test-Path "$apath") ) {
@@ -319,7 +354,9 @@ $hg_dir   = installPrg -aprgname     "hg"                        -url          "
                         -urlmatch_ver "Mercurial.*$hg_urlmatch_arc"            -test         "hg.exe" `
                         -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
 cleanAddPath "\\Mercurial" ""
-invoke-expression 'doskey hg=$hg_dir\hg.exe $*'
+Write-Host "hg_dir'$hg_dir'"
+addbin -filename "$prgs\bin\hg.bat" -command "$hg_dir\hg.exe %*"
+invoke-expression 'doskey hg='
 }
 
 $bzr = {
@@ -341,9 +378,14 @@ $go_dir   = installPrg -aprgname     "go"                        -url          "
                         -unzip
 cleanAddPath "\\go.*" ""
 Write-Host "go_dir\go.exe='$go_dir\go.exe'"
-invoke-expression 'doskey go=$go_dir\go\bin\go.exe $*'
-invoke-expression 'doskey godoc=$go_dir\go\bin\godoc.exe $*'
-invoke-expression 'doskey gofmt=$go_dir\go\bin\gofmt.exe $*'
+addenvs -variable "GOPATH" -value "%PROG%\go"
+addenvs -variable "GOROOT" -value "$go_dir\go"
+addbin -filename "$prgs\bin\go.bat" -command "$go_dir\go\bin\go.exe %*"
+addbin -filename "$prgs\bin\godoc.bat" -command "$go_dir\go\bin\godoc.exe %*"
+addbin -filename "$prgs\bin\gogofmt.bat" -command "$go_dir\go\bin\gofmt.exe %*"
+invoke-expression 'doskey go='
+invoke-expression 'doskey godoc='
+invoke-expression 'doskey gofmt='
 }
 
 $sbt = {
@@ -398,14 +440,22 @@ cleanAddPath "" "$prog\bin"
  iex ('&$npp')
  iex ('&$python')
  iex ('&$hg')
+ iex ('&$hg')
  iex ('&$bzr')
- iex ('&$go')
-#>
  iex ('&$sbt')
+#>
+
+ iex ('&$go')
+# iex ('&$gpg')
 
 $path=get-content "$prgs/path.txt"
 $sp="set PATH=$path"
 $sp=$sp+"`nset term=msys"
+
+#http://stackoverflow.com/questions/15041857/powershell-keep-text-formatting-when-reading-in-a-file
+$envs=(Get-Content "$prgs/envs.txt") -join "`n"
+Write-Host "envs='$envs'"
+$sp=$sp+"`n$envs"
 
 $homep=$env:HOME
 if ( [string]::IsNullOrEmpty($homep) ) {
