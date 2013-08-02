@@ -426,6 +426,19 @@ if ( -not ( Test-Path "$powershell" ) ) {
 
 }
 
+$gpg = {
+# http://www.jrsoftware.org/ishelp/index.php?topic=setupcmdline: bazzar is dead! (since mid-2012)
+$gpg_dir   = installPrg -aprgname     "gpg"                      -url          "http://files.gpg4win.org/Beta/?C=M;O=D" `
+                        -urlmatch     "gpg4win-vanilla-.*.exe$"  -urlmatch_arc "" `
+                        -urlmatch_ver "gpg4win-vanilla-.*.exe$"  -test         "gpg2.exe" `
+                        -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
+cleanAddPath "\\gpg" ""
+Write-Host "gpg_dir\gpg2.exe='$gpg_dir\bzr.exe'"
+invoke-expression 'doskey gpg=$gpg_dir\gpg2.exe $*'
+invoke-expression 'doskey gpg2=$gpg_dir\gpg2.exe $*'
+}
+
+
 
 cleanAddPath "" "$prgs\bin"
 cleanAddPath "" "$prog\bin"
