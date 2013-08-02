@@ -364,15 +364,15 @@ if ( -not ( Test-Path "$gosublime" ) ) {
 }
 
 md2 "$sbt_dir\Data\Packages\User" "for Sublime text user settings"
-$GoSublime.sublime-settings=@"
+$GoSublime_sublime_settings = @"
 {
   "env": { "GOPATH": "$PROG/go:$GS_GOPATH",
            "GOROOT": "$PRGS/go/go1.1.1.windows-amd64/go"
          },
 }
 "@
-if ( -not Test-Path "$sbt_dir\Data\Packages\User\GoSublime.sublime-settings") {
-  Add-Content -value $GoSublime.sublime-settings -path "$sbt_dir\Data\Packages\User\GoSublime.sublime-settings"
+if ( -not ( Test-Path "$sbt_dir\Data\Packages\User\GoSublime.sublime-settings" ) ) {
+  Add-Content -value $GoSublime_sublime_settings -path "$sbt_dir\Data\Packages\User\GoSublime.sublime-settings"
 }
 
 $powershell="$sbt_dir\Data\Packages\PowerShell"
