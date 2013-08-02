@@ -408,7 +408,7 @@ if ( -not ( Test-Path "$gosublime" ) ) {
 md2 "$sbt_dir\Data\Packages\User" "for Sublime text user settings"
 $GoSublime_sublime_settings = @"
 {
-  "env": { "GOPATH": "$PROG/go:$GS_GOPATH",
+  "env": { "GOPATH": "$PROG/go;$GS_GOPATH",
            "GOROOT": "$PRGS/go/go1.1.1.windows-amd64/go"
          },
 }
