@@ -414,24 +414,13 @@ if ( -not ( Test-Path "$gosublime" ) ) {
   git --git-dir="$gosublime\.git" --work-tree="$gosublime" pull origin master
 }
 
-md2 "$sbt_dir\Data\Packages\User" "for Sublime text user settings"
-$GoSublime_sublime_settings = @"
-{
-  "env": { "GOPATH": "$PROG/go;$GS_GOPATH",
-           "GOROOT": "$PRGS/go/go1.1.1.windows-amd64/go"
-         },
-}
-"@
-if ( -not ( Test-Path "$sbt_dir\Data\Packages\User\GoSublime.sublime-settings" ) ) {
-  Add-Content -value $GoSublime_sublime_settings -path "$sbt_dir\Data\Packages\User\GoSublime.sublime-settings"
-}
-
 $powershell="$sbt_dir\Data\Packages\PowerShell"
 if ( -not ( Test-Path "$powershell" ) ) {
   git clone https://github.com/SublimeText/PowerShell "$powershell"
 } else {
   git --git-dir="$powershell\.git" --work-tree="$powershell" pull origin master
 }
+md2 "$sbt_dir\Data\Packages\User" "for Sublime text user settings"
 
 }
 
