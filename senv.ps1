@@ -425,11 +425,11 @@ md2 "$sbt_dir\Data\Packages\User" "for Sublime text user settings"
 }
 
 $gpg = {
-# http://www.jrsoftware.org/ishelp/index.php?topic=setupcmdline: bazzar is dead! (since mid-2012)
+# http://www.gpg4win.org/doc/en/gpg4win-compendium_35.html
 $gpg_dir   = installPrg -aprgname     "gpg"                      -url          "http://files.gpg4win.org/Beta/?C=M;O=D/" `
                         -urlmatch     "gpg4win-vanilla-.*.exe(?!.sig)"  -urlmatch_arc "" `
                         -urlmatch_ver "gpg4win-vanilla-.*.exe(?!.sig)"  -test         "gpg2.exe" `
-                        -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
+                        -invoke       "@FILE@ /S /D=@DEST@"
 cleanAddPath "\\gpg" ""
 Write-Host "gpg_dir\gpg2.exe='$gpg_dir\gpg2.exe'"
 invoke-expression 'doskey gpg=$gpg_dir\gpg2.exe $*'
