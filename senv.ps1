@@ -93,7 +93,8 @@ $progInstallVariableName="prog"
 $progDefaultPath="$Env:userprofile\prog"
 $prog=mdEnvPath "$progInstallVariableName" "for programming data" "$progDefaultPath"
 
-Write-Host "prgs '$prgs', prog '$prog'"
+md2 "$prgs\bin" "prgs bin"
+md2 "$prog\bin" "prog bin"
 
 Write-Host "prgs '$prgs', prog '$prog'"
 
