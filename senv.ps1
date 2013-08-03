@@ -176,7 +176,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   # http://social.technet.microsoft.com/wiki/contents/articles/2286.understanding-booleans-in-powershell.aspx
   $mustupdate=-not (Test-Path "$prgdir\*")
   if(-not $mustupdate) {
-    $folder_pattern=$urlmatch_ver -replace '\.(7z|7Z|zip|exe|msi)$',''
+    $folder_pattern=$urlmatch_ver -replace '\.(7z|7Z|zip|exe|msi).*',''
 	Write-Host "folder_pattern='$folder_pattern'"
     $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$folder_pattern" } | sort CreationTime | select -l 1
     Write-Host "afolder='$afolder'" 
