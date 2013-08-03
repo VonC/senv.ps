@@ -12,13 +12,16 @@ param(
     $update = $false
 )
 
+$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($False)
+
 function addbin([String]$filename, [String]$command) {
   Write-Host "WRITE to $filename the command $command"
   if ( Test-Path "$filename" ) {
     Write-Host "Clear $filename"
     Clear-Content "$filename"
   }
-  Add-Content "$filename" $command
+  $acommand="@echo off`n"+$command
+  [System.IO.File]::WriteAllLines("$filename", "$acommand", $Utf8NoBomEncoding)
 }
 function addenvs([String]$variable, [String]$value) {
   # http://www.pavleck.net/powershell-cookbook/ch07.html
@@ -45,7 +48,8 @@ function addenvs([String]$variable, [String]$value) {
   $envs[$variable] = $value
   # http://stackoverflow.com/questions/5954503/powershell-hashtable-does-not-write-to-file-as-expected-receive-only-system-c
   Clear-Content "$prgs/envs.txt"
-  $envs.GetEnumerator() | Sort-Object Name | ForEach-Object { "set {0}={1}" -f $_.Name,$_.Value } | Add-Content "$prgs\envs.txt"
+  $acontent=($envs.GetEnumerator() | Sort-Object Name | ForEach-Object { "`nset {0}={1}" -f $_.Name,$_.Value })
+  [System.IO.File]::WriteAllLines("$prgs\envs.txt", "$acontent", $Utf8NoBomEncoding)
 }
 # http://technet.microsoft.com/en-us/library/ff730955.aspx
 function md2([String]$apath, [String]$afor) {
@@ -91,7 +95,7 @@ $prog=mdEnvPath "$progInstallVariableName" "for programming data" "$progDefaultP
 
 Write-Host "prgs '$prgs', prog '$prog'"
 
-$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($False)
+Write-Host "prgs '$prgs', prog '$prog'"
 
 # Modify Path http://blogs.technet.com/b/heyscriptingguy/archive/2011/07/23/use-powershell-to-modify-your-environmental-path.aspx
 # SetEnvironmentVariable http://stackoverflow.com/questions/714877/setting-windows-powershell-path-variable
