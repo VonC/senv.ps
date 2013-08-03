@@ -212,8 +212,11 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     $domain = $url -replace "$localpath$"
     # Write-Host "lp='$url', localpath='$localpath', domain='$domain'"
     $dwnUrl = $domain + $dwnUrl
+  } else {
+    $dwnUrl = $url + $dwnUrl
+    $dwnUrl = $dwnUrl -replace "/\?[^/]+", ""
   }
-  # Write-Host "dwnUrl === '$dwnUrl'; urlmatch_ver='$urlmatch_ver'"
+   Write-Host "dwnUrl === '$dwnUrl'; urlmatch_ver='$urlmatch_ver'"
   # http://stackoverflow.com/questions/4546567/get-last-element-of-pipeline-in-powershell
   $prgfile = $dwnUrl -split "/" | where { $_ -match "$urlmatch_ver" }
   $prgfile_dotindex = $prgfile.LastIndexOf('.')
