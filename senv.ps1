@@ -426,12 +426,12 @@ md2 "$sbt_dir\Data\Packages\User" "for Sublime text user settings"
 
 $gpg = {
 # http://www.jrsoftware.org/ishelp/index.php?topic=setupcmdline: bazzar is dead! (since mid-2012)
-$gpg_dir   = installPrg -aprgname     "gpg"                      -url          "http://files.gpg4win.org/Beta/?C=M;O=D" `
-                        -urlmatch     "gpg4win-vanilla-.*.exe$"  -urlmatch_arc "" `
-                        -urlmatch_ver "gpg4win-vanilla-.*.exe$"  -test         "gpg2.exe" `
+$gpg_dir   = installPrg -aprgname     "gpg"                      -url          "http://files.gpg4win.org/Beta/?C=M;O=D/" `
+                        -urlmatch     "gpg4win-vanilla-.*.exe(?!.sig)"  -urlmatch_arc "" `
+                        -urlmatch_ver "gpg4win-vanilla-.*.exe(?!.sig)"  -test         "gpg2.exe" `
                         -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
 cleanAddPath "\\gpg" ""
-Write-Host "gpg_dir\gpg2.exe='$gpg_dir\bzr.exe'"
+Write-Host "gpg_dir\gpg2.exe='$gpg_dir\gpg2.exe'"
 invoke-expression 'doskey gpg=$gpg_dir\gpg2.exe $*'
 invoke-expression 'doskey gpg2=$gpg_dir\gpg2.exe $*'
 }
@@ -445,6 +445,12 @@ cleanAddPath "" "$prog\bin"
 # Exit 0
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
+exit 0
+#>
+
+ iex ('&$gpg')
+exit 0
+
  iex ('&$peazip')
  iex ('&$gow')
  iex ('&$git')
@@ -454,10 +460,8 @@ cleanAddPath "" "$prog\bin"
  iex ('&$hg')
  iex ('&$bzr')
  iex ('&$sbt')
-#>
-
  iex ('&$go')
-# iex ('&$gpg')
+ iex ('&$gpg')
 
 $path=get-content "$prgs/path.txt"
 $sp="set PATH=$path"
