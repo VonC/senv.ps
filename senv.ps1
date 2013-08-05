@@ -200,7 +200,11 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     $dwnUrl = $links
     Write-Host "dwnUrl2='$dwnUrl'"
   }
-  $dwnUrl = ( $dwnUrl.split('^')  )[0]
+  if ( $dwnUrl.GetType().Name -eq "String" ) {
+    $dwnUrl = ( $dwnUrl.split('^') )[0]
+  } else {
+    $dwnUrl = ((( $dwnUrl )[0]).split('^'))[0]
+  }
   Write-Host "dwnUrl3='$dwnUrl'"
   if ( $dwnUrl.StartsWith("//") ) {
     $dwnUrl = ([System.Uri]$url).Scheme + ":" + $dwnUrl
