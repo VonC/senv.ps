@@ -200,6 +200,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     $dwnUrl = $links
     Write-Host "dwnUrl2='$dwnUrl'"
   }
+  # http://stackoverflow.com/questions/10928030/in-powershell-how-can-i-test-if-a-variable-holds-a-numeric-value
   if ( $dwnUrl.GetType().Name -eq "String" ) {
     $dwnUrl = ( $dwnUrl.split('^') )[0]
   } else {
