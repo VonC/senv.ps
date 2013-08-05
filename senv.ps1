@@ -441,49 +441,49 @@ invoke-expression 'doskey gpg2=$gpg_dir\gpg2.exe $*'
 }
 
 
+function post() {
+  cleanAddPath "" "$prgs\bin"
+  cleanAddPath "" "$prog\bin"
+  $path=get-content "$prgs/path.txt"
+  $sp="set PATH=$path"
+  $sp=$sp+"`nset term=msys"
 
-cleanAddPath "" "$prgs\bin"
-cleanAddPath "" "$prog\bin"
+  #http://stackoverflow.com/questions/15041857/powershell-keep-text-formatting-when-reading-in-a-file
+  $envs=(Get-Content "$prgs/envs.txt") -join "`n"
+  Write-Host "envs='$envs'"
+  $sp=$sp+"`n$envs"
+
+  $homep=$env:HOME
+  if ( [string]::IsNullOrEmpty($homep) ) {
+    $homep="$Env:HOMEDRIVE$Env:HOMEPATH"
+    if ( "$Env:HOMEDRIVE" -ne "C:" ) {
+      $homep = "$Env:HOMEDRIVE"
+    }
+  }
+  $sp=$sp+"`nset HOME=$homep"
+  $sp=$sp+"`nif exist `"%HOME%\.proxy.bat`" call `"%HOME%\.proxy.bat`""
+
+  [System.IO.File]::WriteAllLines("$prgs\setpath.bat", "$sp", $Utf8NoBomEncoding)
+}
 
 # iex ('&$bzr')
 # Exit 0
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
 exit 0
-#>
-
- iex ('&$gpg')
+ iex ('&$python')
+ post
 exit 0
+#>
 
  iex ('&$peazip')
  iex ('&$gow')
  iex ('&$git')
  iex ('&$npp')
- iex ('&$python')
  iex ('&$hg')
  iex ('&$hg')
  iex ('&$bzr')
  iex ('&$sbt')
  iex ('&$go')
  iex ('&$gpg')
-
-$path=get-content "$prgs/path.txt"
-$sp="set PATH=$path"
-$sp=$sp+"`nset term=msys"
-
-#http://stackoverflow.com/questions/15041857/powershell-keep-text-formatting-when-reading-in-a-file
-$envs=(Get-Content "$prgs/envs.txt") -join "`n"
-Write-Host "envs='$envs'"
-$sp=$sp+"`n$envs"
-
-$homep=$env:HOME
-if ( [string]::IsNullOrEmpty($homep) ) {
-  $homep="$Env:HOMEDRIVE$Env:HOMEPATH"
-  if ( "$Env:HOMEDRIVE" -ne "C:" ) {
-    $homep = "$Env:HOMEDRIVE"
-  }
-}
-$sp=$sp+"`nset HOME=$homep"
-$sp=$sp+"`nif exist `"%HOME%\.proxy.bat`" call `"%HOME%\.proxy.bat`""
-
-[System.IO.File]::WriteAllLines("$prgs\setpath.bat", "$sp", $Utf8NoBomEncoding)
+ post
