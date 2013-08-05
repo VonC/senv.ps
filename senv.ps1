@@ -217,6 +217,8 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     $domain = $url -replace "$localpath$"
     # Write-Host "lp='$url', localpath='$localpath', domain='$domain'"
     $dwnUrl = $domain + $dwnUrl
+  } elseif ( $dwnUrl.StartsWith("http://") ) {
+    # nothing to change
   } else {
     $dwnUrl = $url + $dwnUrl
     $dwnUrl = $dwnUrl -replace "/\?[^/]+", ""
@@ -471,8 +473,7 @@ function post() {
 # Exit 0
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
-exit 0
- iex ('&$python')
+ iex ('&$npp')
  post
 exit 0
 #>
