@@ -457,7 +457,7 @@ invoke-expression 'doskey gpg2=$gpg_dir\gpg2.exe $*'
 }
 
 
-function post() {
+function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
   $path=get-content "$prgs/path.txt"
@@ -486,8 +486,8 @@ function post() {
 # Exit 0
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$npp')
- post
+ iex ('&$go')
+ post-all-install
 exit 0
 #>
 
@@ -501,4 +501,4 @@ exit 0
  iex ('&$sbt')
  iex ('&$go')
  iex ('&$gpg')
- post
+ post-all-install
