@@ -313,6 +313,7 @@ invoke-expression 'doskey se=$prgs\setpath.bat'
 invoke-expression 'doskey cdd=cd %PROG%'
 invoke-expression 'doskey cds=cd %PRGS%'
 invoke-expression 'doskey cdg=cd %PROG%\git\5995144'
+invoke-expression 'doskey cdgo=cd %PROG%\go\src'
 
 
 $peazip = {
@@ -403,7 +404,7 @@ $go_dir   = installPrg -aprgname     "go"                        -url          "
                         -urlmatch     "go.*$go_urlmatch_arc"     -urlmatch_arc "$go_urlmatch_arc" `
                         -urlmatch_ver "go.*$go_urlmatch_arc"     -test         "go\bin\go.exe" `
                         -unzip
-cleanAddPath "\\go.*" ""
+cleanAddPath "\\go(?!w).*" "%PROG%\go\bin"
 Write-Host "go_dir\go.exe='$go_dir\go.exe'"
 addenvs -variable "GOPATH" -value "%PROG%\go"
 addenvs -variable "GOROOT" -value "$go_dir\go"
