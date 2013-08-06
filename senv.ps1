@@ -29,7 +29,7 @@ function addbin([String]$filename, [String]$command) {
 function addenvs([String]$variable, [String]$value) {
   # http://www.pavleck.net/powershell-cookbook/ch07.html
   $envs=@{}
-  Write-Host "WRITE variable $variable the value $value"
+  Write-Host "WRITE variable $variable the value '$value'"
   if( Test-Path "$prgs\envs.txt" ) {
     # http://stackoverflow.com/questions/4192072/how-to-process-a-file-in-powershell-line-by-line-as-a-stream
     $reader = [System.IO.File]::OpenText("$prgs\envs.txt")
@@ -37,10 +37,11 @@ function addenvs([String]$variable, [String]$value) {
       for(;;) {
         $line = $reader.ReadLine()
         if ($line -eq $null) { break }
+        $line = $line.Trim()
         # http://www.regular-expressions.info/powershell.html
         if ( $line -match "set ([^`"]+)=([^`"]+)" ) {
           Write-Host "Line '$line' match"
-          $envs[$matches[1]] = $matches[2]
+          $envs[$matches[1]]=$matches[2].Trim()
         }
       }
     }
@@ -48,10 +49,13 @@ function addenvs([String]$variable, [String]$value) {
       $reader.Close()
     }
   }
-  $envs[$variable] = $value
+  $envs[$variable]=$value.Trim()
   # http://stackoverflow.com/questions/5954503/powershell-hashtable-does-not-write-to-file-as-expected-receive-only-system-c
   Clear-Content "$prgs/envs.txt"
-  $acontent=($envs.GetEnumerator() | Sort-Object Name | ForEach-Object { "`nset {0}={1}" -f $_.Name,$_.Value })
+  # Make sure acontent is a String, not an Array
+  # or it will add space at the start and end of each line!
+  $acontent=""
+  $envs.GetEnumerator() | Sort-Object Name | ForEach-Object {$acontent+=("`nset {0}={1}" -f $_.Name,$_.Value.Trim())}
   [System.IO.File]::WriteAllLines("$prgs\envs.txt", "$acontent", $Utf8NoBomEncoding)
 }
 # http://technet.microsoft.com/en-us/library/ff730955.aspx
