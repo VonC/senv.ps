@@ -9,7 +9,10 @@
 param(
     [alias("u")]
     [switch]
-    $update = $false
+    $update = $false,
+    [alias("d")]
+    [switch]
+    $updateDependencies = $false
 )
 
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($False)
@@ -417,14 +420,14 @@ md2 "$sbt_dir\Data\Packages" "for Sublime text packages"
 $gosublime="$sbt_dir\Data\Packages\GoSublime"
 if ( -not ( Test-Path "$gosublime" ) ) {
   git clone https://github.com/DisposaBoy/GoSublime "$gosublime"
-} else {
+} elseif ($updateDependencies) {
   git --git-dir="$gosublime\.git" --work-tree="$gosublime" pull origin master
 }
 
 $powershell="$sbt_dir\Data\Packages\PowerShell"
 if ( -not ( Test-Path "$powershell" ) ) {
   git clone https://github.com/SublimeText/PowerShell "$powershell"
-} else {
+} elseif ($updateDependencies) {
   git --git-dir="$powershell\.git" --work-tree="$powershell" pull origin master
 }
 md2 "$sbt_dir\Data\Packages\User" "for Sublime text user settings"
