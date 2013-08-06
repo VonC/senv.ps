@@ -395,7 +395,8 @@ $bzr_dir   = installPrg -aprgname     "bzr"                      -url          "
                         -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
 cleanAddPath "\\Bazaar" ""
 Write-Host "bzr_dir\bzr.exe='$bzr_dir\bzr.exe'"
-invoke-expression 'doskey bzr=$bzr_dir\bzr.exe $*'
+invoke-expression 'doskey bzr='
+addbin -filename "$prgs\bin\bzr.bat" -command "$bzr_dir\bzr.exe %*"
 }
 
 $go = {
