@@ -192,7 +192,12 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     }
   }
   Write-Host "mustupdate='$mustupdate'" 
-  if( -not $update -and -not $mustupdate){ Write-Host "Calling POST" ; post -install_folder "$prgdir\$afolder" -post $post ; return "$prgdir\$afolder" }
+  if( -not $update -and -not $mustupdate){ 
+    # Write-Host "Calling POST"
+    post -install_folder "$prgdir\$afolder" -post $post ; 
+    # Write-Host "Return '$prgdir\$afolder'"
+    return "$prgdir\$afolder" 
+  }
 
   # http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
   $result=$downloader.DownloadString($url)
@@ -373,7 +378,6 @@ $hg_urlmatch_arc = if ( Test-Win64 ) { "-x64.exe" } else { "\d\.exe" }
 # http://www.jrsoftware.org/ishelp/index.php?topic=setupcmdline
 $hg_dir   = installPrg -aprgname     "hg"                        -url          "http://mercurial.selenic.com/sources.js" `
                         -urlmatch     "Mercurial-.*.exe"         -urlmatch_arc "$hg_urlmatch_arc" `
-                        -urlmatch_ver "Mercurial.*$hg_urlmatch_arc"            -test         "hg.exe" `
                         -urlmatch_ver "Mercurial.*$hg_urlmatch_arc"            -test         "hg.exe" `
                         -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
 cleanAddPath "\\Mercurial" ""
