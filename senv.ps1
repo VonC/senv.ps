@@ -184,6 +184,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   $mustupdate=-not (Test-Path "$prgdir\*")
   if(-not $mustupdate) {
     $folder_pattern=$urlmatch_ver -replace '\.(7z|7Z|zip|exe|msi).*',''
+    $folder_pattern=$folder_pattern -replace " ", "_"
 	Write-Host "folder_pattern='$folder_pattern'"
     $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$folder_pattern" } | sort CreationTime | select -l 1
     Write-Host "afolder='$afolder'" 
@@ -200,7 +201,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   }
 
   # http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
-  $result=$downloader.DownloadString($url)
+  $result=$page=$downloader.DownloadString($url)
   # http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
   $result = $result.split("`"") -join "^`""
   $links = ( $result.split("`"") | where { $_ -match "$urlmatch" }  )  # "
@@ -238,9 +239,20 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
    Write-Host "dwnUrl === '$dwnUrl'; urlmatch_ver='$urlmatch_ver'"
   # http://stackoverflow.com/questions/4546567/get-last-element-of-pipeline-in-powershell
   $prgfile = $dwnUrl -split "/" | where { $_ -match "$urlmatch_ver" }
-  $prgfile_dotindex = $prgfile.LastIndexOf('.')
-  Write-Host "prgfile_dotindex='$prgfile_dotindex', " ( $prgfile_dotindex -gt 0 )
-  $prgver_space = if ( $prgfile_dotindex -gt 0 ) { $prgfile.Substring(0,$prgfile_dotindex) } else { $prgfile }
+  if ( [string]::IsNullOrEmpty($prgfile) ) {
+    if ($page -match "$urlmatch_ver") {
+      $prgver_space=$prgfile=$matches[1]
+    }
+    if ( $dwnUrl -match "/[^/]+(\.[^/]*?)$" ) {
+      Write-Host "m=$matches[1]"
+      $prgfile+=$matches[1]
+    }
+    Write-Host "matches: $prgfile for $urlmatch_ver and $dwnUrl"
+  } else {
+    $prgfile_dotindex = $prgfile.LastIndexOf('.')
+    Write-Host "prgfile_dotindex='$prgfile_dotindex', " ( $prgfile_dotindex -gt 0 )
+    $prgver_space = if ( $prgfile_dotindex -gt 0 ) { $prgfile.Substring(0,$prgfile_dotindex) } else { $prgfile }
+  }
   $prgver = $prgver_space -replace " ", "_"
   $prgfile = $prgfile -replace " ", "_"
   Write-Host "result='$dwnUrl': prgver='$prgver', prgfile='$prgfile'"
