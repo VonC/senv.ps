@@ -472,6 +472,9 @@ invoke-expression 'doskey gpg2=$gpg_dir\gpg2.exe $*'
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
+  md2 "$prog\tmp" "temp directory"
+  addenvs -variable "TMP" -value "%PROG%\tmp"
+  addenvs -variable "TEMP" -value "%PROG%\tmp"
   $path=get-content "$prgs/path.txt"
   $sp="set PATH=$path"
   $sp=$sp+"`nset term=msys"
