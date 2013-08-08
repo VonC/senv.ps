@@ -468,6 +468,17 @@ invoke-expression 'doskey gpg=$gpg_dir\gpg2.exe $*'
 invoke-expression 'doskey gpg2=$gpg_dir\gpg2.exe $*'
 }
 
+$procexp = {
+# http://www.gpg4win.org/doc/en/gpg4win-compendium_35.html
+$procexp_dir   = installPrg -aprgname     "procexp"                   -url          "http://technet.microsoft.com/en-us/sysinternals/bb896653" `
+                        -urlmatch     "ProcessExplorer.zip"           -urlmatch_arc "" `
+                        -urlmatch_ver "(Process Explorer v\d+(\.\d+)?)" -test         "procexp.exe" `
+                        -unzip
+cleanAddPath "\\procexp" ""
+Write-Host "procexp_dir\procexp2.exe='$procexp_dir\procexp.exe'"
+invoke-expression 'doskey pe=$procexp_dir\procexp.exe $*'
+}
+
 
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
@@ -501,7 +512,7 @@ function post-all-install() {
 # Exit 0
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$go')
+ iex ('&$procexp')
  post-all-install
 exit 0
 #>
@@ -516,4 +527,5 @@ exit 0
  iex ('&$sbt')
  iex ('&$go')
  iex ('&$gpg')
+ iex ('&$procexp')
  post-all-install
