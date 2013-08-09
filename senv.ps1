@@ -472,9 +472,8 @@ invoke-expression 'doskey gpg2=$gpg_dir\gpg2.exe $*'
 }
 
 $procexp = {
-# http://www.gpg4win.org/doc/en/gpg4win-compendium_35.html
-$procexp_dir   = installPrg -aprgname     "procexp"                   -url          "http://technet.microsoft.com/en-us/sysinternals/bb896653" `
-                        -urlmatch     "ProcessExplorer.zip"           -urlmatch_arc "" `
+$procexp_dir   = installPrg -aprgname     "procexp"              -url          "http://technet.microsoft.com/en-us/sysinternals/bb896653" `
+                        -urlmatch     "ProcessExplorer.zip"      -urlmatch_arc "" `
                         -urlmatch_ver "(Process Explorer v\d+(\.\d+)?)" -test         "procexp.exe" `
                         -unzip
 cleanAddPath "\\procexp" ""
