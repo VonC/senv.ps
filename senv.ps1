@@ -490,7 +490,7 @@ $mc_dir   = installPrg -aprgname     "mc"                        -url "http://mu
                         -urlmatch     "MultiCommander.*.zip"     -urlmatch_arc "$mc_urlmatch_arc" `
                         -urlmatch_ver "MultiCommander.*.zip"     -test "MultiCommander.exe" `
                         -unzip
-cleanAddPath "\\mc" ""
+cleanAddPath "\\MultiCommander" ""
 Write-Host "mc_dir\mc2.exe='$mc_dir\MultiCommander.exe'"
 invoke-expression 'doskey mc=$mc_dir\MultiCommander.exe $*'
 }
