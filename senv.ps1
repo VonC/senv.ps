@@ -250,6 +250,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
       Write-Host "m=$matches[1]"
       $prgfile+=$matches[1]
     }
+    if ($unzip) { $prgfile+=".zip" }
     Write-Host "matches: $prgfile for $urlmatch_ver and $dwnUrl"
   } else {
     $prgfile_dotindex = $prgfile.LastIndexOf('.')
