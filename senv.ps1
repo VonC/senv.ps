@@ -481,6 +481,17 @@ Write-Host "procexp_dir\procexp2.exe='$procexp_dir\procexp.exe'"
 invoke-expression 'doskey pe=$procexp_dir\procexp.exe $*'
 }
 
+$mc = {
+$mc_urlmatch_arc = if ( Test-Win64 ) { "_x64_.*.zip" } else { "_win32_.*.zip" }
+$mc_dir   = installPrg -aprgname     "mc"                        -url "http://multicommander.com/downloads" `
+                        -urlmatch     "MultiCommander.*.zip"     -urlmatch_arc "$mc_urlmatch_arc" `
+                        -urlmatch_ver "MultiCommander.*.zip"     -test "MultiCommander.exe" `
+                        -unzip
+cleanAddPath "\\mc" ""
+Write-Host "mc_dir\mc2.exe='$mc_dir\MultiCommander.exe'"
+invoke-expression 'doskey mc=$mc_dir\MultiCommander.exe $*'
+}
+
 
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
@@ -514,7 +525,7 @@ function post-all-install() {
 # Exit 0
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$procexp')
+ iex ('&$mc')
  post-all-install
 exit 0
 #>
@@ -530,4 +541,5 @@ exit 0
  iex ('&$go')
  iex ('&$gpg')
  iex ('&$procexp')
+ iex ('&$mc')
  post-all-install
