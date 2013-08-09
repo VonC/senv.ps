@@ -233,6 +233,8 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     $dwnUrl = $domain + $dwnUrl
   } elseif ( $dwnUrl.StartsWith("http://") ) {
     # nothing to change
+  } elseif ( $dwnUrl.StartsWith("https://") ) {
+    # nothing to change
   } else {
     $dwnUrl = $url + $dwnUrl
     $dwnUrl = $dwnUrl -replace "/\?[^/]+", ""
