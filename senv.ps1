@@ -496,6 +496,16 @@ invoke-expression 'doskey mc=$mc_dir\MultiCommander.exe $*'
 }
 
 
+$ag = {
+$ag_dir   = installPrg -aprgname     "ag"                        -url          "http://astrogrep.sourceforge.net/download/" `
+                        -urlmatch     "latest/download"          -urlmatch_arc "" `
+                        -urlmatch_ver "(AstroGrep v\d+(\.\d+\.\d+)?)" -test         "AstroGrep.exe" `
+                        -unzip
+cleanAddPath "\\AstroGrep" ""
+Write-Host "ag_dir\AstroGrep.exe='$ag_dir\AstroGrep.exe'"
+invoke-expression 'doskey ag=$ag_dir\AstroGrep.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -528,7 +538,7 @@ function post-all-install() {
 # Exit 0
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$mc')
+ iex ('&$ag')
  post-all-install
 exit 0
 #>
@@ -545,4 +555,5 @@ exit 0
  iex ('&$gpg')
  iex ('&$procexp')
  iex ('&$mc')
+ iex ('&$ag')
  post-all-install
