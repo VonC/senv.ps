@@ -206,7 +206,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   # http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
   $result = $result.split("`"") -join "^`""
   $links = ( $result.split("`"") | where { $_ -match "$urlmatch" }  )  # "
-  Write-Host "links='$links'"
+  # Write-Host "links='$links'"
   if ( $urlmatch_arc -ne "" ) {
     $dwnUrl = ( $links -split "^" | where { $_ -match "$urlmatch_arc" } ) # "
     Write-Host "dwnUrl1='$dwnUrl'"
