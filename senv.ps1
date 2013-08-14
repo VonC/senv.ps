@@ -18,9 +18,9 @@ param(
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($False)
 
 function addbin([String]$filename, [String]$command) {
-  Write-Host "WRITE to $filename the command $command"
+  # Write-Host "WRITE to $filename the command $command"
   if ( Test-Path "$filename" ) {
-    Write-Host "Clear $filename"
+    # Write-Host "Clear $filename"
     Clear-Content "$filename"
   }
   $acommand="@echo off`n"+$command
@@ -29,7 +29,7 @@ function addbin([String]$filename, [String]$command) {
 function addenvs([String]$variable, [String]$value) {
   # http://www.pavleck.net/powershell-cookbook/ch07.html
   $envs=@{}
-  Write-Host "WRITE variable $variable the value '$value'"
+  # Write-Host "WRITE variable $variable the value '$value'"
   if( Test-Path "$prgs\envs.txt" ) {
     # http://stackoverflow.com/questions/4192072/how-to-process-a-file-in-powershell-line-by-line-as-a-stream
     $reader = [System.IO.File]::OpenText("$prgs\envs.txt")
@@ -40,7 +40,7 @@ function addenvs([String]$variable, [String]$value) {
         $line = $line.Trim()
         # http://www.regular-expressions.info/powershell.html
         if ( $line -match "set ([^`"]+)=([^`"]+)" ) {
-          Write-Host "Line '$line' match"
+          # Write-Host "Line '$line' match"
           $envs[$matches[1]]=$matches[2].Trim()
         }
       }
@@ -103,7 +103,7 @@ $prog=mdEnvPath "$progInstallVariableName" "for programming data" "$progDefaultP
 md2 "$prgs\bin" "prgs bin"
 md2 "$prog\bin" "prog bin"
 
-Write-Host "prgs '$prgs', prog '$prog'"
+# Write-Host "prgs '$prgs', prog '$prog'"
 
 # Modify Path http://blogs.technet.com/b/heyscriptingguy/archive/2011/07/23/use-powershell-to-modify-your-environmental-path.aspx
 # SetEnvironmentVariable http://stackoverflow.com/questions/714877/setting-windows-powershell-path-variable
@@ -146,10 +146,10 @@ $downloader.proxy = $proxy
 
 function post([String]$install_folder,[String]$post) {
   if ( $post ) {
-    Write-Host "POST called for '$post'"
+    # Write-Host "POST called for '$post'"
     $post = $post -replace "@install_folder", "$install_folder"
     invoke-expression "$post" -Debug
-    Write-Host "END POST called for '$post'"
+    # Write-Host "END POST called for '$post'"
   }
 }
 
@@ -175,7 +175,8 @@ function install( [String]$invoke, [String]$prgdir, [String]$prgfile, [String]$p
 
 function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]$urlmatch_arc="", [String]$urlmatch_ver,
                     [String]$test, [String]$invoke, [switch][alias("z")]$unzip, [String]$post) {
-  Write-Host "Install aprgname='$aprgname' from url='$url'`r`nurlmatch='$urlmatch', urlmatch_arc='$urlmatch_arc', urlmatch_ver='$urlmatch_ver'`r`ntest='$test', invoke='$invoke' and unzip='$unzip'"
+  Write-Host "Install/Update '$aprgname'"
+  # Write-Host "Install aprgname='$aprgname' from url='$url'`r`nurlmatch='$urlmatch', urlmatch_arc='$urlmatch_arc', urlmatch_ver='$urlmatch_ver'`r`ntest='$test', invoke='$invoke' and unzip='$unzip'"
   # Make sure c:\prgs\xxx exists for application 'xxx'
   $prgdir="$prgs\$aprgname"
   md2 "$prgdir" "$aprgname"
@@ -186,14 +187,14 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     $folder_pattern=$urlmatch_ver -replace '\.(7z|7Z|zip|exe|msi).*',''
     $folder_pattern=$folder_pattern -replace " ", "_"
     $folder_pattern=$folder_pattern -replace "(\(|\))", ""
-	Write-Host "folder_pattern='$folder_pattern'"
+	# Write-Host "folder_pattern='$folder_pattern'"
     $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$folder_pattern" } | sort CreationTime | select -l 1
-    Write-Host "afolder='$afolder'" 
+    # Write-Host "afolder='$afolder'" 
     if ( -not (Test-Path "$prgdir/$afolder/$test") ) {
       $mustupdate = $true
     }
   }
-  Write-Host "mustupdate='$mustupdate'" 
+  # Write-Host "mustupdate='$mustupdate'" 
   if( -not $update -and -not $mustupdate){ 
     # Write-Host "Calling POST"
     post -install_folder "$prgdir\$afolder" -post $post ; 
@@ -209,10 +210,10 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   # Write-Host "links='$links'"
   if ( $urlmatch_arc -ne "" ) {
     $dwnUrl = ( $links -split "^" | where { $_ -match "$urlmatch_arc" } ) # "
-    Write-Host "dwnUrl1='$dwnUrl'"
+    # Write-Host "dwnUrl1='$dwnUrl'"
   } else {
     $dwnUrl = $links
-    Write-Host "dwnUrl2='$dwnUrl'"
+    # Write-Host "dwnUrl2='$dwnUrl'"
   }
   # http://stackoverflow.com/questions/10928030/in-powershell-how-can-i-test-if-a-variable-holds-a-numeric-value
   if ( $dwnUrl.GetType().Name -eq "String" ) {
@@ -220,7 +221,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   } else {
     $dwnUrl = ((( $dwnUrl )[0]).split('^'))[0]
   }
-  Write-Host "dwnUrl3='$dwnUrl'"
+  # Write-Host "dwnUrl3='$dwnUrl'"
   if ( $dwnUrl.StartsWith("//") ) {
     $dwnUrl = ([System.Uri]$url).Scheme + ":" + $dwnUrl
   }
@@ -239,7 +240,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     $dwnUrl = $url + $dwnUrl
     $dwnUrl = $dwnUrl -replace "/\?[^/]+", ""
   }
-   Write-Host "dwnUrl === '$dwnUrl'; urlmatch_ver='$urlmatch_ver'"
+  # Write-Host "dwnUrl === '$dwnUrl'; urlmatch_ver='$urlmatch_ver'"
   # http://stackoverflow.com/questions/4546567/get-last-element-of-pipeline-in-powershell
   $prgfile = $dwnUrl -split "/" | where { $_ -match "$urlmatch_ver" }
   if ( [string]::IsNullOrEmpty($prgfile) ) {
@@ -247,14 +248,14 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
       $prgver_space=$prgfile=$matches[1]
     }
     if ( $dwnUrl -match "/[^/]+(\.[^/]*?)$" ) {
-      Write-Host "m=$matches[1]"
+      # Write-Host "m=$matches[1]"
       $prgfile+=$matches[1]
     }
     if ($unzip) { $prgfile+=".zip" }
-    Write-Host "matches: $prgfile for $urlmatch_ver and $dwnUrl"
+    # Write-Host "matches: $prgfile for $urlmatch_ver and $dwnUrl"
   } else {
     $prgfile_dotindex = $prgfile.LastIndexOf('.')
-    Write-Host "prgfile_dotindex='$prgfile_dotindex', " ( $prgfile_dotindex -gt 0 )
+    # Write-Host "prgfile_dotindex='$prgfile_dotindex', " ( $prgfile_dotindex -gt 0 )
     $prgver_space = if ( $prgfile_dotindex -gt 0 ) { $prgfile.Substring(0,$prgfile_dotindex) } else { $prgfile }
   }
   $prgver = $prgver_space -replace " ", "_"
@@ -316,7 +317,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
       }
     }
   }
-  Write-Host "prgdir\prgver='$prgdir\$prgver'"
+  # Write-Host "prgdir\prgver='$prgdir\$prgver'"
   if ( -not [string]::IsNullOrEmpty($post) ) {
     post -install_folder "$prgdir\$prgver" -post $post
   }
@@ -400,7 +401,7 @@ $hg_dir   = installPrg -aprgname     "hg"                        -url          "
                         -urlmatch_ver "Mercurial.*$hg_urlmatch_arc"            -test         "hg.exe" `
                         -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
 cleanAddPath "\\Mercurial" ""
-Write-Host "hg_dir'$hg_dir'"
+# Write-Host "hg_dir='$hg_dir'"
 addbin -filename "$prgs\bin\hg.bat" -command "$hg_dir\hg.exe %*"
 invoke-expression 'doskey hg='
 }
@@ -412,7 +413,7 @@ $bzr_dir   = installPrg -aprgname     "bzr"                      -url          "
                         -urlmatch_ver "bzr.*-setup.exe"          -test         "bzr.exe" `
                         -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
 cleanAddPath "\\Bazaar" ""
-Write-Host "bzr_dir\bzr.exe='$bzr_dir\bzr.exe'"
+# Write-Host "bzr_dir\bzr.exe='$bzr_dir\bzr.exe'"
 invoke-expression 'doskey bzr='
 addbin -filename "$prgs\bin\bzr.bat" -command "$bzr_dir\bzr.exe %*"
 }
@@ -424,7 +425,7 @@ $go_dir   = installPrg -aprgname     "go"                        -url          "
                         -urlmatch_ver "go.*$go_urlmatch_arc"     -test         "go\bin\go.exe" `
                         -unzip
 cleanAddPath "\\go(?!w).*" "%PROG%\go\bin"
-Write-Host "go_dir\go.exe='$go_dir\go.exe'"
+# Write-Host "go_dir\go.exe='$go_dir\go.exe'"
 addenvs -variable "GOPATH" -value "%PROG%\go"
 addenvs -variable "GOROOT" -value "$go_dir\go"
 addbin -filename "$prgs\bin\go.bat" -command "$go_dir\go\bin\go.exe %*"
@@ -469,7 +470,7 @@ $gpg_dir   = installPrg -aprgname     "gpg"                      -url          "
                         -urlmatch_ver "gpg4win-vanilla-.*.exe(?!.sig)"  -test         "gpg2.exe" `
                         -invoke       "@FILE@ /S /D=@DEST@"
 cleanAddPath "\\gpg" ""
-Write-Host "gpg_dir\gpg2.exe='$gpg_dir\gpg2.exe'"
+# Write-Host "gpg_dir\gpg2.exe='$gpg_dir\gpg2.exe'"
 invoke-expression 'doskey gpg=$gpg_dir\gpg2.exe $*'
 invoke-expression 'doskey gpg2=$gpg_dir\gpg2.exe $*'
 }
@@ -480,7 +481,7 @@ $procexp_dir   = installPrg -aprgname     "procexp"              -url          "
                         -urlmatch_ver "(Process Explorer v\d+(\.\d+)?)" -test         "procexp.exe" `
                         -unzip
 cleanAddPath "\\procexp" ""
-Write-Host "procexp_dir\procexp2.exe='$procexp_dir\procexp.exe'"
+# Write-Host "procexp_dir\procexp2.exe='$procexp_dir\procexp.exe'"
 invoke-expression 'doskey pe=$procexp_dir\procexp.exe $*'
 }
 
@@ -491,7 +492,7 @@ $mc_dir   = installPrg -aprgname     "mc"                        -url "http://mu
                         -urlmatch_ver "MultiCommander.*.zip"     -test "MultiCommander.exe" `
                         -unzip
 cleanAddPath "\\MultiCommander" ""
-Write-Host "mc_dir\mc2.exe='$mc_dir\MultiCommander.exe'"
+# Write-Host "mc_dir\mc2.exe='$mc_dir\MultiCommander.exe'"
 invoke-expression 'doskey mc=$mc_dir\MultiCommander.exe $*'
 }
 
@@ -502,7 +503,7 @@ $ag_dir   = installPrg -aprgname     "ag"                        -url          "
                         -urlmatch_ver "(AstroGrep v\d+(\.\d+\.\d+)?)" -test         "AstroGrep.exe" `
                         -unzip
 cleanAddPath "\\AstroGrep" ""
-Write-Host "ag_dir\AstroGrep.exe='$ag_dir\AstroGrep.exe'"
+# Write-Host "ag_dir\AstroGrep.exe='$ag_dir\AstroGrep.exe'"
 invoke-expression 'doskey ag=$ag_dir\AstroGrep.exe $*'
 }
 
@@ -518,7 +519,7 @@ function post-all-install() {
 
   #http://stackoverflow.com/questions/15041857/powershell-keep-text-formatting-when-reading-in-a-file
   $envs=(Get-Content "$prgs/envs.txt") -join "`n"
-  Write-Host "envs='$envs'"
+  # Write-Host "envs='$envs'"
   $sp=$sp+"`n$envs"
 
   $homep=$env:HOME
