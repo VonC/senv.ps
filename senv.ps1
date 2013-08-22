@@ -206,6 +206,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   $result=$page=$downloader.DownloadString($url)
   # http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
   $result = $result.split("`"") -join "^`""
+  # Write-Host "result='$result'"
   $links = ( $result.split("`"") | where { $_ -match "$urlmatch" }  )  # "
   # Write-Host "links='$links'"
   if ( $urlmatch_arc -ne "" ) {
@@ -508,6 +509,19 @@ cleanAddPath "\\AstroGrep" ""
 invoke-expression 'doskey ag=$ag_dir\AstroGrep.exe $*'
 }
 
+
+$perl = {
+$perl_urlmatch_arc = if ( Test-Win64 ) { "-64bit-portable" } else { "-32bit-portable" }
+$perl_dir   = installPrg -aprgname     "perl"                        -url          "http://strawberryperl.com/releases.html" `
+                        -urlmatch     "/download/"  -urlmatch_arc "$perl_urlmatch_arc" `
+                        -urlmatch_ver "$perl_urlmatch_arc.zip"       -test         "perl\bin\perl.exe" `
+                        -unzip
+cleanAddPath "\\.*perl" ""
+ Write-Host "perl_dir\perl.exe='$perl_dir\perl\bin\perl.exe'"
+invoke-expression 'doskey perl=$perl_dir\perl\bin\perl.exe $*'
+}
+
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -536,11 +550,9 @@ function post-all-install() {
   [System.IO.File]::WriteAllLines("$prgs\setpath.bat", "$sp", $Utf8NoBomEncoding)
 }
 
-# iex ('&$bzr')
-# Exit 0
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$ag')
+ iex ('&$perl')
  post-all-install
 exit 0
 #>
@@ -558,4 +570,5 @@ exit 0
  iex ('&$procexp')
  iex ('&$mc')
  iex ('&$ag')
+ iex ('&$perl')
  post-all-install
