@@ -352,25 +352,30 @@ invoke-expression 'doskey pzc=$peazipDir\res\7z\7z.exe a -tzip -mm=Deflate -mmt=
 invoke-expression 'doskey 7z=$peazipDir\res\7z\7z.exe `$*'
 }
 
+$global:gow_dir   = ""
 $gow = {
 $gow_dir   = installPrg -aprgname     "Gow"                      -url          "https://github.com/VonC/gow/releases" `
                         -urlmatch     "gow/releases/download/.*.zip"           -urlmatch_arc "" `
                         -urlmatch_ver "Gow.*.zip"                -test         "bin\gow.bat" `
                         -invoke       ""                         -unzip
 
-cleanAddPath "\\Gow-" "$gow_dir\bin"
+cleanAddPath "\\Gow-" ""
+# http://stackoverflow.com/questions/12535419/powershell-setting-a-global-variable-from-a-function-where-the-global-variable-n
+Set-Variable -Name "gow_dir" -Value $gow_dir -Scope Global
 }
 
+$global:git_dir = ""
 $git = {
 $git_dir   = installPrg -aprgname     "git"                      -url          "https://code.google.com/p/msysgit/downloads/list?can=2&q=portable&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount" `
                         -urlmatch     "msysgit.googlecode.com/files/Portable.*.7z"            -urlmatch_arc "" `
                         -urlmatch_ver "Portable.*.7z"            -test         "git-cmd.bat" `
                         -invoke       ""                         -unzip
-cleanAddPath "git" "$git_dir\bin"
+cleanAddPath "git" ""
 invoke-expression 'doskey gl=git lg -20'
 invoke-expression 'doskey gla=git lg -20 --all'
 invoke-expression 'doskey glab=git lg -20 --all --branches'
 invoke-expression 'doskey glba=git lg -20 --branches --all'
+Set-Variable -Name "git_dir" -Value $git_dir -Scope Global
 }
 
 $npp = {
@@ -419,13 +424,14 @@ invoke-expression 'doskey bzr='
 addbin -filename "$prgs\bin\bzr.bat" -command "$bzr_dir\bzr.exe %*"
 }
 
+$global:go_dir   = ""
 $go = {
 $go_urlmatch_arc = if ( Test-Win64 ) { "-amd64.zip" } else { "-386.zip" }
 $go_dir   = installPrg -aprgname     "go"                        -url          "https://code.google.com/p/go/downloads/list?can=2&q=windows+zip&sort=-uploaded&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount" `
                         -urlmatch     "go.*$go_urlmatch_arc"     -urlmatch_arc "$go_urlmatch_arc" `
                         -urlmatch_ver "go.*$go_urlmatch_arc"     -test         "go\bin\go.exe" `
                         -unzip
-cleanAddPath "\\go(?!w).*" "%PROG%\go\bin"
+cleanAddPath "\\go(?!w).*" ""
 # Write-Host "go_dir\go.exe='$go_dir\go.exe'"
 addenvs -variable "GOPATH" -value "%PROG%\go"
 addenvs -variable "GOROOT" -value "$go_dir\go"
@@ -435,6 +441,7 @@ addbin -filename "$prgs\bin\gogofmt.bat" -command "$go_dir\go\bin\gofmt.exe %*"
 invoke-expression 'doskey go='
 invoke-expression 'doskey godoc='
 invoke-expression 'doskey gofmt='
+Set-Variable -Name "go_dir" -Value $go_dir -Scope Global
 }
 
 $sbt = {
@@ -464,17 +471,19 @@ md2 "$sbt_dir\Data\Packages\User" "for Sublime text user settings"
 
 }
 
+$global:gpg_dir   = ""
 $gpg = {
 # http://www.gpg4win.org/doc/en/gpg4win-compendium_35.html
 $gpg_dir   = installPrg -aprgname     "gpg"                      -url          "http://files.gpg4win.org/Beta/?C=M;O=D/" `
                         -urlmatch     "gpg4win-vanilla-.*.exe(?!.sig)"  -urlmatch_arc "" `
                         -urlmatch_ver "gpg4win-vanilla-.*.exe(?!.sig)"  -test         "gpg2.exe" `
                         -invoke       "@FILE@ /S /D=@DEST@"
-cleanAddPath "\\gpg" "$gpg_dir"
+cleanAddPath "\\gpg" ""
 # Write-Host "gpg_dir\gpg2.exe='$gpg_dir\gpg2.exe'"
 if(-not (Test-Path "$gpg_dir\gpg.exe")) {
   Copy-Item -Path "$gpg_dir\gpg2.exe" -Destination "$gpg_dir\gpg.exe"
 }
+Set-Variable -Name "gpg_dir" -Value $gpg_dir -Scope Global
 }
 
 $procexp = {
@@ -525,6 +534,11 @@ invoke-expression 'doskey perl=$perl_dir\perl\bin\perl.exe $*'
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
+  cleanAddPath "" "$gow_dir\bin"
+  cleanAddPath "" "$gpg_dir"
+  cleanAddPath "" "$git_dir\bin"
+  cleanAddPath "" "%PROG%\go\bin"
+
   md2 "$prog\tmp" "temp directory"
   addenvs -variable "TMP" -value "%PROG%\tmp"
   addenvs -variable "TEMP" -value "%PROG%\tmp"
