@@ -186,6 +186,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
   if(-not $mustupdate) {
     $folder_pattern=$urlmatch_ver -replace '\.(7z|7Z|zip|exe|msi).*',''
     $folder_pattern=$folder_pattern -replace " ", "_"
+    $folder_pattern=$folder_pattern -replace "\\$", ""
     $folder_pattern=$folder_pattern -replace "(\(|\))", ""
 	# Write-Host "folder_pattern='$folder_pattern'"
     $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$folder_pattern" } | sort CreationTime | select -l 1
@@ -309,7 +310,9 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
       if ( $afolder ) {
         Write-Host "Move '$prgdir\tmp\$prgver' up to '$prgdir\$prgver'"
         Move-Item "$prgdir\tmp\$prgver_space" "$prgdir"
-        Rename-Item "$prgdir\$prgver_space" "$prgdir\$prgver"
+        if ( $prgver_space -ne $prgver ) {
+          Rename-Item "$prgdir\$prgver_space" "$prgdir\$prgver"
+        }
         Write-Host "Deleting '$prgdir\tmp'"
         Remove-Item "$prgdir\tmp"
       } else {
