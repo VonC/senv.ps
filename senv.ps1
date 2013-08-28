@@ -173,8 +173,8 @@ function install( [String]$invoke, [String]$prgdir, [String]$prgfile, [String]$p
   }
 }
 
-function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]$urlmatch_arc="", [String]$urlmatch_ver,
-                    [String]$test, [String]$invoke, [switch][alias("z")]$unzip, [String]$post) {
+function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String]$urlmatch, [String]$urlmatch_arc="", [String]$urlmatch_ver,
+                    [String]$test, [String]$invoke, [switch][alias("z")]$unzip, [String]$post, [String]$url_replace="", [String]$ver_pattern="") {
   Write-Host "Install/Update '$aprgname'"
   # Write-Host "Install aprgname='$aprgname' from url='$url'`r`nurlmatch='$urlmatch', urlmatch_arc='$urlmatch_arc', urlmatch_ver='$urlmatch_ver'`r`ntest='$test', invoke='$invoke' and unzip='$unzip'"
   # Make sure c:\prgs\xxx exists for application 'xxx'
@@ -218,6 +218,10 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     # Write-Host "dwnUrl2='$dwnUrl'"
   }
   # http://stackoverflow.com/questions/10928030/in-powershell-how-can-i-test-if-a-variable-holds-a-numeric-value
+  if ( [string]::IsNullOrEmpty($dwnUrl) ) {
+    $host.ui.WriteErrorLine("No url found for '$aprgname' in '$url', with urlmatch='$urlmatch'")
+    return ""
+  }
   if ( $dwnUrl.GetType().Name -eq "String" ) {
     $dwnUrl = ( $dwnUrl.split('^') )[0]
   } else {
@@ -242,28 +246,51 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlmatch, [String]
     $dwnUrl = $url + $dwnUrl
     $dwnUrl = $dwnUrl -replace "/\?[^/]+", ""
   }
-  # Write-Host "dwnUrl === '$dwnUrl'; urlmatch_ver='$urlmatch_ver'"
+  if ( -not [string]::IsNullOrEmpty($url_replace) ) {
+    $replaces = $url_replace.split(",")
+    $replace_what = $replaces[0]
+    $replace_with = $replaces[1]
+    $dwnUrl = $dwnUrl -replace $replace_what, $replace_with
+  }
+
+   Write-Host "dwnUrl === '$dwnUrl'; urlmatch_ver='$urlmatch_ver'"
   # http://stackoverflow.com/questions/4546567/get-last-element-of-pipeline-in-powershell
   $prgfile = $dwnUrl -split "/" | where { $_ -match "$urlmatch_ver" }
   if ( [string]::IsNullOrEmpty($prgfile) ) {
     if ($page -match "$urlmatch_ver") {
       $prgver_space=$prgfile=$matches[1]
+    } elseif ( [string]::IsNullOrEmpty($urlver) -eq $false ){
+      $pagever=$downloader.DownloadString($urlver)
+      if ($pagever -match "$urlmatch_ver") {
+        $prgver_space=$prgfile=$matches[1]
+      }
+    } else {
+      $host.ui.WriteErrorLine("No version number found for '$aprgname' in '$url' or '$urlver', with urlmatch_ver='$urlmatch_ver'")
+      return ""
     }
     if ( $dwnUrl -match "/[^/]+(\.[^/]*?)$" ) {
-      # Write-Host "m=$matches[1]"
+       Write-Host "prgfile=$prgfile" + $matches[1]
       $prgfile+=$matches[1]
     }
     if ($unzip) { $prgfile+=".zip" }
-    # Write-Host "matches: $prgfile for $urlmatch_ver and $dwnUrl"
+     Write-Host "matches: $prgfile for $urlmatch_ver and $dwnUrl"
   } else {
     $prgfile_dotindex = $prgfile.LastIndexOf('.')
     # Write-Host "prgfile_dotindex='$prgfile_dotindex', " ( $prgfile_dotindex -gt 0 )
     $prgver_space = if ( $prgfile_dotindex -gt 0 ) { $prgfile.Substring(0,$prgfile_dotindex) } else { $prgfile }
   }
-  $prgver = $prgver_space -replace " ", "_"
+  $prgver = $prgver_space -replace "\s+:\s+", " "
+  $prgver = $prgver -replace " ", "_"
   $prgver=$prgver -replace "(\(|\))", ""
+  $prgfile = $prgfile -replace "\s+:\s+", " "
   $prgfile = $prgfile -replace " ", "_"
   $prgfile=$prgfile -replace "(\(|\))", ""
+
+  if ( -not [string]::IsNullOrEmpty($ver_pattern) ) {
+    $prgfile -match $ver_pattern
+    $aver = $matches[1]
+    $dwnUrl = $dwnUrl -replace "@VER@", $aver
+  }
   Write-Host "result='$dwnUrl': prgver='$prgver', prgfile='$prgfile'"
 
   if ( -not (Test-Path "$prgdir/$prgver/$test") ) {
@@ -525,14 +552,26 @@ invoke-expression 'doskey ag=$ag_dir\AstroGrep.exe $*'
 $perl = {
 $perl_urlmatch_arc = if ( Test-Win64 ) { "-64bit-portable" } else { "-32bit-portable" }
 $perl_dir   = installPrg -aprgname     "perl"                        -url          "http://strawberryperl.com/releases.html" `
-                        -urlmatch     "/download/"  -urlmatch_arc "$perl_urlmatch_arc" `
-                        -urlmatch_ver "$perl_urlmatch_arc.zip"       -test         "perl\bin\perl.exe" `
-                        -unzip
+                         -urlmatch     "/download/"  -urlmatch_arc "$perl_urlmatch_arc" `
+                         -urlmatch_ver "$perl_urlmatch_arc.zip"       -test         "perl\bin\perl.exe" `
+                         -unzip
 cleanAddPath "\\.*perl" ""
  Write-Host "perl_dir\perl.exe='$perl_dir\perl\bin\perl.exe'"
 invoke-expression 'doskey perl=$perl_dir\perl\bin\perl.exe $*'
 }
 
+$kitty = {
+$kitty_dir   = installPrg -aprgname     "kitty"                        -url          "http://www.fosshub.com/KiTTY.html" `
+                          -urlmatch     "download/kitty_portable.exe"  -urlmatch_arc "" `
+                          -urlmatch_ver "(KiTTY : (0\.\d+\.\d+\.\d+))" -test         "kitty.exe" `
+                          -invoke       "@FILE@ /S /D=@DEST@"          -urlver       "http://www.9bis.net/kitty/?action=news&zone=en" `
+                          -url_replace  "www.fosshub.com/download/kitty_portable.exe,www.wuala.com/9bis.com/public/build/@VER@/kitty_portable.exe/?dl=1" `
+                          -ver_pattern "(0\.\d+\.\d+\.\d+)"
+
+cleanAddPath "\\.*kitty" ""
+ Write-Host "kitty_dir\kitty.exe='$kitty_dir\kitty.exe'"
+invoke-expression 'doskey kitty=$kitty_dir\kitty\bin\kitty.exe $*'
+}
 
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
@@ -572,10 +611,10 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$perl')
+#>
+ iex ('&$kitty')
  post-all-install
 exit 0
-#>
 
  iex ('&$peazip')
  iex ('&$gow')
@@ -591,4 +630,5 @@ exit 0
  iex ('&$mc')
  iex ('&$ag')
  iex ('&$perl')
+ iex ('&$kitty')
  post-all-install
