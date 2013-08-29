@@ -174,7 +174,8 @@ function install( [String]$invoke, [String]$prgdir, [String]$prgfile, [String]$p
 }
 
 function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String]$urlmatch, [String]$urlmatch_arc="", [String]$urlmatch_ver,
-                    [String]$test, [String]$invoke, [switch][alias("z")]$unzip, [String]$post, [String]$url_replace="", [String]$ver_pattern="") {
+                    [String]$test, [String]$invoke, [switch][alias("z")]$unzip, [String]$post,
+                    [String]$url_replace="", [String]$ver_pattern="", [String]$referer="") {
   Write-Host "Install/Update '$aprgname'"
   # Write-Host "Install aprgname='$aprgname' from url='$url'`r`nurlmatch='$urlmatch', urlmatch_arc='$urlmatch_arc', urlmatch_ver='$urlmatch_ver'`r`ntest='$test', invoke='$invoke' and unzip='$unzip'"
   # Make sure c:\prgs\xxx exists for application 'xxx'
@@ -304,6 +305,9 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
         Write-Host "Copy '$prgfile' from '$Env:homedrive/$prgfile'"
         Copy-Item -Path "$Env:homedrive/$prgfile" -Destination "$prgdir/$prgfile"
       } else {
+        # http://stackoverflow.com/questions/16863455/how-to-do-wget-with-cookies-in-powershell
+        $downloader.Headers.Add("Referer", $referer)
+        # $downloader.Headers.Add([System.Net.HttpRequestHeader]::Cookie, "__utma=109354002.1658337508.1376899038.1377681062.1377759655.6; __utmb=109354002.1.10.1377759655; __utmc=109354002; __utmz=109354002.1377759780.2.2.utmcsr=9bis.net|utmccn=(referral)|utmcmd=referral|utmcct=/kitty/")
         Write-Host "Download '$prgfile' from '$dwnUrl'"
         $downloader.DownloadFile($dwnUrl, "$prgdir/$prgfile")
       }
@@ -570,7 +574,7 @@ $kitty_dir   = installPrg -aprgname     "kitty"                        -url     
                           -urlmatch_ver "(0\.\d+\.\d+\.\d+)"           -test         "kitty.exe" `
                           -invoke       "mkdir @DEST@ & copy @FILE@ @DEST@\\kitty.exe"          -urlver       "http://www.9bis.net/kitty/check_update.php?version=0" `
                           -url_replace  "www.fosshub.com/download/kitty_portable.exe,mirror3.fosshub.com/programs/kitty_portable.exe" `
-                          -ver_pattern "(0\.\d+\.\d+\.\d+)"
+                          -ver_pattern "(0\.\d+\.\d+\.\d+)" -referer "http://www.fosshub.com/KiTTY.html"
 
 cleanAddPath "\\.*kitty" ""
 # Write-Host "kitty_dir\kitty.exe='$kitty_dir\kitty.exe'"
