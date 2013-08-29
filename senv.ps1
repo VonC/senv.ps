@@ -572,7 +572,7 @@ $kitty = {
 $kitty_dir   = installPrg -aprgname     "kitty"                        -url          "http://www.fosshub.com/KiTTY.html" `
                           -urlmatch     "download/kitty_portable.exe"  -urlmatch_arc "" `
                           -urlmatch_ver "(0\.\d+\.\d+\.\d+)"           -test         "kitty.exe" `
-                          -invoke       "mkdir @DEST@ & copy @FILE@ @DEST@\\kitty.exe"          -urlver       "http://www.9bis.net/kitty/check_update.php?version=0" `
+                          -invoke       "mkdir @DEST@ & copy @FILE@ @DEST@\\kitty.exe & mklink /J @DEST@\\Sessions @DEST@\\..\Sessions & mklink /J @DEST@\\kitty.ini @DEST@\\..\kitty.ini"          -urlver       "http://www.9bis.net/kitty/check_update.php?version=0" `
                           -url_replace  "www.fosshub.com/download/kitty_portable.exe,mirror3.fosshub.com/programs/kitty_portable.exe" `
                           -ver_pattern "(0\.\d+\.\d+\.\d+)" -referer "http://www.fosshub.com/KiTTY.html"
 
