@@ -253,7 +253,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     $dwnUrl = $dwnUrl -replace $replace_what, $replace_with
   }
 
-   Write-Host "dwnUrl === '$dwnUrl'; urlmatch_ver='$urlmatch_ver'"
+  # Write-Host "dwnUrl === '$dwnUrl'; urlmatch_ver='$urlmatch_ver'"
   # http://stackoverflow.com/questions/4546567/get-last-element-of-pipeline-in-powershell
   $prgfile = $dwnUrl -split "/" | where { $_ -match "$urlmatch_ver" }
   if ( [string]::IsNullOrEmpty($prgfile) ) {
@@ -269,11 +269,11 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       return ""
     }
     if ( $dwnUrl -match "/[^/]+(\.[^/]*?)$" ) {
-       Write-Host "prgfile=$prgfile" + $matches[1]
+      # Write-Host "prgfile=$prgfile" + $matches[1]
       $prgfile+=$matches[1]
     }
     if ($unzip) { $prgfile+=".zip" }
-     Write-Host "matches: $prgfile for $urlmatch_ver and $dwnUrl"
+    # Write-Host "matches: $prgfile for $urlmatch_ver and $dwnUrl"
   } else {
     $prgfile_dotindex = $prgfile.LastIndexOf('.')
     # Write-Host "prgfile_dotindex='$prgfile_dotindex', " ( $prgfile_dotindex -gt 0 )
