@@ -578,7 +578,7 @@ $kitty_dir   = installPrg -aprgname     "kitty"                        -url     
 
 cleanAddPath "\\.*kitty" ""
 # Write-Host "kitty_dir\kitty.exe='$kitty_dir\kitty.exe'"
-invoke-expression 'doskey kitty=$kitty_dir\kitty\bin\kitty.exe $*'
+invoke-expression 'doskey kitty=$kitty_dir\kitty.exe $*'
 }
 
 function post-all-install() {
