@@ -268,6 +268,10 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       $host.ui.WriteErrorLine("No version number found for '$aprgname' in '$url' or '$urlver', with urlmatch_ver='$urlmatch_ver'")
       return ""
     }
+    # http://blogs.technet.com/b/ben_parker/archive/2011/07/28/how-can-i-tell-if-a-string-in-powershell-contains-a-number.aspx
+    if ( $prgfile -match "^[0-9].*" ) {
+      $prgver_space=$prgfile=$aprgname+ "_" + $prgfile
+    }
     if ( $dwnUrl -match "/[^/]+(\.[^/]*?)$" ) {
       # Write-Host "prgfile=$prgfile" + $matches[1]
       $prgfile+=$matches[1]
