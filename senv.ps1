@@ -164,11 +164,11 @@ function install( [String]$invoke, [String]$prgdir, [String]$prgfile, [String]$p
     $sp=$sp+"`nset TMP=`"$prgs\tmp`""
     $sp=$sp+"`n$invoke"
     [System.IO.File]::WriteAllLines("$prgs\tmp\invoke.bat", "$sp", $Utf8NoBomEncoding)
-    Write-Host "prgdir\prgver1='$prgdir\$prgver'"
+    # Write-Host "prgdir\prgver1='$prgdir\$prgver'"
     # http://stackoverflow.com/a/14606292/6309: make sure to capture the result of the invoke command
     # or it will pollute the prgdir end result.
     $res = invoke-expression "$prgs\tmp\invoke.bat"
-    Write-Host "prgdir\prgver2='$prgdir\$prgver'"
+    # Write-Host "prgdir\prgver2='$prgdir\$prgver'"
     [System.IO.File]::WriteAllLines("$prgs\tmp\res.bat", "$prgdir\$prgver", $Utf8NoBomEncoding)
   }
 }
