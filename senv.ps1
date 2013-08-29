@@ -560,20 +560,20 @@ $perl_dir   = installPrg -aprgname     "perl"                        -url       
                          -urlmatch_ver "$perl_urlmatch_arc.zip"       -test         "perl\bin\perl.exe" `
                          -unzip
 cleanAddPath "\\.*perl" ""
- Write-Host "perl_dir\perl.exe='$perl_dir\perl\bin\perl.exe'"
+# Write-Host "perl_dir\perl.exe='$perl_dir\perl\bin\perl.exe'"
 invoke-expression 'doskey perl=$perl_dir\perl\bin\perl.exe $*'
 }
 
 $kitty = {
 $kitty_dir   = installPrg -aprgname     "kitty"                        -url          "http://www.fosshub.com/KiTTY.html" `
                           -urlmatch     "download/kitty_portable.exe"  -urlmatch_arc "" `
-                          -urlmatch_ver "(KiTTY : (0\.\d+\.\d+\.\d+))" -test         "kitty.exe" `
-                          -invoke       "@FILE@ /S /D=@DEST@"          -urlver       "http://www.9bis.net/kitty/?action=news&zone=en" `
-                          -url_replace  "www.fosshub.com/download/kitty_portable.exe,www.wuala.com/9bis.com/public/build/@VER@/kitty_portable.exe/?dl=1" `
+                          -urlmatch_ver "(0\.\d+\.\d+\.\d+)"           -test         "kitty.exe" `
+                          -invoke       "mkdir @DEST@ & copy @FILE@ @DEST@\\kitty.exe"          -urlver       "http://www.9bis.net/kitty/check_update.php?version=0" `
+                          -url_replace  "www.fosshub.com/download/kitty_portable.exe,mirror3.fosshub.com/programs/kitty_portable.exe" `
                           -ver_pattern "(0\.\d+\.\d+\.\d+)"
 
 cleanAddPath "\\.*kitty" ""
- Write-Host "kitty_dir\kitty.exe='$kitty_dir\kitty.exe'"
+# Write-Host "kitty_dir\kitty.exe='$kitty_dir\kitty.exe'"
 invoke-expression 'doskey kitty=$kitty_dir\kitty\bin\kitty.exe $*'
 }
 
@@ -615,10 +615,10 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
-#>
  iex ('&$kitty')
  post-all-install
 exit 0
+#>
 
  iex ('&$peazip')
  iex ('&$gow')
