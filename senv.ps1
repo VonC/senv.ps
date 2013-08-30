@@ -189,7 +189,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     $folder_pattern=$folder_pattern -replace " ", "_"
     $folder_pattern=$folder_pattern -replace "\\$", ""
     $folder_pattern=$folder_pattern -replace "(\(|\))", ""
-	# Write-Host "folder_pattern='$folder_pattern'"
+    # Write-Host "folder_pattern='$folder_pattern'"
     $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$folder_pattern" } | sort CreationTime | select -l 1
     # Write-Host "afolder='$afolder'" 
     if ( -not (Test-Path "$prgdir/$afolder/$test") ) {
@@ -607,7 +607,7 @@ invoke-expression 'doskey gs=$greenshot_dir\Greenshot.exe $*'
 $fastoneCapture = {
 $fastoneCapture_dir   = installPrg -aprgname     "fastoneCapture"                        -url          "http://www.faststone.org/FSCapturerDownload.htm" `
                           -urlmatch     "www.faststonesoft.net/DN/FSCapture\d+?\.zip"  -urlmatch_arc "" `
-                          -urlmatch_ver "www.faststonesoft.net/DN/(FSCapture\d+?)\.zip"           -test         "FSCapture.exe" `
+                          -urlmatch_ver "(FSCapture\d+?)\.zip"           -test         "FSCapture.exe" `
                           -unzip
 
 cleanAddPath "\\.*fastoneCapture" ""
