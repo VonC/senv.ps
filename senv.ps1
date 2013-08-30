@@ -593,6 +593,17 @@ cleanAddPath "\\.*wintab" ""
 invoke-expression 'doskey wintab=$wintab_dir\WindowTabs.exe $*'
 }
 
+$greenshot = {
+$greenshot_dir   = installPrg -aprgname     "greenshot"                        -url          "http://getgreenshot.org/version-history/" `
+                          -urlmatch     "Greenshot-NO-INSTALLER-.*?.zip"  -urlmatch_arc "" `
+                          -urlmatch_ver "(Greenshot-NO-INSTALLER-.*?).zip"           -test         "Greenshot.exe" `
+                          -unzip
+
+cleanAddPath "\\.*greenshot" ""
+# Write-Host "greenshot_dir\Greenshot.exe='$greenshot_dir\Greenshot.exe'"
+invoke-expression 'doskey gs=$greenshot_dir\Greenshot.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -652,4 +663,5 @@ exit 0
  iex ('&$perl')
  iex ('&$kitty')
  iex ('&$wintab')
+ iex ('&$greenshot')
  post-all-install
