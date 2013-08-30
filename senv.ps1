@@ -582,6 +582,17 @@ cleanAddPath "\\.*kitty" ""
 invoke-expression 'doskey kitty=$kitty_dir\kitty.exe $*'
 }
 
+$wintab = {
+$wintab_dir   = installPrg -aprgname     "wintab"                        -url          "http://www.windowtabs.com/download/" `
+                          -urlmatch     "/WindowTabs.exe"  -urlmatch_arc "" `
+                          -urlmatch_ver "(\d+\.\d+\.\d+)"           -test         "WindowTabs.exe" `
+                          -invoke       "mkdir @DEST@ & copy @FILE@ @DEST@\\WindowTabs.exe"
+
+cleanAddPath "\\.*wintab" ""
+# Write-Host "wintab_dir\WindowTabs.exe='$wintab_dir\WindowTabs.exe'"
+invoke-expression 'doskey wintab=$wintab_dir\WindowTabs.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -620,7 +631,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$kitty')
+ iex ('&$wintab')
  post-all-install
 exit 0
 #>
@@ -640,4 +651,5 @@ exit 0
  iex ('&$ag')
  iex ('&$perl')
  iex ('&$kitty')
+ iex ('&$wintab')
  post-all-install
