@@ -604,6 +604,17 @@ cleanAddPath "\\.*greenshot" ""
 invoke-expression 'doskey gs=$greenshot_dir\Greenshot.exe $*'
 }
 
+$fastoneCapture = {
+$fastoneCapture_dir   = installPrg -aprgname     "fastoneCapture"                        -url          "http://www.faststone.org/FSCapturerDownload.htm" `
+                          -urlmatch     "www.faststonesoft.net/DN/FSCapture\d+?\.zip"  -urlmatch_arc "" `
+                          -urlmatch_ver "www.faststonesoft.net/DN/(FSCapture\d+?)\.zip"           -test         "FSCapture.exe" `
+                          -unzip
+
+cleanAddPath "\\.*fastoneCapture" ""
+# Write-Host "fastoneCapture_dir\FSCapture.exe='$fastoneCapture_dir\FSCapture.exe'"
+invoke-expression 'doskey fc=$fastoneCapture_dir\FSCapture.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -642,7 +653,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$wintab')
+ iex ('&$fastoneCapture')
  post-all-install
 exit 0
 #>
@@ -664,4 +675,5 @@ exit 0
  iex ('&$kitty')
  iex ('&$wintab')
  iex ('&$greenshot')
+ iex ('&$fastoneCapture')
  post-all-install
