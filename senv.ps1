@@ -615,6 +615,17 @@ cleanAddPath "\\.*fastoneCapture" ""
 invoke-expression 'doskey fc=$fastoneCapture_dir\FSCapture.exe $*'
 }
 
+$zoomit = {
+$zoomit_dir   = installPrg -aprgname     "zoomit"              -url          "http://technet.microsoft.com/en-us/sysinternals/bb897434" `
+                        -urlmatch     "ZoomIt.zip"      -urlmatch_arc "" `
+                        -urlmatch_ver "(ZoomIt v\d+(\.\d+)?)" -test         "zoomit.exe" `
+                        -unzip
+cleanAddPath "\\zoomit" ""
+# Write-Host "zoomit_dir\zoomit2.exe='$zoomit_dir\zoomit.exe'"
+invoke-expression 'doskey zi=$zoomit_dir\zoomit.exe $*'
+}
+
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -676,4 +687,5 @@ exit 0
  iex ('&$wintab')
  iex ('&$greenshot')
  iex ('&$fastoneCapture')
+ iex ('&$zoomit')
  post-all-install
