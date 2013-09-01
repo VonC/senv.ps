@@ -636,6 +636,16 @@ invoke-expression 'doskey zi=$zoomit_dir\zoomit.exe $*'
 }
 
 
+$filezilla = {
+$filezilla_dir   = installPrg -aprgname     "filezilla"              -url          "https://filezilla-project.org/download.php?show_all=1" `
+                        -urlmatch     "FileZilla_.*?win32.zip"      -urlmatch_arc "" `
+                        -urlmatch_ver "(FileZilla_\d.\d.\d)" -test         "filezilla.exe" `
+                        -unzip
+cleanAddPath "\\filezilla" ""
+# Write-Host "filezilla_dir\filezilla2.exe='$filezilla_dir\filezilla.exe'"
+invoke-expression 'doskey fz=$filezilla_dir\filezilla.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -674,7 +684,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$fastoneCapture')
+ iex ('&$filezilla')
  post-all-install
 exit 0
 #>
@@ -698,4 +708,5 @@ exit 0
  iex ('&$greenshot')
  iex ('&$fastoneCapture')
  iex ('&$zoomit')
+ iex ('&$filezilla')
  post-all-install
