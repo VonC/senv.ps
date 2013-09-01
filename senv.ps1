@@ -342,13 +342,21 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
         $res=invoke-expression "$prgs\peazip\7z\7z.exe x  -aos -o`"$prgdir\tmp```" -pdefault -sccUTF-8 ```"$prgdir\$prgfile```""
         Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => 7z... DONE"
       }
-      $afolder=Get-ChildItem  "$prgdir\tmp" | Where { $_.PSIsContainer -and $_.Name -eq "$prgver_space" } | sort CreationTime | select -l 1
-      Write-Host "zip afolder='$afolder', vs. prgver='$prgdir\tmp\$prgver'"
+      $files = Get-ChildItem  "$prgdir\tmp"
+      $afolder=$files | Where { $_.PSIsContainer -and $_.Name -eq "$prgver_space" } | sort CreationTime | select -l 1
+      Write-Host "zip afolder='$afolder', vs. prgver='$prgdir\tmp\$prgver': prgver_space='$prgver_space'"
+      if ( -not $afolder ) {
+        $folders = $files | where-object { $_.PSIsContainer }
+        $ftmp = $files | where-object { -not $_.PSIsContainer }
+        if ($folders.Count -eq 1 -and $ftmp.Count -eq 0 ) {
+          $afolder = $folders | select -l 1
+        }
+      }
       if ( $afolder ) {
-        Write-Host "Move '$prgdir\tmp\$prgver' up to '$prgdir\$prgver'"
-        Move-Item "$prgdir\tmp\$prgver_space" "$prgdir"
-        if ( $prgver_space -ne $prgver ) {
-          Rename-Item "$prgdir\$prgver_space" "$prgdir\$prgver"
+        Write-Host "Move '$prgdir\tmp\$afolder' up to '$prgdir\$prgver'"
+        Move-Item "$prgdir\tmp\$afolder" "$prgdir"
+        if ( $afolder -ne $prgver ) {
+          Rename-Item "$prgdir\$afolder" "$prgdir\$prgver"
         }
         Write-Host "Deleting '$prgdir\tmp'"
         Remove-Item "$prgdir\tmp"
