@@ -622,7 +622,7 @@ $fastoneCapture_dir   = installPrg -aprgname     "fastoneCapture"               
 
 cleanAddPath "\\.*fastoneCapture" ""
 # Write-Host "fastoneCapture_dir\FSCapture.exe='$fastoneCapture_dir\FSCapture.exe'"
-invoke-expression 'doskey fc=$fastoneCapture_dir\FSCapture.exe $*'
+invoke-expression 'doskey fsc=$fastoneCapture_dir\FSCapture.exe $*'
 }
 
 $zoomit = {
