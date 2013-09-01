@@ -260,6 +260,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
   if ( [string]::IsNullOrEmpty($prgfile) ) {
     if ($page -match "$urlmatch_ver") {
       $prgver_space=$prgfile=$matches[1]
+      # Write-Host "prgfile=$prgfile, prgver_space='$prgver_space'"
     } elseif ( [string]::IsNullOrEmpty($urlver) -eq $false ){
       $pagever=$downloader.DownloadString($urlver)
       if ($pagever -match "$urlmatch_ver") {
@@ -283,13 +284,14 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     $prgfile_dotindex = $prgfile.LastIndexOf('.')
     # Write-Host "prgfile_dotindex='$prgfile_dotindex', " ( $prgfile_dotindex -gt 0 )
     $prgver_space = if ( $prgfile_dotindex -gt 0 ) { $prgfile.Substring(0,$prgfile_dotindex) } else { $prgfile }
+    # Write-Host "prgfile=$prgfile, prgver_space='$prgver_space' ===="
   }
   $prgver = $prgver_space -replace "\s+:\s+", " "
   $prgver = $prgver -replace " ", "_"
-  $prgver=$prgver -replace "(\(|\))", ""
+  $prgver = $prgver -replace "(\(|\))", ""
   $prgfile = $prgfile -replace "\s+:\s+", " "
   $prgfile = $prgfile -replace " ", "_"
-  $prgfile=$prgfile -replace "(\(|\))", ""
+  $prgfile = $prgfile -replace "(\(|\))", ""
 
   if ( -not [string]::IsNullOrEmpty($ver_pattern) ) {
     $prgfile -match $ver_pattern
