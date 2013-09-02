@@ -346,9 +346,11 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       $afolder=$files | Where { $_.PSIsContainer -and $_.Name -eq "$prgver_space" } | sort CreationTime | select -l 1
       Write-Host "zip afolder='$afolder', vs. prgver='$prgdir\tmp\$prgver': prgver_space='$prgver_space'"
       if ( -not $afolder ) {
+        # http://stackoverflow.com/questions/11526285/how-to-count-objects-in-powershell
         $folders = $files | where-object { $_.PSIsContainer }
         $ftmp = $files | where-object { -not $_.PSIsContainer }
-        if ($folders.Count -eq 1 -and $ftmp.Count -eq 0 ) {
+        # Write-Host "folders: '$folders', ftmp: '$ftmp'"
+        if ( ($folders|measure).Count -eq 1 -and ($ftmp|measure).Count -eq 0 ) {
           $afolder = $folders | select -l 1
         }
       }
