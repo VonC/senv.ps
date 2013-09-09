@@ -143,6 +143,10 @@ $proxy = [System.Net.WebRequest]::GetSystemWebProxy()
 $proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
 $downloader = new-object System.Net.WebClient
 $downloader.proxy = $proxy
+# for http://www.autoitscript.com/site/autoit/downloads
+$downloader.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36")
+$asas=$downloader.Headers.Get("User-Agent")
+# Write-Host("User-Agent='$asas'")
 
 function post([String]$install_folder,[String]$post) {
   if ( $post ) {
