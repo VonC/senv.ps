@@ -727,6 +727,19 @@ cleanAddPath "\\filezilla" ""
 invoke-expression 'doskey fz=$filezilla_dir\filezilla.exe $*'
 }
 
+
+$autoit = {
+$autoit_dir   = installPrg -aprgname     "autoit"              -url          "http://www.autoitscript.com/site/autoit/downloads/index.php" `
+                        -urlmatch     "autoit-v3.zip"      -urlmatch_arc "" `
+                        -urlmatch_ver "(autoit v\d+\.\d+\.\d+\.\d+)" -test         "AutoIt3.exe" `
+                        -unzip `
+                        -referer "http://www.autoitscript.com/site/autoit/downloads" -hostname "www.autoitscript.com" `
+                        -url_replace  'cgi-bin/getfile.pl.,files/'
+cleanAddPath "\\autoit" ""
+# Write-Host "autoit_dir\AutoIt3.exe='$autoit_dir\AutoIt3.exe'"
+invoke-expression 'doskey autoit=$autoit_dir\AutoIt3.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -765,7 +778,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$filezilla')
+ iex ('&$autoit')
  post-all-install
 exit 0
 #>
@@ -790,4 +803,5 @@ exit 0
  iex ('&$fastoneCapture')
  iex ('&$zoomit')
  iex ('&$filezilla')
+ iex ('&$autoit')
  post-all-install
