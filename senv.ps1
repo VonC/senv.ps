@@ -278,11 +278,13 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     if ( $prgfile -match "^[0-9].*" ) {
       $prgver_space=$prgfile=$aprgname+ "_" + $prgfile
     }
+    $anext=""
     if ( $dwnUrl -match "/[^/]+(\.[^/]*?)$" ) {
       # Write-Host "prgfile=$prgfile" + $matches[1]
       $prgfile+=$matches[1]
+      $anext=$matches[1]
     }
-    if ($unzip) { $prgfile+=".zip" }
+    if ($unzip -and $anext -ne ".zip") { $prgfile+=".zip" }
     # Write-Host "matches: $prgfile for $urlmatch_ver and $dwnUrl"
   } else {
     $prgfile_dotindex = $prgfile.LastIndexOf('.')
@@ -290,6 +292,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     $prgver_space = if ( $prgfile_dotindex -gt 0 ) { $prgfile.Substring(0,$prgfile_dotindex) } else { $prgfile }
     # Write-Host "prgfile=$prgfile, prgver_space='$prgver_space' ===="
   }
+
   $prgver = $prgver_space -replace "\s+:\s+", " "
   $prgver = $prgver -replace " ", "_"
   $prgver = $prgver -replace "(\(|\))", ""
