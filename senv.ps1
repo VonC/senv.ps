@@ -388,8 +388,8 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
   }
 
   # http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
-  #  Write-Host "urlmatch='$urlmatch' for url '$url'"
-  $result=$page=$downloader.DownloadString($url)
+    Write-Host "urlmatch='$urlmatch' for url '$url'"
+  $result=$page=Get-WebFile -url $url -Passthru
   # http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
   $result = $result.split("`"") -join "^`""
   # Write-Host "urlmatch='$urlmatch' for url '$url': result='$result'"
@@ -446,7 +446,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       $prgver_space=$prgfile=$matches[1]
       # Write-Host "prgfile=$prgfile, prgver_space='$prgver_space'"
     } elseif ( [string]::IsNullOrEmpty($urlver) -eq $false ){
-      $pagever=$downloader.DownloadString($urlver)
+      $pagever=Get-WebFile -url $urlver -Passthru
       if ($pagever -match "$urlmatch_ver") {
         $prgver_space=$prgfile=$matches[1]
       }
@@ -494,83 +494,8 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
         Write-Host "Copy '$prgfile' from '$Env:homedrive/$prgfile'"
         Copy-Item -Path "$Env:homedrive/$prgfile" -Destination "$prgdir/$prgfile"
       } else {
-        # http://stackoverflow.com/questions/359041/request-web-page-in-c-sharp-spoofing-the-host/4421324#comment3030242_2264692: no WebClient
-        $req = [System.Net.HttpWebRequest]::Create($dwnUrl);
-        $req.proxy = $proxy
-        $req.CookieContainer = New-Object System.Net.CookieContainer
-        # http://stackoverflow.com/questions/16863455/how-to-do-wget-with-cookies-in-powershell
-        $bindingFlags =
-          [System.Reflection.BindingFlags]::NonPublic -bor
-          [System.Reflection.BindingFlags]::Instance -bor
-          [System.Reflection.BindingFlags]::InvokeMethod
-        if ( -not [string]::IsNullOrEmpty($hostname) ) {
-          # $downloader.Headers.Add("Host", $hostname)
-          # http://stackoverflow.com/questions/3334860/an-example-of-using-the-from-and-data-keywords
-          # http://stackoverflow.com/questions/359041/request-web-page-in-c-sharp-spoofing-the-host#7560279
-          $req.Headers.GetType().InvokeMember("ChangeInternal", $bindingFlags, $null, $req.Headers, ("Host","$hostname"));
-          # Write-Host "set Header Host to '$hostname'"
-        }
-         $req.Headers.GetType().InvokeMember("ChangeInternal", $bindingFlags, $null, $req.Headers, ("User-Agent","$asas"));
-        # if ( -not [string]::IsNullOrEmpty($referer) ) {
-           $req.Referer = $referer
-           # Write-Host "set Header Referer to '$referer'"
-        #}
-        #  $downloader.Headers.Add("Accept-Encoding", "gzip,deflate,sdch")
-        # $downloader.Headers.Add([System.Net.HttpRequestHeader]::Cookie, "__utma=109354002.1658337508.1376899038.1377681062.1377759655.6; __utmb=109354002.1.10.1377759655; __utmc=109354002; __utmz=109354002.1377759780.2.2.utmcsr=9bis.net|utmccn=(referral)|utmcmd=referral|utmcct=/kitty/")
-        $sss=$req.Headers.ToString()
-        # Write-Host "req.Headers = '$sss'"
         Write-Host "Download '$prgfile' from '$dwnUrl' ====> '$prgdir\$prgfile'"
-        # http://andersrask.sharepointspace.com/Lists/Posts/Post.aspx?ID=5
-        Try {
-          $res = $req.GetResponse();
-          #$downloader.DownloadFile($dwnUrl, "$prgdir\$prgfile")
-        }
-        catch {
-          Write-Warning "$($Error[0].Exception.ToString())"
-          # http://stackoverflow.com/questions/9543818/error-handling-in-system-net-httpwebrequestgetresponse
-          $ErrorMessage = $Error[0].Exception.ErrorRecord.Exception.Message;
-          $Matched = ($ErrorMessage -match '[0-9]{3}')
-          if ($Matched) {
-            Write-Host -Object ('HTTP status code was {0} ({1})' -f $HttpStatusCode, $matches[0]);
-          }
-          else {
-            Write-Host -Object $ErrorMessage;
-          }
-
-          $HttpWebResponse = $Error[0].Exception.InnerException.Response;
-          $HttpWebResponse.GetResponseHeader("X-Detailed-Error");
-        }
-        if($res.StatusCode -ne 200) {
-          $host.ui.WriteErrorLine("Unable to download '$prgfile' from '$dwnUrl', status '$res.StatusCode'")
-          # Write-Error "Unable to download '$prgfile' from '$dwnUrl', status '$res.StatusCode'"
-          return ""
-        }
-        [int]$goal = $res.ContentLength
-        $reader = $res.GetResponseStream()
-        $writer = new-object System.IO.FileStream $prgdir\$prgfile, "Create"
-        [byte[]]$buffer = new-object byte[] 4096
-        [int]$total = [int]$count = 0
-        do
-        {
-          $count = $reader.Read($buffer, 0, $buffer.Length);
-          $writer.Write($buffer, 0, $count);
-          #if($Passthru){
-          #  $output += $encoding.GetString($buffer,0,$count)
-          #} elseif(!$quiet) {
-            $total += $count
-            if($goal -gt 0) {
-              Write-Progress "Downloading $dwnUrl" "Saving $total of $goal" -id 0 -percentComplete (($total/$goal)*100)
-            } else {
-              Write-Progress "Downloading $dwnUrl" "Saving $total bytes…" -id 0
-            }
-          #}
-        } while ($count -gt 0)
-
-        $reader.Close()
-        $writer.Flush()
-        $writer.Close()
-        $res.Close();
-      }
+        Get-WebFile -url $dwnUrl -filename "$prgdir/$prgfile" -hostname $hostname -referer $referer
     }
 
     install -invoke $invoke -prgdir $prgdir -prgfile $prgfile -prgver $prgver
