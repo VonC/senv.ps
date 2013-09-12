@@ -496,6 +496,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       } else {
         Write-Host "Download '$prgfile' from '$dwnUrl' ====> '$prgdir\$prgfile'"
         Get-WebFile -url $dwnUrl -filename "$prgdir/$prgfile" -hostname $hostname -referer $referer
+      }
     }
 
     install -invoke $invoke -prgdir $prgdir -prgfile $prgfile -prgver $prgver
@@ -882,11 +883,11 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
+#>
  iex ('&$filezilla')
  iex ('&$autoit')
  post-all-install
 exit 0
-#>
 
  iex ('&$peazip')
  iex ('&$gow')
