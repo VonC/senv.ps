@@ -138,15 +138,194 @@ function Test-Win64() {
     return [IntPtr]::size -eq 8
 }
 
-# http://stackoverflow.com/questions/571429/powershell-web-requests-and-proxies
-$proxy = [System.Net.WebRequest]::GetSystemWebProxy()
-$proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials
-$downloader = new-object System.Net.WebClient
-$downloader.proxy = $proxy
-# for http://www.autoitscript.com/site/autoit/downloads
-$downloader.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36")
-$asas=$downloader.Headers.Get("User-Agent")
-# Write-Host("User-Agent='$asas'")
+# http://andersrask.sharepointspace.com/Lists/Posts/Post.aspx?ID=5
+# http://poshcode.org/3920 Get-WebFile 3.7, by Peter Kriegel, an upgrade to Joel Bennett´s wget script
+Function Get-WebFile {
+  [CmdletBinding(SupportsShouldProcess=$False)]
+  param(
+    [Parameter(Mandatory=$true)]
+    [String]$url,
+    [Parameter(Mandatory=$false)]
+    [String]$fileName = $null,
+    [Parameter(Mandatory=$false)]
+    [String]$hostname = $null,
+    [Parameter(Mandatory=$false)]
+    [String]$referer = $null,
+      [String]$ProxyAdress = $Null,
+      [Int]$ProxyPort = 0,
+      [String]$ProxyUserName = '',
+      [String]$ProxyUserPassword = '',
+      [String]$ProxyUserDomain = '',
+      [String]$userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Iron/29.0.1600.1 Chrome/29.0.1600.1 Safari/537.36',
+    [switch]$Passthru,
+    [switch]$quiet
+  )
+  # http://stackoverflow.com/questions/10159066/print-debug-messages-to-console-from-a-powershell-function-that-returns
+  $DebugPreference = 'Continue'
+  $req = [System.Net.HttpWebRequest]::Create($url);
+
+  $webclient = new-object System.Net.WebClient
+
+  If($ProxyAdress.length -eq 0){ # no Proxy is given by the User
+    # check if a proxy is required
+    If (!$webclient.Proxy.IsBypassed($url)) {
+      $creds = [net.CredentialCache]::DefaultCredentials
+      if ($creds -eq $null) {
+        Write-Debug "Default credentials were null. Attempting backup method"
+        $cred = get-credential
+        $creds = $cred.GetNetworkCredential()
+      }
+      $proxyaddress = $webclient.Proxy.GetProxy($url).Authority
+      Write-Verbose "Using this proxyserver: $proxyaddress"
+      $proxy = New-Object System.Net.WebProxy($proxyaddress)
+      $proxy.credentials = $creds
+      $req.proxy = $proxy
+    }
+  }
+  Else { # Proxy was given by the User
+    If($ProxyPort -gt 0){
+      $proxy = New-Object System.Net.WebProxy($ProxyAdress,$ProxyPort)
+    }
+    Else {
+      $proxy = New-Object System.Net.WebProxy($ProxyAdress)
+    }
+    If($ProxyUserName.length -gt 0){
+      # if username is given we create the credentials
+      $creds = New-Object System.Net.NetworkCredential($ProxyUserName,$ProxyUserPassword,$ProxyUserDomain)
+    }
+    Else {
+      # if no username is given try to get the default credentials
+      $creds = [net.CredentialCache]::DefaultCredentials
+    }
+    if ($creds -eq $null) {
+      # no credentials given or found so we as for it
+      Write-Debug "Default credentials were null. Attempting backup method"
+      $cred = get-credential
+      $creds = $cred.GetNetworkCredential()
+    }
+    $proxy.credentials = $creds
+    $req.proxy = $proxy
+  }
+
+  #http://stackoverflow.com/questions/518181/too-many-automatic-redirections-were-attempted-error-message-when-using-a-httpw
+  $req.CookieContainer = New-Object System.Net.CookieContainer
+  if ($userAgent -ne $null) {
+    Write-Debug "Setting the UserAgent to `'$userAgent`'"
+    $req.UserAgent = $userAgent
+  }
+
+  # http://stackoverflow.com/questions/16863455/how-to-do-wget-with-cookies-in-powershell
+  $bindingFlags =
+    [System.Reflection.BindingFlags]::NonPublic -bor
+    [System.Reflection.BindingFlags]::Instance -bor
+    [System.Reflection.BindingFlags]::InvokeMethod
+  if ( -not [string]::IsNullOrEmpty($hostname) ) {
+    # $downloader.Headers.Add("Host", $hostname)
+    # http://stackoverflow.com/questions/3334860/an-example-of-using-the-from-and-data-keywords
+    # http://stackoverflow.com/questions/359041/request-web-page-in-c-sharp-spoofing-the-host#7560279
+    $req.Headers.GetType().InvokeMember("ChangeInternal", $bindingFlags, $null, $req.Headers, ("Host","$hostname"));
+    Write-Debug "set Header Host to '$hostname'"
+  }
+  if ( -not [string]::IsNullOrEmpty($referer) ) {
+    $req.Referer = $referer
+    Write-Debug "set Header Referer to '$referer'"
+  }
+  # $sss=$req.Headers.ToString()
+  # Write-Debug "req.Headers = '$sss'"
+
+  # http://andersrask.sharepointspace.com/Lists/Posts/Post.aspx?ID=5
+  Try {
+    $res = $req.GetResponse();
+    #$downloader.DownloadFile($dwnUrl, "$prgdir\$prgfile")
+  }
+  catch {
+    Write-Warning "$($Error[0].Exception.ToString())"
+    # http://stackoverflow.com/questions/9543818/error-handling-in-system-net-httpwebrequestgetresponse
+    $ErrorMessage = $Error[0].Exception.ErrorRecord.Exception.Message;
+    $Matched = ($ErrorMessage -match '[0-9]{3}')
+    if ($Matched) {
+      Write-Host -Object ('HTTP status code was {0} ({1})' -f $HttpStatusCode, $matches[0]);
+    }
+    else {
+      Write-Host -Object $ErrorMessage;
+    }
+
+    $HttpWebResponse = $Error[0].Exception.InnerException.Response;
+    $HttpWebResponse.GetResponseHeader("X-Detailed-Error");
+  }
+
+  if($res.StatusCode -ne 200) {
+    $host.ui.WriteErrorLine("Unable to download '$prgfile' from '$dwnUrl', status '$res.StatusCode'")
+    # Write-Error "Unable to download '$prgfile' from '$dwnUrl', status '$res.StatusCode'"
+    return ""
+  }
+
+  $isDir = try{Test-Path -PathType "Container" $fileName}catch {$false}
+  Write-Debug "FileName: '$fileName', isDir='$isDir'"
+  if($fileName -and !(Split-Path $fileName)) {
+    $fileName = Join-Path (Get-Location -PSProvider "FileSystem") $fileName
+  }
+  elseif((!$Passthru -and ($fileName -eq $null)) -or (($fileName -ne $null) -and ($isDir)))
+  {
+    [string]$fileName = ([regex]'(?i)filename=(.*)$').Match( $res.Headers["Content-Disposition"] ).Groups[1].Value
+    $fileName = $fileName.trim("\/""'")
+    if(!$fileName) {
+      $fileName = $res.ResponseUri.Segments[-1]
+      $fileName = $fileName.trim("\/")
+      if(!$fileName) {
+        $fileName = Read-Host "Please provide a file name"
+      }
+      $fileName = $fileName.trim("\/")
+      if(!([IO.FileInfo]$fileName).Extension) {
+        $fileName = $fileName + "." + $res.ContentType.Split(";")[0].Split("/")[1]
+      }
+    }
+    $fileName = Join-Path $env:TEMP $fileName
+  }
+  if($Passthru) {
+    $encoding = [System.Text.Encoding]::GetEncoding($res.CharacterSet ) # 'utf-8'
+    [string]$output = ""
+  }
+
+  [int]$goal = $res.ContentLength
+  $reader = $res.GetResponseStream()
+  if($fileName) {
+    $writer = new-object System.IO.FileStream $fileName, "Create"
+  }
+  [byte[]]$buffer = new-object byte[] 4096
+  [int]$total = [int]$count = 0
+  do
+  {
+    $count = $reader.Read($buffer, 0, $buffer.Length);
+    if($fileName) {
+     $writer.Write($buffer, 0, $count);
+    }
+    if($Passthru){
+      $output += $encoding.GetString($buffer,0,$count)
+    } elseif(!$quiet) {
+      $total += $count
+      if($goal -gt 0) {
+        Write-Progress "Downloading $url" "Saving $total of $goal" -id 0 -percentComplete (($total/$goal)*100)
+      } else {
+        Write-Progress "Downloading $url" "Saving $total bytes..." -id 0
+      }
+    }
+  } while ($count -gt 0)
+
+  $reader.Close()
+  if($fileName) {
+    $writer.Flush()
+    $writer.Close()
+  }
+  if($Passthru){
+    $output
+  }
+
+  $res.Close();
+  if($fileName) {
+    ls $fileName
+  }
+}
 
 function post([String]$install_folder,[String]$post) {
   if ( $post ) {
