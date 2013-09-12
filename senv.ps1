@@ -161,7 +161,7 @@ Function Get-WebFile {
     [switch]$quiet
   )
   # http://stackoverflow.com/questions/10159066/print-debug-messages-to-console-from-a-powershell-function-that-returns
-  $DebugPreference = 'Continue'
+  # $DebugPreference = 'Continue'
   $req = [System.Net.HttpWebRequest]::Create($url);
 
   $webclient = new-object System.Net.WebClient
@@ -325,6 +325,7 @@ Function Get-WebFile {
   if($fileName) {
     ls $fileName
   }
+  # Write-Debug "output='$output'"
 }
 
 function post([String]$install_folder,[String]$post) {
@@ -485,7 +486,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     $aver = $matches[1]
     $dwnUrl = $dwnUrl -replace "@VER@", $aver
   }
-  Write-Host "result='$dwnUrl': prgver='$prgver', prgfile='$prgfile'"
+  # Write-Host "result='$dwnUrl': prgver='$prgver', prgfile='$prgfile'"
 
   if ( -not (Test-Path "$prgdir/$prgver/$test") ) {
 
@@ -883,11 +884,12 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
-#>
  iex ('&$filezilla')
  iex ('&$autoit')
+ iex ('&$hg')
  post-all-install
 exit 0
+#>
 
  iex ('&$peazip')
  iex ('&$gow')
