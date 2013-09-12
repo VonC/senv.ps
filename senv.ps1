@@ -882,6 +882,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
+ iex ('&$filezilla')
  iex ('&$autoit')
  post-all-install
 exit 0
