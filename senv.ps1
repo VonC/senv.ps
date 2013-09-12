@@ -283,7 +283,7 @@ Function Get-WebFile {
     $fileName = Join-Path $env:TEMP $fileName
   }
   if($Passthru) {
-    $encoding = [System.Text.Encoding]::GetEncoding($res.CharacterSet ) # 'utf-8'
+    $encoding = try { [System.Text.Encoding]::GetEncoding($res.CharacterSet ) } catch { $Utf8NoBomEncoding } # 'utf-8'
     [string]$output = ""
   }
 
