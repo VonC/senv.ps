@@ -859,6 +859,16 @@ cleanAddPath "\\iron" ""
 invoke-expression 'doskey iron=$iron_dir\IronPortable.exe $*'
 }
 
+$firefox = {
+$firefox_dir   = installPrg -aprgname     "firefox"              -url          "http://www.firefox-usb.com/" `
+                        -urlmatch     "/download/FirefoxPortable.*?.zip"      -urlmatch_arc "" `
+                        -urlmatch_ver "(FirefoxPortable.*?).zip" -test         "FireFoxPortable.exe" `
+                        -unzip
+cleanAddPath "\\firefox" ""
+ Write-Host "firefox_dir\FireFoxPortable.exe='$firefox_dir\FireFoxPortable.exe'"
+invoke-expression 'doskey firefox=$firefox_dir\FireFoxPortable.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -924,4 +934,5 @@ exit 0
  iex ('&$filezilla')
  iex ('&$autoit')
  iex ('&$iron')
+ iex ('&$firefox')
  post-all-install
