@@ -848,6 +848,17 @@ cleanAddPath "\\autoit" ""
 invoke-expression 'doskey autoit=$autoit_dir\AutoIt3.exe $*'
 }
 
+$iron = {
+$iron_dir   = installPrg -aprgname     "iron"              -url          "http://www.srware.net/forum/viewtopic.php?f=18&t=6987" `
+                        -urlmatch     "IronPortable.zip"      -urlmatch_arc "" `
+                        -urlver "http://www.srware.net/forum/viewforum.php?f=18" `
+                        -urlmatch_ver "topictitle..New Iron-Version: (\d+\.\d+\.\d+\.\d+) Stable for Windows" -test         "IronPortable.exe" `
+                        -unzip
+cleanAddPath "\\iron" ""
+# Write-Host "iron_dir\iron3.exe='$iron_dir\IronPortable.exe'"
+invoke-expression 'doskey iron=$iron_dir\IronPortable.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -886,9 +897,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$filezilla')
- iex ('&$autoit')
- iex ('&$hg')
+ iex ('&$firefox')
  post-all-install
 exit 0
 #>
@@ -914,4 +923,5 @@ exit 0
  iex ('&$zoomit')
  iex ('&$filezilla')
  iex ('&$autoit')
+ iex ('&$iron')
  post-all-install
