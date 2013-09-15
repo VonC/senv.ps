@@ -442,6 +442,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
   # Write-Host "dwnUrl === '$dwnUrl'; urlmatch_ver='$urlmatch_ver'"
   # http://stackoverflow.com/questions/4546567/get-last-element-of-pipeline-in-powershell
   $prgfile = $dwnUrl -split "/" | where { $_ -match "$urlmatch_ver" }
+  # Write-Host "prgfile='$prgfile'; urlmatch_ver='$urlmatch_ver'"
   if ( [string]::IsNullOrEmpty($prgfile) ) {
     if ($page -match "$urlmatch_ver") {
       $prgver_space=$prgfile=$matches[1]
@@ -450,6 +451,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       $pagever=Get-WebFile -url $urlver -Passthru
       if ($pagever -match "$urlmatch_ver") {
         $prgver_space=$prgfile=$matches[1]
+        # Write-Host "prgfile=$prgfile, prgver_space='$prgver_space' from urlver='$urlver'"
       }
     } else {
       $host.ui.WriteErrorLine("No version number found for '$aprgname' in '$url' or '$urlver', with urlmatch_ver='$urlmatch_ver'")
@@ -460,7 +462,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       $prgver_space=$prgfile=$aprgname+ "_" + $prgfile
     }
     $anext=""
-    if ( $dwnUrl -match "/[^/]+(\.[^/]*?)$" ) {
+    if ( $dwnUrl -match "[/h][^/]+(\.[^/]*?)$" ) {
       # Write-Host "prgfile=$prgfile" + $matches[1]
       $prgfile+=$matches[1]
       $anext=$matches[1]
