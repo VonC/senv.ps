@@ -388,6 +388,16 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     return "$prgdir\$afolder" 
   }
 
+  $ver_number=""
+  if ( [string]::IsNullOrEmpty($urlver) -eq $false ){
+    $pagever=Get-WebFile -url $urlver -Passthru
+    if ($pagever -match "$urlmatch_ver") {
+      $ver_number=$matches[1]
+       Write-Host "ver_number='$ver_number', from urlver='$urlver'"
+    }
+  }
+  $url = $url -replace "@VER@", $ver_number
+
   # http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
     Write-Host "urlmatch='$urlmatch' for url '$url'"
   $result=$page=Get-WebFile -url $url -Passthru
@@ -432,6 +442,10 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     $dwnUrl = $url + $dwnUrl
     $dwnUrl = $dwnUrl -replace "/\?[^/]+", ""
   }
+
+  $referer = $referer -replace "@dwnUrl@", "$dwnUrl"
+   Write-Host "referer='$referer'"
+
   if ( -not [string]::IsNullOrEmpty($url_replace) ) {
     $replaces = $url_replace.split(",")
     $replace_what = $replaces[0]
@@ -447,12 +461,9 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     if ($page -match "$urlmatch_ver") {
       $prgver_space=$prgfile=$matches[1]
       # Write-Host "prgfile=$prgfile, prgver_space='$prgver_space'"
-    } elseif ( [string]::IsNullOrEmpty($urlver) -eq $false ){
-      $pagever=Get-WebFile -url $urlver -Passthru
-      if ($pagever -match "$urlmatch_ver") {
-        $prgver_space=$prgfile=$matches[1]
-        # Write-Host "prgfile=$prgfile, prgver_space='$prgver_space' from urlver='$urlver'"
-      }
+    } elseif ( [string]::IsNullOrEmpty($ver_number) -eq $false ){
+      $prgver_space=$prgfile=$ver_number
+      # Write-Host "prgfile=$prgfile, prgver_space='$prgver_space' from urlver='$urlver'"
     } else {
       $host.ui.WriteErrorLine("No version number found for '$aprgname' in '$url' or '$urlver', with urlmatch_ver='$urlmatch_ver'")
       return ""
@@ -498,6 +509,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
         Copy-Item -Path "$Env:homedrive/$prgfile" -Destination "$prgdir/$prgfile"
       } else {
         Write-Host "Download '$prgfile' from '$dwnUrl' ====> '$prgdir\$prgfile'"
+        $referer = $referer -replace "@dwnUrl@", $dwnUrl
         Get-WebFile -url $dwnUrl -filename "$prgdir/$prgfile" -hostname $hostname -referer $referer
       }
     }
@@ -869,6 +881,30 @@ cleanAddPath "\\firefox" ""
 invoke-expression 'doskey firefox=$firefox_dir\FireFoxPortable.exe $*'
 }
 
+$kdiff3 = {
+# http://scriptinghell.blogspot.fr/2012/10/ternary-operator-support-in-powershell.html (second comment)
+$kdiff3_urlmatch_arc = if ( Test-Win64 ) { "64bit" } else { "32bits" }
+$kdiff3Dir = installPrg -aprgname     "kdiff3"                   -url          "http://sourceforge.net/projects/kdiff3/files/kdiff3/@VER@/" `
+                        -urlmatch     "Setup_.*?/download"             -urlmatch_arc "$kdiff3_urlmatch_arc" `
+                        -urlver "http://kdiff3.sourceforge.net/" `
+                        -urlmatch_ver "Current version: (.*) \(" -test         "kdiff3.exe" `
+                        -invoke       "" `
+                        -url_replace  'sourceforge.net/.*/(.*?)/download,downloads.sourceforge.net/kdiff3/$1'
+                        # http://downloads.sourceforge.net/projects/kdiff3/files/kdiff3/0.9.97/KDiff3-64bit-Setup_0.9.97.exe
+                        # http://downloads.sourceforge.net/kdiff3/KDiff3-64bit-Setup_0.9.97.exe
+                        # -hostname "dfn.dl.sourceforge.net" -referer "@dwnUrl@?source=dlp" 
+                        # http://sourceforge.net/projects/kdiff3/files/kdiff3/0.9.97/KDiff3-64bit-Setup_0.9.97.exe/download
+                        # http://freefr.dl.sourceforge.net/project/kdiff3/kdiff3/0.9.97/KDiff3-32bit-Setup_0.9.97.exe
+                        # http://dfn.dl.sourceforge.net/project/kdiff3/kdiff3/0.9.97/KDiff3-64bit-Setup_0.9.97.exe
+# http://superuser.com/questions/544520/how-can-i-copy-a-directory-overwriting-its-contents-if-it-exists-using-powershe
+
+cleanAddPath -cleanPattern "\\kdiff3" -addPath ""
+
+invoke-expression 'doskey pzx=$kdiff3Dir\res\7z\7z.exe x -aos -o"$2" -pdefault -sccUTF-8 `"`$1`"'
+invoke-expression 'doskey pzc=$kdiff3Dir\res\7z\7z.exe a -tzip -mm=Deflate -mmt=on -mx5 -w `"`$2`" `"`$1`"'
+invoke-expression 'doskey 7z=$kdiff3Dir\res\7z\7z.exe `$*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -907,10 +943,10 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$firefox')
+#>
+ iex ('&$kdiff3')
  post-all-install
 exit 0
-#>
 
  iex ('&$peazip')
  iex ('&$gow')
@@ -935,4 +971,5 @@ exit 0
  iex ('&$autoit')
  iex ('&$iron')
  iex ('&$firefox')
+ iex ('&$kdiff3')
  post-all-install
