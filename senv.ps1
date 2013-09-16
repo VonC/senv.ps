@@ -891,8 +891,8 @@ $kdiff3Dir = installPrg -aprgname     "kdiff3"                   -url          "
                         -urlmatch     "Setup_.*?/download"             -urlmatch_arc "$kdiff3_urlmatch_arc" `
                         -urlver "http://kdiff3.sourceforge.net/" `
                         -urlmatch_ver "Current version: (.*) \(" -test         "kdiff3.exe" `
-                        -invoke       "" `
-                        -url_replace  'sourceforge.net/.*/(.*?)/download,downloads.sourceforge.net/kdiff3/$1'
+                        -invoke       "@FILE@ /S /D=@DEST@" `
+                        -url_replace  'sourceforge.net/projects/kdiff3/files/(.*?)/download,netcologne.dl.sourceforge.net/project/kdiff3/$1'
                         # http://downloads.sourceforge.net/projects/kdiff3/files/kdiff3/0.9.97/KDiff3-64bit-Setup_0.9.97.exe
                         # http://downloads.sourceforge.net/kdiff3/KDiff3-64bit-Setup_0.9.97.exe
                         # -hostname "dfn.dl.sourceforge.net" -referer "@dwnUrl@?source=dlp" 
@@ -946,10 +946,10 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
-#>
  iex ('&$kdiff3')
  post-all-install
 exit 0
+#>
 
  iex ('&$peazip')
  iex ('&$gow')
