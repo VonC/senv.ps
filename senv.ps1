@@ -372,8 +372,11 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     $folder_pattern=$urlmatch_ver -replace '\.(7z|7Z|zip|exe|msi).*',''
     $folder_pattern=$folder_pattern -replace " ", "_"
     $folder_pattern=$folder_pattern -replace "\\$", ""
-    $folder_pattern=$folder_pattern -replace "(\(|\))", ""
-    # Write-Host "folder_pattern='$folder_pattern'"
+    # Write-Host "folder_pattern 0 ='$folder_pattern'"
+    $folder_pattern=$folder_pattern -replace "^[^\(]*?\(", ""
+    $folder_pattern=$folder_pattern -replace "\).*$", ""
+    if( $folder_pattern -eq ".*" ) { $folder_pattern="$aprgname_.+"}
+    # Write-Host "folder_pattern 1 ='$folder_pattern'"
     $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$folder_pattern" } | sort CreationTime | select -l 1
     # Write-Host "afolder='$afolder'" 
     if ( -not (Test-Path "$prgdir/$afolder/$test") ) {
