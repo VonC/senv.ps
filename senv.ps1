@@ -869,7 +869,7 @@ $iron = {
 $iron_dir   = installPrg -aprgname     "iron"              -url          "http://www.srware.net/forum/viewtopic.php?f=18&t=6987" `
                         -urlmatch     "IronPortable.zip"      -urlmatch_arc "" `
                         -urlver "http://www.srware.net/forum/viewforum.php?f=18" `
-                        -urlmatch_ver "topictitle..New Iron-Version: (\d+\.\d+\.\d+\.\d+) Stable for Windows" -test         "IronPortable.exe" `
+                        -urlmatch_ver "topictitle..New Iron-Version: (\d+\.\d+\.\d+\.\d+) Stable for Windows" -ver_only -test         "IronPortable.exe" `
                         -unzip
 cleanAddPath "\\iron" ""
 # Write-Host "iron_dir\iron3.exe='$iron_dir\IronPortable.exe'"
@@ -892,7 +892,7 @@ $kdiff3_urlmatch_arc = if ( Test-Win64 ) { "64bit" } else { "32bits" }
 $kdiff3Dir = installPrg -aprgname     "kdiff3"                   -url          "http://sourceforge.net/projects/kdiff3/files/kdiff3/@VER@/" `
                         -urlmatch     "Setup_.*?/download"             -urlmatch_arc "$kdiff3_urlmatch_arc" `
                         -urlver "http://kdiff3.sourceforge.net/" `
-                        -urlmatch_ver "Current version: (.*) \(" -test         "kdiff3.exe" `
+                        -urlmatch_ver "Current version: (.*) \(" -ver_only -test         "kdiff3.exe" `
                         -invoke       "@FILE@ /S /D=@DEST@" `
                         -url_replace  'sourceforge.net/projects/kdiff3/files/(.*?)/download,netcologne.dl.sourceforge.net/project/kdiff3/$1'
                         # http://downloads.sourceforge.net/projects/kdiff3/files/kdiff3/0.9.97/KDiff3-64bit-Setup_0.9.97.exe
@@ -911,7 +911,7 @@ invoke-expression 'doskey kdiff3=$kdiff3Dir\kdiff3.exe `$*'
 $paint = {
 $paint_dir   = installPrg -aprgname     "paint"              -url          "http://www.rw-designer.com/image-editor" `
                         -urlmatch     "RWPaint.zip"      -urlmatch_arc "" `
-                        -urlmatch_ver "/([^/]*)/RWPaint.zip" `
+                        -urlmatch_ver "/([^/]*)/RWPaint.zip" -ver_only `
                         -unzip -test         "RWPaint.exe"
 cleanAddPath "\\paint" ""
 # Write-Host "paint_dir\paint3.exe='$paint_dir\paintPortable.exe'"
