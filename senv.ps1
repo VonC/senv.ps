@@ -359,7 +359,7 @@ function install( [String]$invoke, [String]$prgdir, [String]$prgfile, [String]$p
 
 function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String]$urlmatch, [String]$urlmatch_arc="", [String]$urlmatch_ver,
                     [String]$test, [String]$invoke, [switch][alias("z")]$unzip, [String]$post,
-                    [String]$url_replace="", [String]$ver_pattern="", [String]$referer="", [String]$hostname="") {
+                    [String]$url_replace="", [String]$ver_pattern="", [String]$referer="", [String]$hostname="", [switch][alias("v")]$ver_only) {
   Write-Host "Install/Update '$aprgname'"
   # Write-Host "Install aprgname='$aprgname' from url='$url'`r`nurlmatch='$urlmatch', urlmatch_arc='$urlmatch_arc', urlmatch_ver='$urlmatch_ver'`r`ntest='$test', invoke='$invoke' and unzip='$unzip'"
   # Make sure c:\prgs\xxx exists for application 'xxx'
@@ -373,8 +373,10 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     $folder_pattern=$folder_pattern -replace " ", "_"
     $folder_pattern=$folder_pattern -replace "\\$", ""
     # Write-Host "folder_pattern 0 ='$folder_pattern'"
-    $folder_pattern=$folder_pattern -replace "^[^\(]*?\(", ""
-    $folder_pattern=$folder_pattern -replace "\).*$", ""
+    if ( $ver_only ) {
+      $folder_pattern=$folder_pattern -replace "^[^\(]*?\(", ""
+      $folder_pattern=$folder_pattern -replace "\).*$", ""
+    }
     if( $folder_pattern -eq ".*" ) { $folder_pattern="$aprgname_.+"}
     # Write-Host "folder_pattern 1 ='$folder_pattern'"
     $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$folder_pattern" } | sort CreationTime | select -l 1
