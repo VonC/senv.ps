@@ -963,7 +963,7 @@ exit 0
  iex ('&$gow')
  iex ('&$git')
  iex ('&$npp')
- iex ('&$hg')
+ iex ('&$python')
  iex ('&$hg')
  iex ('&$bzr')
  iex ('&$sbt')
