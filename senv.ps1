@@ -903,9 +903,17 @@ $kdiff3Dir = installPrg -aprgname     "kdiff3"                   -url          "
 
 cleanAddPath -cleanPattern "\\kdiff3" -addPath ""
 
-invoke-expression 'doskey pzx=$kdiff3Dir\res\7z\7z.exe x -aos -o"$2" -pdefault -sccUTF-8 `"`$1`"'
-invoke-expression 'doskey pzc=$kdiff3Dir\res\7z\7z.exe a -tzip -mm=Deflate -mmt=on -mx5 -w `"`$2`" `"`$1`"'
-invoke-expression 'doskey 7z=$kdiff3Dir\res\7z\7z.exe `$*'
+invoke-expression 'doskey kdiff3=$kdiff3Dir\kdiff3.exe `$*'
+}
+
+$paint = {
+$paint_dir   = installPrg -aprgname     "paint"              -url          "http://www.rw-designer.com/image-editor" `
+                        -urlmatch     "RWPaint.zip"      -urlmatch_arc "" `
+                        -urlmatch_ver "/([^/]*)/RWPaint.zip" `
+                        -unzip -test         "RWPaint.exe"
+cleanAddPath "\\paint" ""
+# Write-Host "paint_dir\paint3.exe='$paint_dir\paintPortable.exe'"
+invoke-expression 'doskey paint=$paint_dir\RWPaint.exe $*'
 }
 
 function post-all-install() {
@@ -946,7 +954,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$kdiff3')
+ iex ('&$paint')
  post-all-install
 exit 0
 #>
@@ -975,4 +983,5 @@ exit 0
  iex ('&$iron')
  iex ('&$firefox')
  iex ('&$kdiff3')
+ iex ('&$paint')
  post-all-install
