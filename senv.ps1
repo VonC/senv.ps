@@ -917,15 +917,14 @@ invoke-expression 'doskey paint=$paint_dir\RWPaint.exe $*'
 }
 
 $svn = {
-$svn_urlmatch_arc = if ( Test-Win64 ) { "-x64.msi" } else { "-win32.msi" }
 # http://www.svn.org/download/releases/2.4/msi/
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/3729e9c2-cb1f-42f7-a4ee-91bc6b101d9a/invokeexpression-syntax-issues
-$svn_dir   = installPrg -aprgname     "svn"                -url          "http://www.sliksvn.com/en/download" `
-                        -urlmatch     "Slik-Subversion-.*.msi"           -urlmatch_arc "$svn_urlmatch_arc" `
-                        -urlmatch_ver "Slik-Subversion-.*$svn_urlmatch_arc"            -test         "svn.exe" `
-                        -invoke       "C:\WINDOWS\system32\msiexec.exe /i @FILE@ /l @DEST@.log TARGETDIR=@DEST@ /qn"
+$svn_dir   = installPrg -aprgname     "svn"                -url          "http://www.visualsvn.com/downloads/" `
+                        -urlmatch     "Apache-Subversion-.*?.zip"          `
+                        -urlmatch_ver "Apache-Subversion-.*?.zip"            -test         "bin\svn.exe" `
+                        -unzip
 cleanAddPath "\\svn" ""
-invoke-expression 'doskey svn=$svn_dir\svn.exe $*'
+invoke-expression 'doskey svn=$svn_dir\bin\svn.exe $*'
 }
 
 
@@ -968,10 +967,10 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
-#>
  iex ('&$svn')
  post-all-install
 exit 0
+#>
 
  iex ('&$peazip')
  iex ('&$gow')
