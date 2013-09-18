@@ -543,7 +543,8 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
                    & "C:\Program Files\7-Zip\7z.exe" u -mx5 -tzip -r "$DestFileZip" "$DestFile"
                 '@
 		#>
-        $res=invoke-expression "$prgs\peazip\7z\7z.exe x  -aos -o`"$prgdir\tmp```" -pdefault -sccUTF-8 ```"$prgdir\$prgfile```""
+        # Write-Host "$prgs\peazip\7z\7z.exe x  -aos -o`"$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
+        $res=invoke-expression "$prgs\peazip\7z\7z.exe x  -aos -o`"$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
         Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => 7z... DONE"
       }
       $files = Get-ChildItem  "$prgdir\tmp"
@@ -969,7 +970,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$iron')
+ iex ('&$git')
  post-all-install
 exit 0
 #>
