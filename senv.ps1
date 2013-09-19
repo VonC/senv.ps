@@ -388,7 +388,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
   # Write-Host "mustupdate='$mustupdate'" 
   if( -not $update -and -not $mustupdate){ 
     # Write-Host "Calling POST"
-    post -install_folder "$prgdir\$afolder" -post $post ; 
+    $rpost = post -install_folder "$prgdir\$afolder" -post $post ;
     # Write-Host "Return '$prgdir\$afolder'"
     return "$prgdir\$afolder" 
   }
@@ -575,7 +575,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
   }
   # Write-Host "prgdir\prgver='$prgdir\$prgver'"
   if ( -not [string]::IsNullOrEmpty($post) ) {
-    post -install_folder "$prgdir\$prgver" -post $post
+    $rpost = post -install_folder "$prgdir\$prgver" -post $post
   }
   return "$prgdir\$prgver"
 }
