@@ -854,7 +854,8 @@ $filezilla = {
 $filezilla_dir   = installPrg -aprgname     "filezilla"              -url          "https://filezilla-project.org/download.php?show_all=1" `
                         -urlmatch     "FileZilla_.*?win32.zip"      -urlmatch_arc "" `
                         -urlmatch_ver "(FileZilla_\d.\d.\d)" -test         "filezilla.exe" `
-                        -unzip
+                        -unzip `
+                        -url_replace  'sourceforge.net/projects/filezilla/files/(.*?)/download,netcologne.dl.sourceforge.net/project/filezilla/$1'
 cleanAddPath "\\filezilla" ""
 # Write-Host "filezilla_dir\filezilla2.exe='$filezilla_dir\filezilla.exe'"
 invoke-expression 'doskey fz=$filezilla_dir\filezilla.exe $*'
