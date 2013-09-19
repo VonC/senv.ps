@@ -519,7 +519,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       }
     }
 
-    install -invoke $invoke -prgdir $prgdir -prgfile $prgfile -prgver $prgver
+    $rinst = install -invoke $invoke -prgdir $prgdir -prgfile $prgfile -prgver $prgver
 
     if ( $unzip ) {
       if ( $prgfile.EndsWith(".zip") ) {
