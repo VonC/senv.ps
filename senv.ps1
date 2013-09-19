@@ -816,7 +816,9 @@ $greenshot = {
 $greenshot_dir   = installPrg -aprgname     "greenshot"                        -url          "http://getgreenshot.org/version-history/" `
                           -urlmatch     "Greenshot-NO-INSTALLER-.*?.zip"  -urlmatch_arc "" `
                           -urlmatch_ver "(Greenshot-NO-INSTALLER-.*?).zip"           -test         "Greenshot.exe" `
-                          -unzip
+                          -unzip `
+                          -url_replace  'sourceforge.net/projects/greenshot/files/(.*?)/download,netcologne.dl.sourceforge.net/project/greenshot/$1'
+
 
 cleanAddPath "\\.*greenshot" ""
 # Write-Host "greenshot_dir\Greenshot.exe='$greenshot_dir\Greenshot.exe'"
