@@ -449,7 +449,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
   }
 
   $referer = $referer -replace "@dwnUrl@", "$dwnUrl"
-   Write-Host "referer='$referer'"
+  # Write-Host "referer='$referer'"
 
   if ( -not [string]::IsNullOrEmpty($url_replace) ) {
     $replaces = $url_replace.split(",")
@@ -536,13 +536,13 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       }
       elseif ( $prgfile.EndsWith(".7z") ) {
         Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => 7z..."
-		# http://social.technet.microsoft.com/Forums/scriptcenter/en-US/65186252-fcf7-4c6c-a11c-697ef0633018/escaping-the-escape-character-in-invokeexpression
-		# http://social.technet.microsoft.com/Forums/windowsserver/en-US/cd08c144-7105-421d-bbce-ab27dcee0fb7/escaping-parameters-for-an-external-program-in-invokeexpression
-		<#
-		$exec = @'
+		    # http://social.technet.microsoft.com/Forums/scriptcenter/en-US/65186252-fcf7-4c6c-a11c-697ef0633018/escaping-the-escape-character-in-invokeexpression
+		    # http://social.technet.microsoft.com/Forums/windowsserver/en-US/cd08c144-7105-421d-bbce-ab27dcee0fb7/escaping-parameters-for-an-external-program-in-invokeexpression
+		    <#
+		      $exec = @'
                    & "C:\Program Files\7-Zip\7z.exe" u -mx5 -tzip -r "$DestFileZip" "$DestFile"
-                '@
-		#>
+                 '@
+		    #>
         # Write-Host "$prgs\peazip\7z\7z.exe x  -aos -o`"$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
         $res=invoke-expression "$prgs\peazip\7z\7z.exe x  -aos -o`"$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
         Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => 7z... DONE"
