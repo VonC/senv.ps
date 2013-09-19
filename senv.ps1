@@ -764,10 +764,12 @@ invoke-expression 'doskey mc=$mc_dir\MultiCommander.exe $*'
 
 
 $ag = {
-$ag_dir   = installPrg -aprgname     "ag"                        -url          "http://astrogrep.sourceforge.net/download/" `
-                        -urlmatch     "latest/download"          -urlmatch_arc "" `
+$ag_dir   = installPrg -aprgname     "ag"                        -url          "http://sourceforge.net/projects/astrogrep/files/AstroGrep%20%28Win32%29/@VER@/" `
+                        -urlmatch     "AstroGrep_v.*?/download"          -urlmatch_arc "" `
+                        -urlver "http://astrogrep.sourceforge.net/download/" `
                         -urlmatch_ver "(AstroGrep v\d+(\.\d+\.\d+)?)" -test         "AstroGrep.exe" `
-                        -unzip
+                        -unzip `
+                        -url_replace  'sourceforge.net/projects/astrogrep/files/(.*?)/download,netcologne.dl.sourceforge.net/project/astrogrep/$1'
 cleanAddPath "\\AstroGrep" ""
 # Write-Host "ag_dir\AstroGrep.exe='$ag_dir\AstroGrep.exe'"
 invoke-expression 'doskey ag=$ag_dir\AstroGrep.exe $*'
