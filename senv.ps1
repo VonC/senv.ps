@@ -160,6 +160,9 @@ Function Get-WebFile {
     [switch]$Passthru,
     [switch]$quiet
   )
+
+  # http://stackoverflow.com/questions/9917875/power-shell-web-scraping-ssl-tsl-issue
+  [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
   # http://stackoverflow.com/questions/10159066/print-debug-messages-to-console-from-a-powershell-function-that-returns
   # $DebugPreference = 'Continue'
   $req = [System.Net.HttpWebRequest]::Create($url);
