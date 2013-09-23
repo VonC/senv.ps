@@ -508,6 +508,8 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     $dwnUrl = $dwnUrl -replace "@VER@", $aver
   }
   # Write-Host "result='$dwnUrl': prgver='$prgver', prgfile='$prgfile': " + (Test-Path "$prgdir/$prgver/$test")
+  # Write-Host "TestPath='$prgdir/$prgver/$test'"
+#exit 0
 
   if ( -not (Test-Path "$prgdir/$prgver/$test") ) {
 
@@ -687,7 +689,7 @@ $go = {
 $go_urlmatch_arc = if ( Test-Win64 ) { "-amd64.zip" } else { "-386.zip" }
 $go_dir   = installPrg -aprgname     "go"                        -url          "https://code.google.com/p/go/downloads/list?can=2&q=windows+zip&sort=-uploaded&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount" `
                         -urlmatch     "go.*$go_urlmatch_arc"     -urlmatch_arc "$go_urlmatch_arc" `
-                        -urlmatch_ver "go.*$go_urlmatch_arc"     -test         "go\bin\go.exe" `
+                        -urlmatch_ver "go.*$go_urlmatch_arc"     -test         "bin\go.exe" `
                         -unzip
 cleanAddPath "\\go(?!w).*" ""
 # Write-Host "go_dir\go.exe='$go_dir\go.exe'"
@@ -978,7 +980,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$git')
+ iex ('&$go')
  post-all-install
 exit 0
 #>
