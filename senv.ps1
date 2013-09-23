@@ -692,10 +692,10 @@ $go_dir   = installPrg -aprgname     "go"                        -url          "
 cleanAddPath "\\go(?!w).*" ""
 # Write-Host "go_dir\go.exe='$go_dir\go.exe'"
 addenvs -variable "GOPATH" -value "%PROG%\go"
-addenvs -variable "GOROOT" -value "$go_dir\go"
-addbin -filename "$prgs\bin\go.bat" -command "$go_dir\go\bin\go.exe %*"
-addbin -filename "$prgs\bin\godoc.bat" -command "$go_dir\go\bin\godoc.exe %*"
-addbin -filename "$prgs\bin\gogofmt.bat" -command "$go_dir\go\bin\gofmt.exe %*"
+addenvs -variable "GOROOT" -value "$go_dir"
+addbin -filename "$prgs\bin\go.bat" -command "$go_dir\bin\go.exe %*"
+addbin -filename "$prgs\bin\godoc.bat" -command "$go_dir\go\godoc.exe %*"
+addbin -filename "$prgs\bin\gogofmt.bat" -command "$go_dir\go\gofmt.exe %*"
 invoke-expression 'doskey go='
 invoke-expression 'doskey godoc='
 invoke-expression 'doskey gofmt='
