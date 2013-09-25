@@ -407,13 +407,13 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
   $url = $url -replace "@VER@", $ver_number
 
   # http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
-    Write-Host "urlmatch='$urlmatch' for url '$url'"
+  # Write-Host "urlmatch='$urlmatch' for url '$url'"
   $result=$page=Get-WebFile -url $url -Passthru
   # http://www.systemcentercentral.com/powershell-quicktip-splitting-a-string-on-a-word-in-powershell-powershell-scsm-sysctr/
   $result = $result.split("`"") -join "^`""
   # Write-Host "urlmatch='$urlmatch' for url '$url': result='$result'"
   $links = ( $result.split("`"") | where { $_ -match "$urlmatch" }  )  # "
-  #  Write-Host "links='$links'"
+  # Write-Host "links='$links'"
   if ( $urlmatch_arc -ne "" ) {
     $dwnUrl = ( $links -split "^" | where { $_ -match "$urlmatch_arc" } ) # "
     # Write-Host "dwnUrl1='$dwnUrl'"
