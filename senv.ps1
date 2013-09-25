@@ -897,7 +897,7 @@ invoke-expression 'doskey firefox=$firefox_dir\FireFoxPortable.exe $*'
 
 $kdiff3 = {
 # http://scriptinghell.blogspot.fr/2012/10/ternary-operator-support-in-powershell.html (second comment)
-$kdiff3_urlmatch_arc = if ( Test-Win64 ) { "64bit" } else { "32bits" }
+$kdiff3_urlmatch_arc = if ( Test-Win64 ) { "64bit" } else { "32bit" }
 $kdiff3Dir = installPrg -aprgname     "kdiff3"                   -url          "http://sourceforge.net/projects/kdiff3/files/kdiff3/@VER@/" `
                         -urlmatch     "Setup_.*?/download"             -urlmatch_arc "$kdiff3_urlmatch_arc" `
                         -urlver "http://kdiff3.sourceforge.net/" `
