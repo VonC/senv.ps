@@ -938,6 +938,14 @@ cleanAddPath "\\svn" ""
 invoke-expression 'doskey svn=$svn_dir\bin\svn.exe $*'
 }
 
+$wiztree = {
+$wiztree_dir   = installPrg -aprgname     "wiztree"                -url          "http://antibody-software.com/web/software/software/wiztree-finds-the-files-and-folders-using-the-most-disk-space-on-your-hard-drive/" `
+                        -urlmatch     "wiztree_.*?portable.zip"          `
+                        -urlmatch_ver "wiztree_.*?portable.zip"            -test         "WizTree.exe" `
+                        -unzip
+cleanAddPath "\\wiztree" ""
+invoke-expression 'doskey wiztree=$wiztree_dir\WizTree.exe $*'
+}
 
 
 function post-all-install() {
@@ -1009,4 +1017,5 @@ exit 0
  iex ('&$kdiff3')
  iex ('&$paint')
  iex ('&$svn')
+ iex ('&$wiztree')
  post-all-install
