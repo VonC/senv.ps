@@ -947,6 +947,15 @@ cleanAddPath "\\wiztree" ""
 invoke-expression 'doskey wiztree=$wiztree_dir\WizTree.exe $*'
 }
 
+$ss = {
+$ss_dir   = installPrg -aprgname     "ss"                -url          "http://www.uderzo.it/main_products/space_sniffer/download.html" `
+                        -urlmatch     "spacesniffer_.*?.zip"          `
+                        -urlmatch_ver "spacesniffer_.*?.zip"            -test         "SpaceSniffer.exe" `
+                        -url_replace  'download.htmlfiles,files' `
+                        -unzip
+cleanAddPath "\\ss" ""
+invoke-expression 'doskey ss=$ss_dir\SpaceSniffer.exe $*'
+}
 
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
@@ -986,7 +995,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$go')
+ iex ('&$ss')
  post-all-install
 exit 0
 #>
@@ -1018,4 +1027,5 @@ exit 0
  iex ('&$paint')
  iex ('&$svn')
  iex ('&$wiztree')
+ iex ('&$ss')
  post-all-install
