@@ -548,8 +548,14 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
                    & "C:\Program Files\7-Zip\7z.exe" u -mx5 -tzip -r "$DestFileZip" "$DestFile"
                  '@
 		    #>
-        # Write-Host "$prgs\peazip\7z\7z.exe x  -aos -o`"$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
-        $res=invoke-expression "$prgs\peazip\7z\7z.exe x  -aos -o`"$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
+		# http://stackoverflow.com/questions/8128276/invoke-expression-dropping-double-quote
+         Write-Host "$prgs\peazip\7z\7z.exe x -aos -o`"$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
+		$7zexe = "$prgs\peazip\7z\7z.exe"
+		$arg = " x -aos `"-o$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
+        $cmdline = $7zexe, $arg -join ""
+        # $cmdline
+        $res=Invoke-Expression -command  "$cmdline "
+        # $res=invoke-expression '$prgs\peazip\7z\7z.exe x  -aos -o"$prgdir\tmp" -pdefault -sccUTF-8 "$prgdir\$prgfile"'
         Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => 7z... DONE"
       }
       $files = Get-ChildItem  "$prgdir\tmp"
