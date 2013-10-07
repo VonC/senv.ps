@@ -600,7 +600,9 @@ $peazip_urlmatch_arc = if ( Test-Win64 ) { "WIN64" } else { "WINDOWS" }
 $peazipDir = installPrg -aprgname     "peazip"                   -url          "http://peazip.sourceforge.net/peazip-portable.html" `
                         -urlmatch     "zip/download"             -urlmatch_arc "$peazip_urlmatch_arc" `
                         -urlmatch_ver "$peazip_urlmatch_arc.zip" -test         "peazip.exe" `
-                        -invoke       ""                         -unzip        -post "Copy-Item @install_folder\res\7z @install_folder\.. -Force -Recurse"
+                        -invoke       ""                         -unzip        -post "Copy-Item @install_folder\res\7z @install_folder\.. -Force -Recurse" `
+						-url_replace  'sourceforge.net/projects/peazip/files/(.*?)/download,netcologne.dl.sourceforge.net/project/peazip/$1'
+
 # http://superuser.com/questions/544520/how-can-i-copy-a-directory-overwriting-its-contents-if-it-exists-using-powershe
 
 cleanAddPath -cleanPattern "\\peazip" -addPath ""
