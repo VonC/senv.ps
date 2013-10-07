@@ -573,7 +573,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       if ( $afolder ) {
         Write-Host "Move '$prgdir\tmp\$afolder' up to '$prgdir\$prgver'"
         Move-Item "$prgdir\tmp\$afolder" "$prgdir"
-        if ( $afolder -ne $prgver ) {
+        if ( $afolder -ne $prgver -and ("$prgdir\$afolder" -ne "$prgdir\$prgver")) {
           Rename-Item "$prgdir\$afolder" "$prgdir\$prgver"
         }
         Write-Host "Deleting '$prgdir\tmp'"
