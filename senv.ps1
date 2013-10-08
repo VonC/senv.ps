@@ -401,7 +401,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     $pagever=Get-WebFile -url $urlver -Passthru
     if ($pagever -match "$urlmatch_ver") {
       $ver_number=$matches[1]
-       Write-Host "ver_number='$ver_number', from urlver='$urlver'"
+      # Write-Host "ver_number='$ver_number', from urlver='$urlver'"
     }
   }
   $url = $url -replace "@VER@", $ver_number
