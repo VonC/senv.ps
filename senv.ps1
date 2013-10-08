@@ -965,6 +965,15 @@ cleanAddPath "\\ss" ""
 invoke-expression 'doskey ss=$ss_dir\SpaceSniffer.exe $*'
 }
 
+$liteide = {
+$liteide_dir   = installPrg -aprgname     "liteide"                      -url          "https://code.google.com/p/golangide/downloads/list?can=2&q=windows&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount" `
+                        -urlmatch     "golangide.googlecode.com/files/liteidex.*.windows.7z"            -urlmatch_arc "" `
+                        -urlmatch_ver "windows.*.7z"            -test         "bin\liteide.exe" `
+                        -invoke       ""                         -unzip
+cleanAddPath "liteide" ""
+invoke-expression 'doskey goide=$liteide_dir\bin\liteide.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -1003,7 +1012,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$ss')
+ iex ('&$liteide')
  post-all-install
 exit 0
 #>
@@ -1036,4 +1045,5 @@ exit 0
  iex ('&$svn')
  iex ('&$wiztree')
  iex ('&$ss')
+ iex ('&$liteide')
  post-all-install
