@@ -912,12 +912,6 @@ $kdiff3Dir = installPrg -aprgname     "kdiff3"                   -url          "
                         -urlmatch_ver "Current version: (.*) \(" -ver_only -test         "kdiff3.exe" `
                         -invoke       "@FILE@ /S /D=@DEST@" `
                         -url_replace  'sourceforge.net/projects/kdiff3/files/(.*?)/download,netcologne.dl.sourceforge.net/project/kdiff3/$1'
-                        # http://downloads.sourceforge.net/projects/kdiff3/files/kdiff3/0.9.97/KDiff3-64bit-Setup_0.9.97.exe
-                        # http://downloads.sourceforge.net/kdiff3/KDiff3-64bit-Setup_0.9.97.exe
-                        # -hostname "dfn.dl.sourceforge.net" -referer "@dwnUrl@?source=dlp" 
-                        # http://sourceforge.net/projects/kdiff3/files/kdiff3/0.9.97/KDiff3-64bit-Setup_0.9.97.exe/download
-                        # http://freefr.dl.sourceforge.net/project/kdiff3/kdiff3/0.9.97/KDiff3-32bit-Setup_0.9.97.exe
-                        # http://dfn.dl.sourceforge.net/project/kdiff3/kdiff3/0.9.97/KDiff3-64bit-Setup_0.9.97.exe
 # http://superuser.com/questions/544520/how-can-i-copy-a-directory-overwriting-its-contents-if-it-exists-using-powershe
 
 cleanAddPath -cleanPattern "\\kdiff3" -addPath ""
