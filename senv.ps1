@@ -969,6 +969,18 @@ cleanAddPath "liteide" ""
 invoke-expression 'doskey goide=$liteide_dir\bin\liteide.exe $*'
 }
 
+$gvim = {
+$gvim_dir   = installPrg -aprgname     "gvim"                     -url          "http://ftp.vim.org/pub/vim/pc/?C=M;O=D" `
+                        -urlmatch     "gvim[\d_]+.zip"             `
+                        -urlmatch_ver "gvim[\d_]+.zip"            -test         "gvim.exe" `
+                        -post "Get-ChildItem @install_folder\vim*\* -Recurse | Move-Item -Destination @install_folder" `
+                        -unzip
+cleanAddPath "gvim" ""
+invoke-expression 'doskey gvim=$gvim_dir\gvim.exe $*'
+invoke-expression 'doskey vim=$gvim_dir\gvim.exe $*'
+invoke-expression 'doskey vi=$gvim_dir\gvim.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -1007,7 +1019,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$liteide')
+ iex ('&$gvim')
  post-all-install
 exit 0
 #>
@@ -1041,4 +1053,5 @@ exit 0
  iex ('&$wiztree')
  iex ('&$ss')
  iex ('&$liteide')
+ iex ('&$gvim')
  post-all-install
