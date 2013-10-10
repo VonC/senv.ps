@@ -447,9 +447,10 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
   } elseif ( $dwnUrl.StartsWith("https://") ) {
     # nothing to change
   } else {
-    $dwnUrl = $url + $dwnUrl
+    $dwnUrl = $url + '/' + $dwnUrl
     $dwnUrl = $dwnUrl -replace "/\?[^/]+", ""
   }
+  # Write-Host "dwnUrlpr='$dwnUrl'"
 
   $referer = $referer -replace "@dwnUrl@", "$dwnUrl"
   # Write-Host "referer='$referer'"
@@ -963,7 +964,7 @@ $liteide = {
 $liteide_dir   = installPrg -aprgname     "liteide"                      -url          "https://code.google.com/p/golangide/downloads/list?can=2&q=windows&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount" `
                         -urlmatch     "golangide.googlecode.com/files/liteidex.*.windows.7z"            -urlmatch_arc "" `
                         -urlmatch_ver "windows.*.7z"            -test         "bin\liteide.exe" `
-                        -invoke       ""                         -unzip
+                        -unzip
 cleanAddPath "liteide" ""
 invoke-expression 'doskey goide=$liteide_dir\bin\liteide.exe $*'
 }
