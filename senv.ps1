@@ -521,7 +521,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       } else {
         Write-Host "Download '$prgfile' from '$dwnUrl' ====> '$prgdir\$prgfile'"
         $referer = $referer -replace "@dwnUrl@", $dwnUrl
-        Get-WebFile -url $dwnUrl -filename "$prgdir/$prgfile" -hostname $hostname -referer $referer
+        $rgetwebfile = Get-WebFile -url $dwnUrl -filename "$prgdir/$prgfile" -hostname $hostname -referer $referer
       }
     }
 
