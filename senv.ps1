@@ -117,7 +117,7 @@ function cleanAddPath([String]$cleanPattern, [String]$addPath) {
   $newPath=$path
   $pathAlreadyThere=$false
   # '-or' http://www.powershellpro.com/powershell-tutorial-introduction/powershell-tutorial-conditional-logic/
-  $newPath=( $newPath.split(';') | where { 
+  $newPath=( $newPath.split(';') | where {
     ( ( [string]::IsNullOrEmpty($cleanPattern) -or $_ -notmatch "$cleanPattern" ) -and ( [string]::IsNullOrEmpty($addPath) -or $_ -ne "$addPath"  -or ( $_ -eq "$addPath" -and ($pathAlreadyThere=$true) -eq $true ) ) )
     # Write-Host "....... " + $_ + ": IsNullOrEmpty(cleanPattern)=" + ( [string]::IsNullOrEmpty($cleanPattern) -or $_ -notmatch "$cleanPattern" ) + ", or:" + ( [string]::IsNullOrEmpty($addPath) -or ( $_ -eq "$addPath" -and ($pathAlreadyThere=$true) -eq $true ) ) +", pathAlreadyThere='$pathAlreadyThere' ==> " + ( ( [string]::IsNullOrEmpty($cleanPattern) -or $_ -notmatch "$cleanPattern" ) -or ( [string]::IsNullOrEmpty($addPath) -or ( $_ -eq "$addPath" -and ($pathAlreadyThere=$true) -eq $true ) ) )
   } ) -join ";"
@@ -383,17 +383,17 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     if( $folder_pattern -eq ".*" ) { $folder_pattern="$aprgname_.+"}
     # Write-Host "folder_pattern 1 ='$folder_pattern'"
     $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$folder_pattern" } | sort CreationTime | select -l 1
-    # Write-Host "afolder='$afolder'" 
+    # Write-Host "afolder='$afolder'"
     if ( -not (Test-Path "$prgdir/$afolder/$test") ) {
       $mustupdate = $true
     }
   }
-  # Write-Host "mustupdate='$mustupdate'" 
-  if( -not $update -and -not $mustupdate){ 
+  # Write-Host "mustupdate='$mustupdate'"
+  if( -not $update -and -not $mustupdate){
     # Write-Host "Calling POST"
     $rpost = post -install_folder "$prgdir\$afolder" -post $post ;
     # Write-Host "Return '$prgdir\$afolder'"
-    return "$prgdir\$afolder" 
+    return "$prgdir\$afolder"
   }
 
   $ver_number=""
