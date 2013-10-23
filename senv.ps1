@@ -981,6 +981,16 @@ invoke-expression 'doskey vim=$gvim_dir\gvim.exe $*'
 invoke-expression 'doskey vi=$gvim_dir\gvim.exe $*'
 }
 
+$dexpot = {
+$dexpot_dir   = installPrg -aprgname     "dexpot"                     -url          "http://dexpot.de/index.php?id=download" `
+                        -urlmatch     "download/dexpot_[\d]+_portable[\dr_]+.zip"             `
+                        -urlmatch_ver "(dexpot_[\d]+_portable[\dr_]+).zip"            -test         "dexpot.exe" `
+                        -url_replace  'index.php.id=download/,' `
+                        -unzip
+cleanAddPath "dexpot" ""
+invoke-expression 'doskey dexpot=$dexpot_dir\dexpot.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -1019,7 +1029,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$gvim')
+ iex ('&$dexpot')
  post-all-install
 exit 0
 #>
@@ -1054,4 +1064,5 @@ exit 0
  iex ('&$ss')
  iex ('&$liteide')
  iex ('&$gvim')
+ iex ('&$dexpot')
  post-all-install
