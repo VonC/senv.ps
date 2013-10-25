@@ -991,6 +991,17 @@ cleanAddPath "dexpot" ""
 invoke-expression 'doskey dexpot=$dexpot_dir\dexpot.exe $*'
 }
 
+$freeplane = {
+$freeplane_dir   = installPrg -aprgname     "freeplane"                        -url          "http://sourceforge.net/projects/freeplane/files/freeplane%20stable/" `
+                        -urlmatch     "stable/freeplane_bin-.*?zip/download"           `
+                        -urlmatch_ver "stable/(freeplane_bin-.*?).zip/download" -test         "freeplane.exe" `
+                        -unzip `
+                        -url_replace  'sourceforge.net/projects/freeplane/files/(.*?)/download,netcologne.dl.sourceforge.net/project/freeplane/$1'
+cleanAddPath "\\freeplane" ""
+# Write-Host "freeplane_dir\AstroGrep.exe='$freeplane_dir\AstroGrep.exe'"
+invoke-expression 'doskey fp=$freeplane_dir\freeplane.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -1029,7 +1040,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$dexpot')
+ iex ('&$freeplane')
  post-all-install
 exit 0
 #>
@@ -1065,4 +1076,5 @@ exit 0
  iex ('&$liteide')
  iex ('&$gvim')
  iex ('&$dexpot')
+ iex ('&$freeplane')
  post-all-install
