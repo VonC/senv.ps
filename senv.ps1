@@ -1002,6 +1002,16 @@ cleanAddPath "\\freeplane" ""
 invoke-expression 'doskey fp=$freeplane_dir\freeplane.exe $*'
 }
 
+$node = {
+$node_urlmatch_arc = if ( Test-Win64 ) { "x64" } else { "x86" }
+$node_dir   = installPrg -aprgname     "node"                        -url          "http://nodejs.org/download/" `
+                        -urlmatch     "http://nodejs.org/dist/v[^/]+/$node_urlmatch_arc/node.exe"           `
+                        -urlmatch_ver "(node-v[^-]+-$node_urlmatch_arc).msi"
+cleanAddPath "\\node" ""
+# Write-Host "node_dir\AstroGrep.exe='$node_dir\AstroGrep.exe'"
+invoke-expression 'doskey node=$node_dir.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -1040,7 +1050,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$freeplane')
+ iex ('&$node')
  post-all-install
 exit 0
 #>
@@ -1077,4 +1087,5 @@ exit 0
  iex ('&$gvim')
  iex ('&$dexpot')
  iex ('&$freeplane')
+ iex ('&$node')
  post-all-install
