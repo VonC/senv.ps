@@ -384,8 +384,16 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     # Write-Host "folder_pattern 1 ='$folder_pattern'"
     $afolder=Get-ChildItem  $prgdir | Where { $_.PSIsContainer -and $_ -match "$folder_pattern" } | sort CreationTime | select -l 1
     # Write-Host "afolder='$afolder'"
-    if ( -not (Test-Path "$prgdir/$afolder/$test") ) {
+    if ( -not [string]::IsNullOrEmpty($afolder) -and -not (Test-Path "$prgdir/$afolder/$test") ) {
       $mustupdate = $true
+    }
+    if ( [string]::IsNullOrEmpty($afolder) -and [string]::IsNullOrEmpty($test) ) {
+      # Write-Host "filepattern='$folder_pattern.exe'"
+      $anexe = Get-ChildItem  $prgdir | Where { -not $_.PSIsContainer -and $_ -match "$folder_pattern.exe" } | sort CreationTime | select -l 1
+      # Write-Host "anexe='$anexe' :" + [string]::IsNullOrEmpty($anexe);
+      if ( [string]::IsNullOrEmpty($anexe) ) {
+        $mustupdate = $true
+      }
     }
   }
   # Write-Host "mustupdate='$mustupdate'"
