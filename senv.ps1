@@ -413,6 +413,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     }
   }
   $url = $url -replace "@VER@", $ver_number
+  $urlmatch = $urlmatch -replace "@VER@", $ver_number
 
   # http://stackoverflow.com/questions/2182666/powershell-2-0-try-catch-how-to-access-the-exception
   # Write-Host "urlmatch='$urlmatch' for url '$url'"
