@@ -907,7 +907,7 @@ $firefox = {
 $firefox_dir   = installPrg -aprgname     "firefox"              -url          "http://www.firefox-usb.com/" `
                         -urlmatch     "/download/FirefoxPortable.*?.zip"      -urlmatch_arc "" `
                         -urlmatch_ver "(FirefoxPortable.*?).zip" -test         "FireFoxPortable.exe" `
-                        -unzip
+                        -unzip -referer "http://www.firefox-usb.com/" -hostname "www.firefox-usb.com"
 cleanAddPath "\\firefox" ""
 # Write-Host "firefox_dir\FireFoxPortable.exe='$firefox_dir\FireFoxPortable.exe'"
 invoke-expression 'doskey firefox=$firefox_dir\FireFoxPortable.exe $*'
@@ -1070,7 +1070,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$npm')
+ iex ('&$firefox')
  post-all-install
 exit 0
 #>
