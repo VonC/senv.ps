@@ -1029,7 +1029,7 @@ $npm_dir   = installPrg -aprgname     "npm"                     -url          "h
                                     -test         "npm.cmd" `
                         -unzip
 cleanAddPath "npm" ""
-invoke-expression 'doskey npm=$npm_dir\npm.exe $*'
+invoke-expression 'doskey npm=$npm_dir\npm.cmd $*'
 }
 
 function post-all-install() {
