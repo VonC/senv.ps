@@ -391,6 +391,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       # Write-Host "filepattern='$folder_pattern.exe'"
       $anexe = Get-ChildItem  $prgdir | Where { -not $_.PSIsContainer -and $_ -match "$folder_pattern.exe" } | sort CreationTime | select -l 1
       # Write-Host "anexe='$anexe' :" + [string]::IsNullOrEmpty($anexe);
+       $afolder = $anexe
       if ( [string]::IsNullOrEmpty($anexe) ) {
         $mustupdate = $true
       }
@@ -1017,8 +1018,8 @@ $node_dir   = installPrg -aprgname     "node"                        -url       
                         -urlmatch     "http://nodejs.org/dist/v[^/]+/$node_urlmatch_arc/node.exe"           `
                         -urlmatch_ver "(node-v[^-]+-$node_urlmatch_arc).msi"
 cleanAddPath "\\node" ""
-# Write-Host "node_dir\AstroGrep.exe='$node_dir\AstroGrep.exe'"
-invoke-expression 'doskey node=$node_dir.exe $*'
+# Write-Host "node_dir.exe='$node_dir'"
+addbin -filename "$prgs\bin\node.bat" -command "$node_dir %*"
 }
 
 $npm = {
@@ -1039,6 +1040,7 @@ function post-all-install() {
   cleanAddPath "" "$gpg_dir"
   cleanAddPath "" "$git_dir\bin"
   cleanAddPath "" "%PROG%\go\bin"
+  cleanAddPath "" "$prgs\node"
 
   md2 "$prog\tmp" "temp directory"
   addenvs -variable "TMP" -value "%PROG%\tmp"
@@ -1070,7 +1072,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$firefox')
+ iex ('&$node')
  post-all-install
 exit 0
 #>
