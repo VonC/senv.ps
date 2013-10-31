@@ -559,8 +559,8 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
 		    #>
 		# http://stackoverflow.com/questions/8128276/invoke-expression-dropping-double-quote
          Write-Host "$prgs\peazip\7z\7z.exe x -aos -o`"$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
-		$7zexe = "$prgs\peazip\7z\7z.exe"
-		$arg = " x -aos `"-o$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
+        $7zexe = "$prgs\peazip\7z\7z.exe"
+        $arg = " x -aos `"-o$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
         $cmdline = $7zexe, $arg -join ""
         # $cmdline
         $res=Invoke-Expression -command  "$cmdline "
