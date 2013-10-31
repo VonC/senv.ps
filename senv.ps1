@@ -535,8 +535,6 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       }
     }
 
-    $rinst = install -invoke $invoke -prgdir $prgdir -prgfile $prgfile -prgver $prgver
-
     if ( $unzip ) {
       if ( $prgfile.EndsWith(".zip") ) {
         $shellApplication = new-object -com shell.application
@@ -594,6 +592,9 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
         Rename-Item -Path "$prgdir\tmp" -NewName "$prgdir\$prgver"
       }
     }
+
+    $rinst = install -invoke $invoke -prgdir $prgdir -prgfile $prgfile -prgver $prgver
+
   }
   # Write-Host "prgdir\prgver='$prgdir\$prgver'"
   if ( -not [string]::IsNullOrEmpty($post) ) {
@@ -908,7 +909,9 @@ $firefox = {
 $firefox_dir   = installPrg -aprgname     "firefox"              -url          "http://www.firefox-usb.com/" `
                         -urlmatch     "/download/FirefoxPortable.*?.zip"      -urlmatch_arc "" `
                         -urlmatch_ver "(FirefoxPortable.*?).zip" -test         "FireFoxPortable.exe" `
-                        -unzip -referer "http://www.firefox-usb.com/" -hostname "www.firefox-usb.com"
+                        -unzip -referer "http://www.firefox-usb.com/" -hostname "www.firefox-usb.com" `
+                        -invoke       "move @DEST@\\Data @DEST@\\Data.ori & mklink /J @DEST@\\Data @DEST@\\..\Data" `
+
 cleanAddPath "\\firefox" ""
 # Write-Host "firefox_dir\FireFoxPortable.exe='$firefox_dir\FireFoxPortable.exe'"
 invoke-expression 'doskey firefox=$firefox_dir\FireFoxPortable.exe $*'
