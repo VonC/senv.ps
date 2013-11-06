@@ -496,14 +496,20 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       $prgver_space=$prgfile=$aprgname+ "_" + $prgfile
     }
     $anext=""
+    # Write-Host "dwnUrl AA= $dwnUrl"
     if ( $dwnUrl -match "[/h][^/]+(\.[^/\?]*?)(\?.*)?$" ) {
-      # Write-Host "prgfile=$prgfile" + $matches[1]
-      $prgfile+=$matches[1]
+      # Write-Host "prgfile 11=$prgfile" + $matches[1]
       $anext=$matches[1]
+      $anext = $anext -replace "\?[^/]+", ""
+      # Write-Host "prgfile 22=$prgfile" + $anext
+      $prgfile+=$anext
     }
     if ($unzip -and $anext -ne ".zip" -and $anext -ne ".7z") { $prgfile+=".zip" }
     # Write-Host "matches: $prgfile for $urlmatch_ver and $dwnUrl"
   } else {
+    # Write-Host "prgfile AA=$prgfile"
+    $prgfile = $prgfile -replace "7[zZ]\?[^/]+", "7z"
+    $prgfile = $prgfile -replace "[zZ][iI][pP]\?[^/]+", "zip"
     $prgfile_dotindex = $prgfile.LastIndexOf('.')
     # Write-Host "prgfile_dotindex='$prgfile_dotindex', " ( $prgfile_dotindex -gt 0 )
     $prgver_space = if ( $prgfile_dotindex -gt 0 ) { $prgfile.Substring(0,$prgfile_dotindex) } else { $prgfile }
