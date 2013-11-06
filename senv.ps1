@@ -1037,6 +1037,19 @@ cleanAddPath "npm" ""
 invoke-expression 'doskey npm=$npm_dir\npm.cmd $*'
 }
 
+$global:ruby_dir = ""
+$ruby = {
+$ruby_urlmatch_arc = if ( Test-Win64 ) { "x64" } else { "x86" }
+$ruby_dir   = installPrg -aprgname     "ruby"                        -url          "http://rubyinstaller.org/downloads/" `
+                        -urlmatch     "http://dl.bintray.com/oneclick/rubyinstaller/ruby-(.*?)-$ruby_urlmatch_arc-mingw32.7z"           `
+                        -urlmatch_ver "(ruby-.*?-$ruby_urlmatch_arc)" `
+                        -unzip -test "bin\ruby.exe"
+cleanAddPath "\\ruby" ""
+# Write-Host "ruby_dir.exe='$ruby_dir'"
+Set-Variable -Name "ruby_dir" -Value $ruby_dir -Scope Global
+}
+
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -1045,6 +1058,7 @@ function post-all-install() {
   cleanAddPath "" "$git_dir\bin"
   cleanAddPath "" "%PROG%\go\bin"
   cleanAddPath "" "$prgs\node"
+  cleanAddPath "" "$ruby_dir\bin"
 
   md2 "$prog\tmp" "temp directory"
   addenvs -variable "TMP" -value "%PROG%\tmp"
@@ -1076,7 +1090,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$node')
+ iex ('&$ruby')
  post-all-install
 exit 0
 #>
@@ -1115,4 +1129,5 @@ exit 0
  iex ('&$freeplane')
  iex ('&$node')
  iex ('&$npm')
+ iex ('&$ruby')
  post-all-install
