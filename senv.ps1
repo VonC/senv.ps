@@ -1018,7 +1018,7 @@ invoke-expression 'doskey dexpot=$dexpot_dir\dexpot.exe $*'
 $freeplane = {
 $freeplane_dir   = installPrg -aprgname     "freeplane"                        -url          "http://sourceforge.net/projects/freeplane/files/freeplane%20stable/" `
                         -urlmatch     "stable/freeplane_bin-.*?zip/download"           `
-                        -urlmatch_ver "stable/(freeplane_bin-.*?).zip/download" -test         "freeplane.exe" `
+                        -urlmatch_ver "stable/(freeplane_bin-.*?).zip/download" -ver_only -test         "freeplane.exe" `
                         -unzip `
                         -url_replace  'sourceforge.net/projects/freeplane/files/(.*?)/download,netcologne.dl.sourceforge.net/project/freeplane/$1'
 cleanAddPath "\\freeplane" ""
@@ -1100,7 +1100,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$ruby')
+ iex ('&$freeplane')
  post-all-install
 exit 0
 #>
