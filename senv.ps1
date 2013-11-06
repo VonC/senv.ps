@@ -372,6 +372,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
   # http://social.technet.microsoft.com/wiki/contents/articles/2286.understanding-booleans-in-powershell.aspx
   $mustupdate=-not (Test-Path "$prgdir\*")
   if(-not $mustupdate) {
+    # Write-Host "folder_pattern 00='$urlmatch_ver'"
     $folder_pattern=$urlmatch_ver -replace '\.(7z|7Z|zip|exe|msi).*',''
     $folder_pattern=$folder_pattern -replace " ", "_"
     $folder_pattern=$folder_pattern -replace "\\$", ""
@@ -390,11 +391,14 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     if ( [string]::IsNullOrEmpty($afolder) -and [string]::IsNullOrEmpty($test) ) {
       # Write-Host "filepattern='$folder_pattern.exe'"
       $anexe = Get-ChildItem  $prgdir | Where { -not $_.PSIsContainer -and $_ -match "$folder_pattern.exe" } | sort CreationTime | select -l 1
-       # Write-Host "anexe='$anexe' :" + [string]::IsNullOrEmpty($anexe);
-       $afolder = $anexe
+      # Write-Host "anexe='$anexe' :" + [string]::IsNullOrEmpty($anexe);
+      $afolder = $anexe
       if ( [string]::IsNullOrEmpty($anexe) ) {
         $mustupdate = $true
       }
+    }
+    if ( [string]::IsNullOrEmpty($afolder) -and -not [string]::IsNullOrEmpty($test) ) {
+      $mustupdate = $true
     }
   }
   # Write-Host "mustupdate='$mustupdate'"
@@ -404,7 +408,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     # Write-Host "Return '$prgdir\$afolder'"
     return "$prgdir\$afolder"
   }
-
+# exit 0
   $ver_number=""
   if ( [string]::IsNullOrEmpty($urlver) -eq $false ){
     $pagever=Get-WebFile -url $urlver -Passthru
