@@ -1052,7 +1052,7 @@ $ruby = {
 $ruby_urlmatch_arc = if ( Test-Win64 ) { "x64" } else { "x86" }
 $ruby_dir   = installPrg -aprgname     "ruby"                        -url          "http://rubyinstaller.org/downloads/" `
                         -urlmatch     "http://dl.bintray.com/oneclick/rubyinstaller/ruby-(.*?)-$ruby_urlmatch_arc-mingw32.7z"           `
-                        -urlmatch_ver "(ruby-.*?-$ruby_urlmatch_arc)" `
+                        -urlmatch_ver "(ruby-.*?-$ruby_urlmatch_arc-mingw32)" `
                         -unzip -test "bin\ruby.exe"
 cleanAddPath "\\ruby" ""
 # Write-Host "ruby_dir.exe='$ruby_dir'"
