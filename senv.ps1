@@ -390,7 +390,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
     if ( [string]::IsNullOrEmpty($afolder) -and [string]::IsNullOrEmpty($test) ) {
       # Write-Host "filepattern='$folder_pattern.exe'"
       $anexe = Get-ChildItem  $prgdir | Where { -not $_.PSIsContainer -and $_ -match "$folder_pattern.exe" } | sort CreationTime | select -l 1
-      # Write-Host "anexe='$anexe' :" + [string]::IsNullOrEmpty($anexe);
+       # Write-Host "anexe='$anexe' :" + [string]::IsNullOrEmpty($anexe);
        $afolder = $anexe
       if ( [string]::IsNullOrEmpty($anexe) ) {
         $mustupdate = $true
@@ -492,12 +492,12 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       $prgver_space=$prgfile=$aprgname+ "_" + $prgfile
     }
     $anext=""
-    if ( $dwnUrl -match "[/h][^/]+(\.[^/]*?)$" ) {
+    if ( $dwnUrl -match "[/h][^/]+(\.[^/\?]*?)(\?.*)?$" ) {
       # Write-Host "prgfile=$prgfile" + $matches[1]
       $prgfile+=$matches[1]
       $anext=$matches[1]
     }
-    if ($unzip -and $anext -ne ".zip") { $prgfile+=".zip" }
+    if ($unzip -and $anext -ne ".zip" -and $anext -ne ".7z") { $prgfile+=".zip" }
     # Write-Host "matches: $prgfile for $urlmatch_ver and $dwnUrl"
   } else {
     $prgfile_dotindex = $prgfile.LastIndexOf('.')
@@ -531,6 +531,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       } else {
         Write-Host "Download '$prgfile' from '$dwnUrl' ====> '$prgdir\$prgfile'"
         $referer = $referer -replace "@dwnUrl@", $dwnUrl
+#exit 0
         $rgetwebfile = Get-WebFile -url $dwnUrl -filename "$prgdir/$prgfile" -hostname $hostname -referer $referer
       }
     }
