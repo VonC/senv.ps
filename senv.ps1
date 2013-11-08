@@ -1028,8 +1028,9 @@ invoke-expression 'doskey fp=$freeplane_dir\freeplane.exe $*'
 
 $node = {
 $node_urlmatch_arc = if ( Test-Win64 ) { "x64" } else { "x86" }
+$node_urlmatch_arc2 = if ( Test-Win64 ) { "x64" } else { "" }
 $node_dir   = installPrg -aprgname     "node"                        -url          "http://nodejs.org/download/" `
-                        -urlmatch     "http://nodejs.org/dist/v[^/]+/$node_urlmatch_arc/node.exe"           `
+                        -urlmatch     "http://nodejs.org/dist/v[^/]+/?$node_urlmatch_arc2/node.exe"           `
                         -urlmatch_ver "(node-v[^-]+-$node_urlmatch_arc).msi"
 cleanAddPath "\\node" ""
 # Write-Host "node_dir.exe='$node_dir'"
