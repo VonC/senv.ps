@@ -1050,7 +1050,7 @@ invoke-expression 'doskey npm=$npm_dir\npm.cmd $*'
 
 $global:ruby_dir = ""
 $ruby = {
-$ruby_urlmatch_arc = if ( Test-Win64 ) { "x64" } else { "x86" }
+$ruby_urlmatch_arc = if ( Test-Win64 ) { "x64" } else { "i386" }
 $ruby_dir   = installPrg -aprgname     "ruby"                        -url          "http://rubyinstaller.org/downloads/" `
                         -urlmatch     "http://dl.bintray.com/oneclick/rubyinstaller/ruby-(.*?)-$ruby_urlmatch_arc-mingw32.7z"           `
                         -urlmatch_ver "(ruby-.*?-$ruby_urlmatch_arc-mingw32)" `
@@ -1101,7 +1101,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$ss')
+ iex ('&$ruby')
  post-all-install
 exit 0
 #>
