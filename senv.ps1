@@ -978,7 +978,7 @@ $ss = {
 $ss_dir   = installPrg -aprgname     "ss"                -url          "http://www.uderzo.it/main_products/space_sniffer/download.html" `
                         -urlmatch     "spacesniffer_.*?.zip"          `
                         -urlmatch_ver "spacesniffer_.*?.zip"            -test         "SpaceSniffer.exe" `
-                        -url_replace  'download.htmlfiles,files' `
+                        -url_replace  'download.html/files,files' `
                         -unzip
 cleanAddPath "\\ss" ""
 invoke-expression 'doskey ss=$ss_dir\SpaceSniffer.exe $*'
@@ -1100,7 +1100,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$freeplane')
+ iex ('&$ss')
  post-all-install
 exit 0
 #>
