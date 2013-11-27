@@ -1061,6 +1061,17 @@ Set-Variable -Name "ruby_dir" -Value $ruby_dir -Scope Global
 }
 
 
+$ads = {
+$ads_urlmatch_arc = if ( Test-Win64 ) { "x86_64-" } else { "x86-" }
+$ads_dir   = installPrg -aprgname     "ads"                     -url          "http://directory.apache.org/studio/download/download-windows.html" `
+                        -urlmatch     "ApacheDirectoryStudio-win32-$ads_urlmatch_arc(.*?).exe"             `
+                        -urlmatch_ver "(ApacheDirectoryStudio-win32-$ads_urlmatch_arc-?.*?)" `
+                        -test         "Apache Directory Studio.exe" `
+                        -invoke       "@FILE@ /S /D=@DEST@"
+cleanAddPath "ads" ""
+invoke-expression 'doskey ads=$ads_dir\ads.cmd $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -1101,7 +1112,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$ruby')
+ iex ('&$ads')
  post-all-install
 exit 0
 #>
@@ -1141,4 +1152,5 @@ exit 0
  iex ('&$node')
  iex ('&$npm')
  iex ('&$ruby')
+ iex ('&$ads')
  post-all-install
