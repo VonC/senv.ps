@@ -614,13 +614,13 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
   return "$prgdir\$prgver"
 }
 
-invoke-expression 'doskey sc=$prgs\setpath.bat'
-invoke-expression 'doskey sp=$prgs\setpath.bat'
-invoke-expression 'doskey se=$prgs\setpath.bat'
-invoke-expression 'doskey cdd=cd %PROG%'
-invoke-expression 'doskey cds=cd %PRGS%'
-invoke-expression 'doskey cdg=cd %PROG%\git\5995144'
-invoke-expression 'doskey cdgo=cd %PROG%\go\src'
+invoke-expression 'doskey sc=%prgs%\setpath.bat ; doskey /exename=sc sc=%prgs%\setpath.bat ; doskey sc=%prgs%\setpath.bat'
+invoke-expression 'doskey sp=%prgs%\setpath.bat ; doskey /exename=sp sp=%prgs%\setpath.bat'
+invoke-expression 'doskey se=%prgs%\setpath.bat ; doskey /exename=se se=%prgs%\setpath.bat'
+invoke-expression 'doskey cdd=cd %PROG% ; doskey /exename=cdd cdd=cd %PROG%'
+invoke-expression 'doskey cds=cd %PRGS% ; doskey /exename=cds cds=cd %PRGS%'
+invoke-expression 'doskey cdg=cd %PROG%\git\5995144 ; doskey /exename=cdg cdg=cd %PROG%\git\5995144'
+invoke-expression 'doskey cdgo=cd %PROG%\go\src ; doskey /exename=cdgo cdgo=cd %PROG%\go\src'
 
 
 $peazip = {
@@ -636,9 +636,9 @@ $peazipDir = installPrg -aprgname     "peazip"                   -url          "
 
 cleanAddPath -cleanPattern "\\peazip" -addPath ""
 
-invoke-expression 'doskey pzx=$peazipDir\res\7z\7z.exe x -aos -o"$2" -pdefault -sccUTF-8 `"`$1`"'
-invoke-expression 'doskey pzc=$peazipDir\res\7z\7z.exe a -tzip -mm=Deflate -mmt=on -mx5 -w `"`$2`" `"`$1`"'
-invoke-expression 'doskey 7z=$peazipDir\res\7z\7z.exe `$*'
+invoke-expression 'doskey pzx=$peazipDir\res\7z\7z.exe x -aos -o"$2" -pdefault -sccUTF-8 `"`$1`" ; doskey /exename=pzx pzx=$peazipDir\res\7z\7z.exe x -aos -o"$2" -pdefault -sccUTF-8 `"`$1`"'
+invoke-expression 'doskey pzc=$peazipDir\res\7z\7z.exe a -tzip -mm=Deflate -mmt=on -mx5 -w `"`$2`" `"`$1`" ; doskey /exename=pzc pzc=$peazipDir\res\7z\7z.exe a -tzip -mm=Deflate -mmt=on -mx5 -w `"`$2`" `"`$1`"'
+invoke-expression 'doskey 7z=$peazipDir\res\7z\7z.exe `$* ; doskey /exename=7z 7z=$peazipDir\res\7z\7z.exe `$*'
 }
 
 $global:gow_dir   = ""
@@ -660,10 +660,10 @@ $git_dir   = installPrg -aprgname     "git"                      -url          "
                         -urlmatch_ver "Portable.*.7z"            -test         "git-cmd.bat" `
                         -invoke       ""                         -unzip
 cleanAddPath "git" ""
-invoke-expression 'doskey gl=git lg -20'
-invoke-expression 'doskey gla=git lg -20 --all'
-invoke-expression 'doskey glab=git lg -20 --all --branches'
-invoke-expression 'doskey glba=git lg -20 --branches --all'
+invoke-expression 'doskey gl=git lg -20 ; doskey /exename=gl gl=git lg -20'
+invoke-expression 'doskey gla=git lg -20 --all ; doskey /exename=gla gla=git lg -20 --all'
+invoke-expression 'doskey glab=git lg -20 --all --branches ; doskey /exename=glab glab=git lg -20 --all --branches'
+invoke-expression 'doskey glba=git lg -20 --branches --all ; doskey /exename=glba glba=git lg -20 --branches --all'
 Set-Variable -Name "git_dir" -Value $git_dir -Scope Global
 }
 
@@ -673,7 +673,7 @@ $npp_dir   = installPrg -aprgname     "npp"                      -url          "
                         -urlmatch_ver "npp.*.bin.zip"            -test         "notepad++.exe" `
                         -invoke       ""                         -unzip
 cleanAddPath "\\npp" ""
-invoke-expression 'doskey npp=$npp_dir\notepad++.exe $*'
+invoke-expression 'doskey npp=$npp_dir\notepad++.exe $* ; doskey /exename=npp npp=$npp_dir\notepad++.exe $*'
 }
 
 $python = {
@@ -685,7 +685,7 @@ $python_dir   = installPrg -aprgname     "python"                -url          "
                         -urlmatch_ver "python-2.*$python_urlmatch_arc"            -test         "python.exe" `
                         -invoke       "C:\WINDOWS\system32\msiexec.exe /i @FILE@ /l @DEST@.log TARGETDIR=@DEST@ ADDLOCAL=DefaultFeature`,TclTk`,Documentation`,Tools`,Testsuite /qn"
 cleanAddPath "\\python" ""
-invoke-expression 'doskey python=$python_dir\python.exe $*'
+invoke-expression 'doskey python=$python_dir\python.exe $* ; doskey /exename=python python=$python_dir\python.exe $*'
 }
 
 $hg = {
@@ -698,7 +698,7 @@ $hg_dir   = installPrg -aprgname     "hg"                        -url          "
 cleanAddPath "\\Mercurial" ""
 # Write-Host "hg_dir='$hg_dir'"
 addbin -filename "$prgs\bin\hg.bat" -command "$hg_dir\hg.exe %*"
-invoke-expression 'doskey hg='
+invoke-expression 'doskey hg= ; doskey /exename=hg hg='
 }
 
 $bzr = {
@@ -709,7 +709,7 @@ $bzr_dir   = installPrg -aprgname     "bzr"                      -url          "
                         -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
 cleanAddPath "\\Bazaar" ""
 # Write-Host "bzr_dir\bzr.exe='$bzr_dir\bzr.exe'"
-invoke-expression 'doskey bzr='
+invoke-expression 'doskey bzr= ; doskey /exename=bzr bzr='
 addbin -filename "$prgs\bin\bzr.bat" -command "$bzr_dir\bzr.exe %*"
 }
 
@@ -727,9 +727,9 @@ addenvs -variable "GOROOT" -value "$go_dir"
 addbin -filename "$prgs\bin\go.bat" -command "$go_dir\bin\go.exe %*"
 addbin -filename "$prgs\bin\godoc.bat" -command "$go_dir\go\godoc.exe %*"
 addbin -filename "$prgs\bin\gogofmt.bat" -command "$go_dir\go\gofmt.exe %*"
-invoke-expression 'doskey go='
-invoke-expression 'doskey godoc='
-invoke-expression 'doskey gofmt='
+invoke-expression 'doskey go= ; doskey /exename=go go='
+invoke-expression 'doskey godoc= ; doskey /exename=godoc godoc='
+invoke-expression 'doskey gofmt= ; doskey /exename=gofmt gofmt='
 Set-Variable -Name "go_dir" -Value $go_dir -Scope Global
 }
 
@@ -740,7 +740,7 @@ $sbt_dir   = installPrg -aprgname     "sbt"                       -url          
                         -urlmatch_ver "Sublime.*$sbt_urlmatch_arc"    -test         "sublime_text.exe" `
                         -unzip
 cleanAddPath "\\Sublime.*" ""
-invoke-expression 'doskey sbt=start "Sublime Text 3" "$sbt_dir\sublime_text.exe" $*'
+invoke-expression 'doskey sbt=start "Sublime Text 3" "$sbt_dir\sublime_text.exe" $* ; doskey /exename=sbt sbt=start "Sublime Text 3" "$sbt_dir\sublime_text.exe" $*'
 
 md2 "$sbt_dir\Data\Packages" "for Sublime text packages"
 $gosublime="$sbt_dir\Data\Packages\GoSublime"
@@ -782,7 +782,7 @@ $procexp_dir   = installPrg -aprgname     "procexp"              -url          "
                         -unzip
 cleanAddPath "\\procexp" ""
 # Write-Host "procexp_dir\procexp2.exe='$procexp_dir\procexp.exe'"
-invoke-expression 'doskey pe=$procexp_dir\procexp.exe $*'
+invoke-expression 'doskey pe=$procexp_dir\procexp.exe $* ; doskey /exename=pe pe=$procexp_dir\procexp.exe $*'
 }
 
 $mc = {
@@ -793,7 +793,7 @@ $mc_dir   = installPrg -aprgname     "mc"                        -url "http://mu
                         -unzip
 cleanAddPath "\\MultiCommander" ""
 # Write-Host "mc_dir\mc2.exe='$mc_dir\MultiCommander.exe'"
-invoke-expression 'doskey mc=$mc_dir\MultiCommander.exe $*'
+invoke-expression 'doskey mc=$mc_dir\MultiCommander.exe $* ; doskey /exename=mc mc=$mc_dir\MultiCommander.exe $*'
 }
 
 
@@ -806,7 +806,7 @@ $ag_dir   = installPrg -aprgname     "ag"                        -url          "
                         -url_replace  'sourceforge.net/projects/astrogrep/files/(.*?)/download,netcologne.dl.sourceforge.net/project/astrogrep/$1'
 cleanAddPath "\\AstroGrep" ""
 # Write-Host "ag_dir\AstroGrep.exe='$ag_dir\AstroGrep.exe'"
-invoke-expression 'doskey ag=$ag_dir\AstroGrep.exe $*'
+invoke-expression 'doskey ag=$ag_dir\AstroGrep.exe $* ; doskey /exename=ag ag=$ag_dir\AstroGrep.exe $*'
 }
 
 
@@ -818,7 +818,7 @@ $perl_dir   = installPrg -aprgname     "perl"                        -url       
                          -unzip
 cleanAddPath "\\.*perl" ""
 # Write-Host "perl_dir\perl.exe='$perl_dir\perl\bin\perl.exe'"
-invoke-expression 'doskey perl=$perl_dir\perl\bin\perl.exe $*'
+invoke-expression 'doskey perl=$perl_dir\perl\bin\perl.exe $* ; doskey /exename=perl perl=$perl_dir\perl\bin\perl.exe $*'
 }
 
 $kitty = {
@@ -832,7 +832,7 @@ $kitty_dir   = installPrg -aprgname     "kitty"                        -url     
 
 cleanAddPath "\\.*kitty" ""
 # Write-Host "kitty_dir\kitty.exe='$kitty_dir\kitty.exe'"
-invoke-expression 'doskey kitty=$kitty_dir\kitty.exe $*'
+invoke-expression 'doskey kitty=$kitty_dir\kitty.exe $* ; doskey /exename=kitty kitty=$kitty_dir\kitty.exe $*'
 }
 
 $wintab = {
@@ -843,7 +843,7 @@ $wintab_dir   = installPrg -aprgname     "wintab"                        -url   
 
 cleanAddPath "\\.*wintab" ""
 # Write-Host "wintab_dir\WindowTabs.exe='$wintab_dir\WindowTabs.exe'"
-invoke-expression 'doskey wintab=$wintab_dir\WindowTabs.exe $*'
+invoke-expression 'doskey wintab=$wintab_dir\WindowTabs.exe $* ; doskey /exename=wintab wintab=$wintab_dir\WindowTabs.exe $*'
 }
 
 $greenshot = {
@@ -856,7 +856,7 @@ $greenshot_dir   = installPrg -aprgname     "greenshot"                        -
 
 cleanAddPath "\\.*greenshot" ""
 # Write-Host "greenshot_dir\Greenshot.exe='$greenshot_dir\Greenshot.exe'"
-invoke-expression 'doskey gs=$greenshot_dir\Greenshot.exe $*'
+invoke-expression 'doskey gs=$greenshot_dir\Greenshot.exe $* ; doskey /exename=gs gs=$greenshot_dir\Greenshot.exe $*'
 }
 
 $fastoneCapture = {
@@ -867,7 +867,7 @@ $fastoneCapture_dir   = installPrg -aprgname     "fastoneCapture"               
 
 cleanAddPath "\\.*fastoneCapture" ""
 # Write-Host "fastoneCapture_dir\FSCapture.exe='$fastoneCapture_dir\FSCapture.exe'"
-invoke-expression 'doskey fsc=$fastoneCapture_dir\FSCapture.exe $*'
+invoke-expression 'doskey fsc=$fastoneCapture_dir\FSCapture.exe $* ; doskey /exename=fsc fsc=$fastoneCapture_dir\FSCapture.exe $*'
 }
 
 $zoomit = {
@@ -877,7 +877,7 @@ $zoomit_dir   = installPrg -aprgname     "zoomit"              -url          "ht
                         -unzip
 cleanAddPath "\\zoomit" ""
 # Write-Host "zoomit_dir\zoomit2.exe='$zoomit_dir\zoomit.exe'"
-invoke-expression 'doskey zi=$zoomit_dir\zoomit.exe $*'
+invoke-expression 'doskey zi=$zoomit_dir\zoomit.exe $* ; doskey /exename=zi zi=$zoomit_dir\zoomit.exe $*'
 }
 
 
@@ -889,7 +889,7 @@ $filezilla_dir   = installPrg -aprgname     "filezilla"              -url       
                         -url_replace  'sourceforge.net/projects/filezilla/files/(.*?)/download,netcologne.dl.sourceforge.net/project/filezilla/$1'
 cleanAddPath "\\filezilla" ""
 # Write-Host "filezilla_dir\filezilla2.exe='$filezilla_dir\filezilla.exe'"
-invoke-expression 'doskey fz=$filezilla_dir\filezilla.exe $*'
+invoke-expression 'doskey fz=$filezilla_dir\filezilla.exe $* ; doskey /exename=fz fz=$filezilla_dir\filezilla.exe $*'
 }
 
 
@@ -902,7 +902,7 @@ $autoit_dir   = installPrg -aprgname     "autoit"              -url          "ht
                         -url_replace  'cgi-bin/getfile.pl.,files/'
 cleanAddPath "\\autoit" ""
 # Write-Host "autoit_dir\AutoIt3.exe='$autoit_dir\AutoIt3.exe'"
-invoke-expression 'doskey autoit=$autoit_dir\AutoIt3.exe $*'
+invoke-expression 'doskey autoit=$autoit_dir\AutoIt3.exe $* ; doskey /exename=autoit autoit=$autoit_dir\AutoIt3.exe $*'
 }
 
 $iron = {
@@ -913,7 +913,7 @@ $iron_dir   = installPrg -aprgname     "iron"              -url          "http:/
                         -unzip
 cleanAddPath "\\iron" ""
 # Write-Host "iron_dir\iron3.exe='$iron_dir\IronPortable.exe'"
-invoke-expression 'doskey iron=$iron_dir\IronPortable.exe $*'
+invoke-expression 'doskey iron=$iron_dir\IronPortable.exe $* ; doskey /exename=iron iron=$iron_dir\IronPortable.exe $*'
 }
 
 $firefox = {
@@ -925,7 +925,7 @@ $firefox_dir   = installPrg -aprgname     "firefox"              -url          "
 
 cleanAddPath "\\firefox" ""
 # Write-Host "firefox_dir\FireFoxPortable.exe='$firefox_dir\FireFoxPortable.exe'"
-invoke-expression 'doskey firefox=$firefox_dir\FireFoxPortable.exe $*'
+invoke-expression 'doskey firefox=$firefox_dir\FireFoxPortable.exe $* ; doskey /exename=firefox firefox=$firefox_dir\FireFoxPortable.exe $*'
 }
 
 $kdiff3 = {
@@ -941,7 +941,7 @@ $kdiff3Dir = installPrg -aprgname     "kdiff3"                   -url          "
 
 cleanAddPath -cleanPattern "\\kdiff3" -addPath ""
 
-invoke-expression 'doskey kdiff3=$kdiff3Dir\kdiff3.exe `$*'
+invoke-expression 'doskey kdiff3=$kdiff3Dir\kdiff3.exe `$* ; doskey /exename=kdiff3 kdiff3=$kdiff3Dir\kdiff3.exe `$*'
 }
 
 $paint = {
@@ -951,7 +951,7 @@ $paint_dir   = installPrg -aprgname     "paint"              -url          "http
                         -unzip -test         "RWPaint.exe"
 cleanAddPath "\\paint" ""
 # Write-Host "paint_dir\paint3.exe='$paint_dir\paintPortable.exe'"
-invoke-expression 'doskey paint=$paint_dir\RWPaint.exe $*'
+invoke-expression 'doskey paint=$paint_dir\RWPaint.exe $* ; doskey /exename=paint paint=$paint_dir\RWPaint.exe $*'
 }
 
 $svn = {
@@ -962,7 +962,7 @@ $svn_dir   = installPrg -aprgname     "svn"                -url          "http:/
                         -urlmatch_ver "Apache-Subversion-.*?.zip"            -test         "bin\svn.exe" `
                         -unzip
 cleanAddPath "\\svn" ""
-invoke-expression 'doskey svn=$svn_dir\bin\svn.exe $*'
+invoke-expression 'doskey svn=$svn_dir\bin\svn.exe $* ; doskey /exename=svn svn=$svn_dir\bin\svn.exe $*'
 }
 
 $wiztree = {
@@ -971,7 +971,7 @@ $wiztree_dir   = installPrg -aprgname     "wiztree"                -url         
                         -urlmatch_ver "wiztree_.*?portable.zip"            -test         "WizTree.exe" `
                         -unzip
 cleanAddPath "\\wiztree" ""
-invoke-expression 'doskey wiztree=$wiztree_dir\WizTree.exe $*'
+invoke-expression 'doskey wiztree=$wiztree_dir\WizTree.exe $* ; doskey /exename=wiztree wiztree=$wiztree_dir\WizTree.exe $*'
 }
 
 $ss = {
@@ -981,7 +981,7 @@ $ss_dir   = installPrg -aprgname     "ss"                -url          "http://w
                         -url_replace  'download.html/files,files' `
                         -unzip
 cleanAddPath "\\ss" ""
-invoke-expression 'doskey ss=$ss_dir\SpaceSniffer.exe $*'
+invoke-expression 'doskey ss=$ss_dir\SpaceSniffer.exe $* ; doskey /exename=ss ss=$ss_dir\SpaceSniffer.exe $*'
 }
 
 $liteide = {
@@ -990,7 +990,7 @@ $liteide_dir   = installPrg -aprgname     "liteide"                      -url   
                         -urlmatch_ver "windows.*.7z"            -test         "bin\liteide.exe" `
                         -unzip
 cleanAddPath "liteide" ""
-invoke-expression 'doskey goide=$liteide_dir\bin\liteide.exe $*'
+invoke-expression 'doskey goide=$liteide_dir\bin\liteide.exe $* ; doskey /exename=goide goide=$liteide_dir\bin\liteide.exe $*'
 }
 
 $gvim = {
@@ -1000,9 +1000,9 @@ $gvim_dir   = installPrg -aprgname     "gvim"                     -url          
                         -post "Get-ChildItem @install_folder\vim*\* -Recurse | Move-Item -Destination @install_folder" `
                         -unzip
 cleanAddPath "gvim" ""
-invoke-expression 'doskey gvim=$gvim_dir\gvim.exe $*'
-invoke-expression 'doskey vim=$gvim_dir\gvim.exe $*'
-invoke-expression 'doskey vi=$gvim_dir\gvim.exe $*'
+invoke-expression 'doskey gvim=$gvim_dir\gvim.exe $* ; doskey /exename=gvim gvim=$gvim_dir\gvim.exe $*'
+invoke-expression 'doskey vim=$gvim_dir\gvim.exe $* ; doskey /exename=vim vim=$gvim_dir\gvim.exe $*'
+invoke-expression 'doskey vi=$gvim_dir\gvim.exe $* ; doskey /exename=vi vi=$gvim_dir\gvim.exe $*'
 }
 
 $dexpot = {
@@ -1012,7 +1012,7 @@ $dexpot_dir   = installPrg -aprgname     "dexpot"                     -url      
                         -url_replace  'index.php.id=download/,' `
                         -unzip
 cleanAddPath "dexpot" ""
-invoke-expression 'doskey dexpot=$dexpot_dir\dexpot.exe $*'
+invoke-expression 'doskey dexpot=$dexpot_dir\dexpot.exe $* ; doskey /exename=dexpot dexpot=$dexpot_dir\dexpot.exe $*'
 }
 
 $freeplane = {
@@ -1023,7 +1023,7 @@ $freeplane_dir   = installPrg -aprgname     "freeplane"                        -
                         -url_replace  'sourceforge.net/projects/freeplane/files/(.*?)/download,netcologne.dl.sourceforge.net/project/freeplane/$1'
 cleanAddPath "\\freeplane" ""
 # Write-Host "freeplane_dir\AstroGrep.exe='$freeplane_dir\AstroGrep.exe'"
-invoke-expression 'doskey fp=$freeplane_dir\freeplane.exe $*'
+invoke-expression 'doskey fp=$freeplane_dir\freeplane.exe $* ; doskey /exename=fp fp=$freeplane_dir\freeplane.exe $*'
 }
 
 $node = {
@@ -1045,7 +1045,7 @@ $npm_dir   = installPrg -aprgname     "npm"                     -url          "h
                                     -test         "npm.cmd" `
                         -unzip
 cleanAddPath "npm" ""
-invoke-expression 'doskey npm=$npm_dir\npm.cmd $*'
+invoke-expression 'doskey npm=$npm_dir\npm.cmd $* ; doskey /exename=npm npm=$npm_dir\npm.cmd $*'
 }
 
 $global:ruby_dir = ""
@@ -1069,7 +1069,7 @@ $ads_dir   = installPrg -aprgname     "ads"                     -url          "h
                         -test         "Apache Directory Studio.exe" `
                         -invoke       "@FILE@ /S /D=@DEST@"
 cleanAddPath "ads" ""
-invoke-expression 'doskey ads=$ads_dir\ads.cmd $*'
+invoke-expression 'doskey ads=$ads_dir\ads.cmd $* ; doskey /exename=ads ads=$ads_dir\ads.cmd $*'
 }
 
 function post-all-install() {
@@ -1106,8 +1106,8 @@ function post-all-install() {
 
   [System.IO.File]::WriteAllLines("$prgs\setpath.bat", "$sp", $Utf8NoBomEncoding)
 
-  doskey h=doskey /history
-  doskey l=ls -alrt
+  invoke-expression 'doskey h=doskey /history ; doskey /exename=h h=doskey /history'
+  invoke-expression 'doskey l=ls -alr ; doskey /exename=l l=ls -alrt'
 }
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
