@@ -619,7 +619,7 @@ invoke-expression 'doskey sp=%prgs%\setpath.bat ; doskey /exename=sp sp=%prgs%\s
 invoke-expression 'doskey se=%prgs%\setpath.bat ; doskey /exename=se se=%prgs%\setpath.bat'
 invoke-expression 'doskey cdd=cd %PROG% ; doskey /exename=cdd cdd=cd %PROG%'
 invoke-expression 'doskey cds=cd %PRGS% ; doskey /exename=cds cds=cd %PRGS%'
-invoke-expression 'doskey cdg=cd %PROG%\git\5995144 ; doskey /exename=cdg cdg=cd %PROG%\git\5995144'
+invoke-expression 'doskey cdg=cd %PROG%\git\senv ; doskey /exename=cdg cdg=cd %PROG%\git\senv'
 invoke-expression 'doskey cdgo=cd %PROG%\go\src ; doskey /exename=cdgo cdgo=cd %PROG%\go\src'
 
 
