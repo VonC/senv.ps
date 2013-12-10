@@ -1069,7 +1069,7 @@ $ads_dir   = installPrg -aprgname     "ads"                     -url          "h
                         -test         "Apache Directory Studio.exe" `
                         -invoke       "@FILE@ /S /D=@DEST@"
 cleanAddPath "ads" ""
-invoke-expression 'doskey ads=$ads_dir\ads.cmd $* ; doskey /exename=ads ads=$ads_dir\ads.cmd $*'
+invoke-expression 'doskey ads=$ads_dir\Apache~1.exe $* ; doskey /exename=ads ads=$ads_dir\Apache~1.exe $*'
 }
 
 function post-all-install() {
