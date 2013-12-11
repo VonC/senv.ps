@@ -758,6 +758,14 @@ if ( -not ( Test-Path "$powershell" ) ) {
 }
 md2 "$sbt_dir\Data\Packages\User" "for Sublime text user settings"
 
+$goimports="$sbt_dir\Data\Packages\GoImports"
+if ( -not ( Test-Path "$goimports" ) ) {
+  git clone https://VonC@github.com/VonC/sublime_goimports "$goimports"
+} elseif ($updateDependencies) {
+  git --git-dir="$goimports\.git" --work-tree="$goimports" pull origin master
+  invoke-expression 'cmd /C "set GOPATH=$sbt_dir\Data\Packages\GoImports&& go get github.com/bradfitz/goimports"'
+}
+
 }
 
 $global:gpg_dir   = ""
