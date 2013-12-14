@@ -725,8 +725,8 @@ cleanAddPath "\\go(?!w).*" ""
 addenvs -variable "GOPATH" -value "%PROG%\go"
 addenvs -variable "GOROOT" -value "$go_dir"
 addbin -filename "$prgs\bin\go.bat" -command "$go_dir\bin\go.exe %*"
-addbin -filename "$prgs\bin\godoc.bat" -command "$go_dir\go\godoc.exe %*"
-addbin -filename "$prgs\bin\gogofmt.bat" -command "$go_dir\go\gofmt.exe %*"
+addbin -filename "$prgs\bin\godoc.bat" -command "$go_dir\bin\godoc.exe %*"
+addbin -filename "$prgs\bin\gogofmt.bat" -command "$go_dir\bin\gofmt.exe %*"
 invoke-expression 'doskey go= ; doskey /exename=go go='
 invoke-expression 'doskey godoc= ; doskey /exename=godoc godoc='
 invoke-expression 'doskey gofmt= ; doskey /exename=gofmt gofmt='
