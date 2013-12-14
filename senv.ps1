@@ -1080,6 +1080,18 @@ cleanAddPath "ads" ""
 invoke-expression 'doskey ads=$ads_dir\Apache~1.exe $* ; doskey /exename=ads ads=$ads_dir\Apache~1.exe $*'
 }
 
+$ontop = {
+$ontop_dir   = installPrg -aprgname     "ontop"                     -url          "http://ontopreplica.codeplex.com/" `
+                        -urlmatch     "http://ontopreplica.codeplex.com/downloads/get/.*"             `
+                        -urlver "http://ontopreplica.codeplex.com/" `
+                        -urlmatch_ver 'Release (\d+\.\d+)' -ver_only `
+                                    -test         "OnTopReplica.exe" `
+                        -unzip `
+                        -url_replace  'ontopreplica.codeplex.com.*,www.klopfenstein.net/download.aspx?file=ontopreplica%2fontopreplica-executable.zip'
+cleanAddPath "ontop" ""
+invoke-expression 'doskey ontop=$ontop_dir\OnTopReplica.exe $* ; doskey /exename=ontop ontop=$ontop_dir\OnTopReplica.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -1120,7 +1132,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$ads')
+ iex ('&$ontop')
  post-all-install
 exit 0
 #>
@@ -1161,4 +1173,5 @@ exit 0
  iex ('&$npm')
  iex ('&$ruby')
  iex ('&$ads')
+ iex ('&$ontop')
  post-all-install
