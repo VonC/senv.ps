@@ -236,6 +236,10 @@ Function Get-WebFile {
   # $sss=$req.Headers.ToString()
   # Write-Debug "req.Headers = '$sss'"
 
+  $req.Headers.Add("Cookie", "notice_preferences=2:cb8350a2759273dccf1e483791e6f8fd; s_nr=1387063234730; s_cc=true; gpw_e24=http%3A%2F%2Fwww.oracle.com%2Ftechnetwork%2Fjava%2Fjavase%2Fdownloads%2Fjdk7-downloads-1880260.html; s_sq=%5B%5BB%5D%5D") 
+
+# exit 0
+
   # http://andersrask.sharepointspace.com/Lists/Posts/Post.aspx?ID=5
   Try {
     $res = $req.GetResponse();
@@ -530,7 +534,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
   }
   # Write-Host "result='$dwnUrl': prgver='$prgver', prgfile='$prgfile': " + (Test-Path "$prgdir/$prgver/$test")
   # Write-Host "TestPath='$prgdir/$prgver/$test'"
-#exit 0
+# exit 0
 
   if ( -not (Test-Path "$prgdir/$prgver/$test") ) {
 
@@ -545,7 +549,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
         $rgetwebfile = Get-WebFile -url $dwnUrl -filename "$prgdir/$prgfile" -hostname $hostname -referer $referer
       }
     }
-
+#exit 0
     if ( $unzip ) {
       if ( $prgfile.EndsWith(".zip") ) {
         $shellApplication = new-object -com shell.application
@@ -1092,6 +1096,20 @@ cleanAddPath "ontop" ""
 invoke-expression 'doskey ontop=$ontop_dir\OnTopReplica.exe $* ; doskey /exename=ontop ontop=$ontop_dir\OnTopReplica.exe $*'
 }
 
+$jdk = {
+$jdk_urlmatch_arc = if ( Test-Win64 ) { "x64" } else { "i586" }
+$jdk_dir   = installPrg -aprgname     "jdk"                     -url          "http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html" `
+                        -urlmatch     "http://download.oracle.com/otn-pub/java/jdk/.*/jdk-7u45-windows-$jdk_urlmatch_arc.exe"             `
+                        -urlver "http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html" `
+                        -urlmatch_ver "(jdk-\du\d+-windows-$jdk_urlmatch_arc).exe" `
+                                    -test         "jdkReplica.exe" `
+                                    -hostname "download.oracle.com" `
+                        -unzip `
+                        -url_replace  'jdkreplica.codeplex.com.*,www.klopfenstein.net/download.aspx?file=jdkreplica%2fjdkreplica-executable.zip'
+cleanAddPath "jdk" ""
+invoke-expression 'doskey jdk=$jdk_dir\jdkReplica.exe $* ; doskey /exename=jdk jdk=$jdk_dir\jdkReplica.exe $*'
+}
+
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
@@ -1132,7 +1150,7 @@ function post-all-install() {
 
 # http://social.technet.microsoft.com/Forums/windowsserver/en-US/7fea96e4-1c42-48e0-bcb2-0ae23df5da2f/powershell-equivalent-of-goto
 <#
- iex ('&$ontop')
+ iex ('&$jdk')
  post-all-install
 exit 0
 #>
@@ -1174,4 +1192,5 @@ exit 0
  iex ('&$ruby')
  iex ('&$ads')
  iex ('&$ontop')
+# iex ('&$jdk')
  post-all-install
