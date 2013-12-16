@@ -622,6 +622,28 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       }
     }
 
+    if ( $jdk ) {
+      Write-Host "JDK loaded to '$prgdir/$prgfile' from '$dwnUrl'"
+      $prglinuxfile = $prgfile -replace "-windows-", "-linux-"
+      $prglinuxfile = $prglinuxfile -replace ".exe", ".tar.gz"
+      $dwnlinuxUrl = $dwnUrl -replace "-windows-", "-linux-"
+      $dwnlinuxUrl = $dwnlinuxUrl -replace ".exe", ".tar.gz"
+      Write-Host "JDK loaded to '$prgdir/$prglinuxfile' from '$dwnlinuxUrl'"
+
+      if(-not (Test-Path "$prgdir/$prglinuxfile")) {
+        if ( Test-Path "$Env:homedrive/$prglinuxfile" ) {
+          Write-Host "Copy '$prglinuxfile' from '$Env:homedrive/$prglinuxfile'"
+          Copy-Item -Path "$Env:homedrive/$prglinuxfile" -Destination "$prgdir/$prglinuxfile"
+        } else {
+          Write-Host "Download '$prglinuxfile' from '$dwnlinuxUrl' ====> '$prgdir\$prglinuxfile'"
+          # http://stackoverflow.com/questions/7808227/conditionally-specifying-switch-parameters-in-powershell
+          $rgetwebfile = Get-WebFile -url $dwnlinuxUrl -filename "$prgdir/$prglinuxfile" -hostname $hostname -referer $referer -jdk:$jdk
+        }
+      }
+
+      exit 0
+    }
+
     $rinst = install -invoke $invoke -prgdir $prgdir -prgfile $prgfile -prgver $prgver
 
   }
