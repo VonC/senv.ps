@@ -641,6 +641,28 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
         }
       }
 
+      if(-not (Test-Path "$prgdir/$prgver/tools.zip")) {
+         Write-Host "$prgs\peazip\7z\7z.exe x -aos -o`"$prgdir\$prgver`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`" -- tools.zip"
+        $7zexe = "$prgs\peazip\7z\7z.exe"
+        $arg = " x -aos `"-o$prgdir\$prgver`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`" -- tools.zip"
+        $cmdline = $7zexe, $arg -join ""
+        # $cmdline
+        $res=Invoke-Expression -command  "$cmdline "
+        # $res=invoke-expression '$prgs\peazip\7z\7z.exe x  -aos -o"$prgdir\tmp" -pdefault -sccUTF-8 "$prgdir\$prgfile"'
+        Write-Host "prgdir/prgfile: '$prgdir\$prgfile' tools.zip => 7z... DONE"
+      }
+
+      if(-not (Test-Path "$prgdir/$prgver/src.zip")) {
+         Write-Host "$prgs\peazip\7z\7z.exe x -aos -o`"$prgdir\$prgver`" -pdefault -sccUTF-8 `"$prgdir\$prglinuxfile`" -- src.zip"
+        $7zexe = "$prgs\peazip\7z\7z.exe"
+        $arg = " x -aos `"-o$prgdir\$prgver`" -pdefault -sccUTF-8 `"$prgdir\$prglinuxfile`" -- jdk-7u45-linux-x64.tar/jdk1.7.0_45/src.zip"
+        $cmdline = $7zexe, $arg -join ""
+        # $cmdline
+        $res=Invoke-Expression -command  "$cmdline "
+        # $res=invoke-expression '$prgs\peazip\7z\7z.exe x  -aos -o"$prgdir\tmp" -pdefault -sccUTF-8 "$prgdir\$prgfile"'
+        Write-Host "prgdir/prgfile: '$prgdir\$prglinuxfile' src.zip => 7z... DONE"
+      }
+
       exit 0
     }
 
