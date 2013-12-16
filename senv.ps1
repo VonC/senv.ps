@@ -158,7 +158,8 @@ Function Get-WebFile {
       [String]$ProxyUserDomain = '',
       [String]$userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Iron/29.0.1600.1 Chrome/29.0.1600.1 Safari/537.36',
     [switch]$Passthru,
-    [switch]$quiet
+    [switch]$quiet,
+    [switch]$jdk
   )
 
   # http://stackoverflow.com/questions/9917875/power-shell-web-scraping-ssl-tsl-issue
@@ -236,7 +237,18 @@ Function Get-WebFile {
   # $sss=$req.Headers.ToString()
   # Write-Debug "req.Headers = '$sss'"
 
-  $req.Headers.Add("Cookie", "notice_preferences=2:cb8350a2759273dccf1e483791e6f8fd; s_nr=1387063234730; s_cc=true; gpw_e24=http%3A%2F%2Fwww.oracle.com%2Ftechnetwork%2Fjava%2Fjavase%2Fdownloads%2Fjdk7-downloads-1880260.html; s_sq=%5B%5BB%5D%5D") 
+  if ( $jdk ) {
+    $c1 = New-Object System.Net.Cookie("testSessionCookie", "Enabled", "/technetwork/java/javase/downloads", ".www.oracle.com")
+    $c2 = New-Object System.Net.Cookie("oraclelicensejdk-6u31-oth-JPR", "accept-securebackup-cookie", "/", ".www.oracle.com")
+    $c3 = New-Object System.Net.Cookie("gpw_e24", "http%3A%2F%2Fwww.oracle.com%2Ftechnetwork%2Fjava%2Fjavase%2Fdownloads%2Fjdk.html", "/", ".oracle.com")
+    # http://www.howtoasp.net/web-forms-tutorials/how-to-create-cookie-in-asp-net/
+    $c3.Expires = [DateTime]::Now.AddMinutes(1d);
+    $cookies = New-Object System.Net.CookieCollection
+    $cookies.Add($c1)
+    $cookies.Add($c2)
+    $cookies.Add($c3)
+    $req.CookieContainer.Add($cookies)
+  }
 
 # exit 0
 
@@ -366,7 +378,8 @@ function install( [String]$invoke, [String]$prgdir, [String]$prgfile, [String]$p
 
 function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String]$urlmatch, [String]$urlmatch_arc="", [String]$urlmatch_ver,
                     [String]$test, [String]$invoke, [switch][alias("z")]$unzip, [String]$post,
-                    [String]$url_replace="", [String]$ver_pattern="", [String]$referer="", [String]$hostname="", [switch][alias("v")]$ver_only) {
+                    [String]$url_replace="", [String]$ver_pattern="", [String]$referer="", [String]$hostname="", [switch][alias("v")]$ver_only,
+                    [switch]$jdk) {
   Write-Host "Install/Update '$aprgname'"
   # Write-Host "Install aprgname='$aprgname' from url='$url'`r`nurlmatch='$urlmatch', urlmatch_arc='$urlmatch_arc', urlmatch_ver='$urlmatch_ver'`r`ntest='$test', invoke='$invoke' and unzip='$unzip'"
   # Make sure c:\prgs\xxx exists for application 'xxx'
@@ -546,7 +559,8 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
         Write-Host "Download '$prgfile' from '$dwnUrl' ====> '$prgdir\$prgfile'"
         $referer = $referer -replace "@dwnUrl@", $dwnUrl
 #exit 0
-        $rgetwebfile = Get-WebFile -url $dwnUrl -filename "$prgdir/$prgfile" -hostname $hostname -referer $referer
+        # http://stackoverflow.com/questions/7808227/conditionally-specifying-switch-parameters-in-powershell
+        $rgetwebfile = Get-WebFile -url $dwnUrl -filename "$prgdir/$prgfile" -hostname $hostname -referer $referer -jdk:$jdk
       }
     }
 #exit 0
@@ -1104,7 +1118,7 @@ $jdk_dir   = installPrg -aprgname     "jdk"                     -url          "h
                         -urlmatch_ver "(jdk-\du\d+-windows-$jdk_urlmatch_arc).exe" `
                                     -test         "jdkReplica.exe" `
                                     -hostname "download.oracle.com" `
-                        -unzip `
+                        -jdk `
                         -url_replace  'jdkreplica.codeplex.com.*,www.klopfenstein.net/download.aspx?file=jdkreplica%2fjdkreplica-executable.zip'
 cleanAddPath "jdk" ""
 invoke-expression 'doskey jdk=$jdk_dir\jdkReplica.exe $* ; doskey /exename=jdk jdk=$jdk_dir\jdkReplica.exe $*'
