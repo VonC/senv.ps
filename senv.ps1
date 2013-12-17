@@ -1175,6 +1175,7 @@ cleanAddPath "ontop" ""
 invoke-expression 'doskey ontop=$ontop_dir\OnTopReplica.exe $* ; doskey /exename=ontop ontop=$ontop_dir\OnTopReplica.exe $*'
 }
 
+$global:jdk_dir = ""
 $jdk = {
 $jdk_urlmatch_arc = if ( Test-Win64 ) { "x64" } else { "i586" }
 $jdk_dir   = installPrg -aprgname     "jdk"                     -url          "http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html" `
@@ -1186,7 +1187,8 @@ $jdk_dir   = installPrg -aprgname     "jdk"                     -url          "h
                         -jdk `
                         -url_replace  'jdkreplica.codeplex.com.*,www.klopfenstein.net/download.aspx?file=jdkreplica%2fjdkreplica-executable.zip'
 cleanAddPath "jdk" ""
-invoke-expression 'doskey jdk=$jdk_dir\jdkReplica.exe $* ; doskey /exename=jdk jdk=$jdk_dir\jdkReplica.exe $*'
+# Write-Host "jdk_dir='$jdk_dir'"
+Set-Variable -Name "jdk_dir" -Value $jdk_dir -Scope Global
 }
 
 function post-all-install() {
@@ -1198,10 +1200,12 @@ function post-all-install() {
   cleanAddPath "" "%PROG%\go\bin"
   cleanAddPath "" "$prgs\node"
   cleanAddPath "" "$ruby_dir\bin"
+  cleanAddPath "" "$jdk_dir\bin"
 
   md2 "$prog\tmp" "temp directory"
   addenvs -variable "TMP" -value "%PROG%\tmp"
   addenvs -variable "TEMP" -value "%PROG%\tmp"
+  addenvs -variable "JAVA_HOME" -value "$jdk_dir"
   $path=get-content "$prgs/path.txt"
   $sp="set PATH=$path"
   $sp=$sp+"`nset term=msys"
@@ -1271,5 +1275,5 @@ exit 0
  iex ('&$ruby')
  iex ('&$ads')
  iex ('&$ontop')
-# iex ('&$jdk')
+ iex ('&$jdk')
  post-all-install
