@@ -387,7 +387,7 @@ function uncompress([String]$destination, [String]$archive, [String]$msgPrefix="
   $argFile=""
   if ( -not [string]::IsNullOrEmpty($file) ) { $argFile=" -- $file" }
   $aMsgPrfix=""
-  if ( -not [string]::IsNullOrEmpty($msgPrefix) ) { $aMsgPrfix = "$msgPrefix: "}
+  if ( -not [string]::IsNullOrEmpty($msgPrefix) ) { $aMsgPrfix = "${msgPrefix}: "}
   Write-Host "$aMsgPrefix'$archive'$argFile => 7z..."
   # http://stackoverflow.com/questions/8128276/invoke-expression-dropping-double-quote
   $extractCmd="x"
