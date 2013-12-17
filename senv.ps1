@@ -376,6 +376,32 @@ function install( [String]$invoke, [String]$prgdir, [String]$prgfile, [String]$p
   }
 }
 
+function uncompress([String]$destination, [String]$archive, [String]$msgPrefix="", [String]$file="",[switch][alias("e")]$extract) {
+  # http://social.technet.microsoft.com/Forums/scriptcenter/en-US/65186252-fcf7-4c6c-a11c-697ef0633018/escaping-the-escape-character-in-invokeexpression
+  # http://social.technet.microsoft.com/Forums/windowsserver/en-US/cd08c144-7105-421d-bbce-ab27dcee0fb7/escaping-parameters-for-an-external-program-in-invokeexpression
+  <#
+    $exec = @'
+             & "C:\Program Files\7-Zip\7z.exe" u -mx5 -tzip -r "$DestFileZip" "$DestFile"
+           '@
+  #>
+  $argFile=""
+  if ( -not [string]::IsNullOrEmpty($file) ) { $argFile=" -- $file" }
+  $aMsgPrfix=""
+  if ( -not [string]::IsNullOrEmpty($msgPrefix) ) { $aMsgPrfix = "$msgPrefix: "}
+  Write-Host "$aMsgPrefix'$archive'$argFile => 7z..."
+  # http://stackoverflow.com/questions/8128276/invoke-expression-dropping-double-quote
+  $extractCmd="x"
+  if ( $extract ) { $extractCmd = "e"}
+  Write-Host "$prgs\peazip\7z\7z.exe $extractCmd -aos -o`"$destination`" -pdefault -sccUTF-8 `"$archive`"$argFile"
+  $7zexe = "$prgs\peazip\7z\7z.exe"
+  $arg = " $extractCmd -aos `"-o$destination`" -pdefault -sccUTF-8 `"$archive`"$argFile"
+  $cmdline = $7zexe, $arg -join ""
+  # $cmdline
+  $res=Invoke-Expression -command  "$cmdline "
+  # $res=invoke-expression '$prgs\peazip\7z\7z.exe x  -aos -o"$prgdir\tmp" -pdefault -sccUTF-8 "$prgdir\$prgfile"'
+  Write-Host "$aMsgPrefix'$archive'$argFile => 7z... DONE"
+}
+
 function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String]$urlmatch, [String]$urlmatch_arc="", [String]$urlmatch_ver,
                     [String]$test, [String]$invoke, [switch][alias("z")]$unzip, [String]$post,
                     [String]$url_replace="", [String]$ver_pattern="", [String]$referer="", [String]$hostname="", [switch][alias("v")]$ver_only,
@@ -578,23 +604,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
         $destination.Copyhere($zipPackage.items(), 0x14)
       }
       elseif ( $prgfile.EndsWith(".7z") ) {
-        Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => 7z..."
-		    # http://social.technet.microsoft.com/Forums/scriptcenter/en-US/65186252-fcf7-4c6c-a11c-697ef0633018/escaping-the-escape-character-in-invokeexpression
-		    # http://social.technet.microsoft.com/Forums/windowsserver/en-US/cd08c144-7105-421d-bbce-ab27dcee0fb7/escaping-parameters-for-an-external-program-in-invokeexpression
-		    <#
-		      $exec = @'
-                   & "C:\Program Files\7-Zip\7z.exe" u -mx5 -tzip -r "$DestFileZip" "$DestFile"
-                 '@
-		    #>
-		# http://stackoverflow.com/questions/8128276/invoke-expression-dropping-double-quote
-         Write-Host "$prgs\peazip\7z\7z.exe x -aos -o`"$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
-        $7zexe = "$prgs\peazip\7z\7z.exe"
-        $arg = " x -aos `"-o$prgdir\tmp`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`""
-        $cmdline = $7zexe, $arg -join ""
-        # $cmdline
-        $res=Invoke-Expression -command  "$cmdline "
-        # $res=invoke-expression '$prgs\peazip\7z\7z.exe x  -aos -o"$prgdir\tmp" -pdefault -sccUTF-8 "$prgdir\$prgfile"'
-        Write-Host "prgdir/prgfile: '$prgdir\$prgfile' => 7z... DONE"
+        $uncompress=uncompress -destination "prgdir\tmp" -archive "$prgdir\$prgfile" -msgPrefix "prgdir/prgfile"
       }
       $files = Get-ChildItem  "$prgdir\tmp"
       $afolder=$files | Where { $_.PSIsContainer -and $_.Name -eq "$prgver_space" } | sort CreationTime | select -l 1
@@ -642,25 +652,12 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
       }
 
       if(-not (Test-Path "$prgdir/$prgver/tools.zip")) {
-         Write-Host "$prgs\peazip\7z\7z.exe x -aos -o`"$prgdir\$prgver`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`" -- tools.zip"
-        $7zexe = "$prgs\peazip\7z\7z.exe"
-        $arg = " x -aos `"-o$prgdir\$prgver`" -pdefault -sccUTF-8 `"$prgdir\$prgfile`" -- tools.zip"
-        $cmdline = $7zexe, $arg -join ""
-        # $cmdline
-        $res=Invoke-Expression -command  "$cmdline "
-        # $res=invoke-expression '$prgs\peazip\7z\7z.exe x  -aos -o"$prgdir\tmp" -pdefault -sccUTF-8 "$prgdir\$prgfile"'
-        Write-Host "prgdir/prgfile: '$prgdir\$prgfile' tools.zip => 7z... DONE"
+        $uncompress=uncompress -destination "$prgdir\$prgver" -archive "$prgdir\$prgfile" -msgPrefix "prgdir/prgfile" -file "tools.zip"
       }
 
-      if(-not (Test-Path "$prgdir/$prgver/src.zip")) {
-         Write-Host "$prgs\peazip\7z\7z.exe x -aos -o`"$prgdir\$prgver`" -pdefault -sccUTF-8 `"$prgdir\$prglinuxfile`" -- src.zip"
-        $7zexe = "$prgs\peazip\7z\7z.exe"
-        $arg = " x -aos `"-o$prgdir\$prgver`" -pdefault -sccUTF-8 `"$prgdir\$prglinuxfile`" -- jdk-7u45-linux-x64.tar/jdk1.7.0_45/src.zip"
-        $cmdline = $7zexe, $arg -join ""
-        # $cmdline
-        $res=Invoke-Expression -command  "$cmdline "
-        # $res=invoke-expression '$prgs\peazip\7z\7z.exe x  -aos -o"$prgdir\tmp" -pdefault -sccUTF-8 "$prgdir\$prgfile"'
-        Write-Host "prgdir/prgfile: '$prgdir\$prglinuxfile' src.zip => 7z... DONE"
+      $prglinuxfile2 = $prglinuxfile -replace ".gz", ""
+      if(-not (Test-Path "$prgdir/$prglinuxfile2")) {
+        $uncompress=uncompress -destination "$prgdir" -archive "$prgdir\$prglinuxfile" -msgPrefix "prgdir/prglinuxfile" -file "$prglinuxfile2"
       }
 
       exit 0
