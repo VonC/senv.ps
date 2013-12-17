@@ -660,7 +660,31 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
         $uncompress=uncompress -destination "$prgdir" -archive "$prgdir\$prglinuxfile" -msgPrefix "prgdir/prglinuxfile" -file "$prglinuxfile2"
       }
 
-      exit 0
+      $srcPath=Invoke-Expression -command  "$prgs\peazip\7z\7z.exe l -r $prgdir\$prglinuxfile2 -- src.zip "
+      [string]$srcPath = ([regex]'(?i).*\s(\S+\\src.zip).*$').Match( $srcPath ).Groups[1].Value
+      # Write-Host "srcPath='$srcPath'"
+
+      if(-not (Test-Path "$prgdir/$prgver/src.zip")) {
+        $uncompress=uncompress -destination "$prgdir\$prgver" -archive "$prgdir\$prglinuxfile2" -msgPrefix "prgdir/prglinuxfile2" -file "$srcPath" -extract
+      }
+      if(-not (Test-Path "$prgdir/$prgver/release")) {
+        $uncompress=uncompress -destination "$prgdir\$prgver" -archive "$prgdir\$prgver\tools.zip" -msgPrefix "prgdir/prgver/tools"
+      }
+      # http://stackoverflow.com/questions/8677628/recursive-file-search-using-powershell
+      $unpack = Get-ChildItem -Path "$prgdir\$prgver" -Filter "unpack*.exe" -Recurse  | Select-Object -First 1
+      # Write-Host ("unpack '" + $unpack.Name + "' => '" + $unpack.FullName + "'")
+      $unpack = $unpack.FullName
+      $packs = Get-ChildItem -Path "$prgdir\$prgver" -Filter "*.pack" -Recurse
+      # http://stackoverflow.com/questions/11568221/using-foreach-with-get-childitem-recurse
+      foreach($pack in $packs){
+        # Write-Host ("pack '" + $pack.Name + "' => '" + $pack.FullName + "'")
+        $apack = $pack.FullName
+        $nopack = $apack -replace ".pack", ".jar"
+        if (-not (Test-Path "$nopack")) {
+          Write-Host ("Unpack '$apack'")
+          $srcPath=Invoke-Expression -command  "$unpack $apack $nopack"
+        }
+      }
     }
 
     $rinst = install -invoke $invoke -prgdir $prgdir -prgfile $prgfile -prgver $prgver
@@ -1157,7 +1181,7 @@ $jdk_dir   = installPrg -aprgname     "jdk"                     -url          "h
                         -urlmatch     "http://download.oracle.com/otn-pub/java/jdk/.*/jdk-7u45-windows-$jdk_urlmatch_arc.exe"             `
                         -urlver "http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html" `
                         -urlmatch_ver "(jdk-\du\d+-windows-$jdk_urlmatch_arc).exe" `
-                                    -test         "jdkReplica.exe" `
+                                    -test         "bin\java.exe" `
                                     -hostname "download.oracle.com" `
                         -jdk `
                         -url_replace  'jdkreplica.codeplex.com.*,www.klopfenstein.net/download.aspx?file=jdkreplica%2fjdkreplica-executable.zip'
