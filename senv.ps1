@@ -820,6 +820,7 @@ $sbt = {
 $sbt_urlmatch_arc = if ( Test-Win64 ) { "x64.zip" } else { "\d\d\d\d.zip" }
 $sbt_dir   = installPrg -aprgname     "sbt"                       -url          "http://www.sublimetext.com/3" `
                         -urlmatch     "Sublime.*$sbt_urlmatch_arc"    -urlmatch_arc "$sbt_urlmatch_arc" `
+                        -invoke       "if not exist @DEST@\\..\\Data (move @DEST@\\Data @DEST@\\..) & if not exist @DEST@\\_Data (move @DEST@\\Data @DEST@\\_Data) && mklink /J @DEST@\\Data @DEST@\\..\Data" `
                         -urlmatch_ver "Sublime.*$sbt_urlmatch_arc"    -test         "sublime_text.exe" `
                         -unzip
 cleanAddPath "\\Sublime.*" ""
