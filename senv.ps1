@@ -604,7 +604,7 @@ function installPrg([String]$aprgname, [String]$url, [String]$urlver="", [String
         $destination.Copyhere($zipPackage.items(), 0x14)
       }
       elseif ( $prgfile.EndsWith(".7z") ) {
-        $uncompress=uncompress -destination "prgdir\tmp" -archive "$prgdir\$prgfile" -msgPrefix "prgdir/prgfile"
+        $uncompress=uncompress -destination "$prgdir\tmp" -archive "$prgdir\$prgfile" -msgPrefix "prgdir/prgfile"
       }
       $files = Get-ChildItem  "$prgdir\tmp"
       $afolder=$files | Where { $_.PSIsContainer -and $_.Name -eq "$prgver_space" } | sort CreationTime | select -l 1
