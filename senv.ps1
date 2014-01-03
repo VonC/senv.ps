@@ -1195,9 +1195,9 @@ Set-Variable -Name "jdk_dir" -Value $jdk_dir -Scope Global
 function post-all-install() {
   cleanAddPath "" "$prgs\bin"
   cleanAddPath "" "$prog\bin"
-  cleanAddPath "" "$gow_dir\bin"
   cleanAddPath "" "$gpg_dir"
   cleanAddPath "" "$git_dir\bin"
+  cleanAddPath "" "$gow_dir\bin"
   cleanAddPath "" "%PROG%\go\bin"
   cleanAddPath "" "$prgs\node"
   cleanAddPath "" "$ruby_dir\bin"
