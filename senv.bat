@@ -13,4 +13,6 @@ copy "%prog%\git\senv\gtags.bat" "%prgs%\bin" >NUL
 if not exist "%prgs%\bin\aliases.bat" copy "%prog%\git\senv\aliases.bat" "%prgs%\bin" >NUL
 if not exist "%prgs%\bin\goupdate.bat" copy "%prog%\git\senv\goupdate.bat" "%prgs%\bin" >NUL
 
+if not exist "%HOME%\.gitconfig" copy "%prog%\git\senv\.gitconfig" "%HOME%" >NUL
+
 if exist "%~dp0aliases.bat" call "%~dp0aliases.bat"
