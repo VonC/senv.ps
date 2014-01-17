@@ -1180,7 +1180,7 @@ $global:jdk_dir = ""
 $jdk = {
 $jdk_urlmatch_arc = if ( Test-Win64 ) { "x64" } else { "i586" }
 $jdk_dir   = installPrg -aprgname     "jdk"                     -url          "http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html" `
-                        -urlmatch     "http://download.oracle.com/otn-pub/java/jdk/.*/jdk-7u45-windows-$jdk_urlmatch_arc.exe"             `
+                        -urlmatch     "http://download.oracle.com/otn-pub/java/jdk/.*/jdk-.*?-windows-$jdk_urlmatch_arc.exe"             `
                         -urlver "http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html" `
                         -urlmatch_ver "(jdk-\du\d+-windows-$jdk_urlmatch_arc).exe" `
                                     -test         "bin\java.exe" `
