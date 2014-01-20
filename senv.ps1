@@ -734,6 +734,7 @@ $gow_dir   = installPrg -aprgname     "Gow"                      -url          "
 cleanAddPath "\\Gow-" ""
 # http://stackoverflow.com/questions/12535419/powershell-setting-a-global-variable-from-a-function-where-the-global-variable-n
 Set-Variable -Name "gow_dir" -Value $gow_dir -Scope Global
+invoke-expression 'doskey grep=$gow_dir\bin\grep.exe `$* ; doskey /exename=grep grep=$gow_dir\bin\grep.exe `$*'
 }
 
 $global:git_dir = ""
