@@ -772,6 +772,7 @@ cleanAddPath "\\python" ""
 invoke-expression 'doskey python=$python_dir\python.exe $* ; doskey /exename=python python=$python_dir\python.exe $*'
 }
 
+$global:hg_dir = ""
 $hg = {
 $hg_urlmatch_arc = if ( Test-Win64 ) { "-x64.exe" } else { "\d\.exe" }
 # http://www.jrsoftware.org/ishelp/index.php?topic=setupcmdline
@@ -781,8 +782,7 @@ $hg_dir   = installPrg -aprgname     "hg"                        -url          "
                         -invoke       "@FILE@ /LOG=@DEST@.log /DIR=@DEST@ /NOICONS /VERYSILENT"
 cleanAddPath "\\Mercurial" ""
 # Write-Host "hg_dir='$hg_dir'"
-addbin -filename "$prgs\bin\hg.bat" -command "$hg_dir\hg.exe %*"
-invoke-expression 'doskey hg= ; doskey /exename=hg hg='
+Set-Variable -Name "hg_dir" -Value $hg_dir -Scope Global
 }
 
 $bzr = {
@@ -1198,6 +1198,7 @@ function post-all-install() {
   cleanAddPath "" "$prog\bin"
   cleanAddPath "" "$gpg_dir"
   cleanAddPath "" "$git_dir\bin"
+  cleanAddPath "" "$hg_dir"
   cleanAddPath "" "$gow_dir\bin"
   cleanAddPath "" "%PROG%\go\bin"
   cleanAddPath "" "$prgs\node"
