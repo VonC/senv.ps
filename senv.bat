@@ -16,3 +16,7 @@ if not exist "%prgs%\bin\goupdate.bat" copy "%prog%\git\senv\goupdate.bat" "%prg
 if not exist "%HOME%\.gitconfig" copy "%prog%\git\senv\.gitconfig" "%HOME%" >NUL
 
 if exist "%~dp0aliases.bat" call "%~dp0aliases.bat"
+
+copy "%prog%\git\senv\gt.bat" "%prgs%\bin" >NUL
+copy "%prog%\git\senv\gtt.bat" "%prgs%\bin" >NUL
+copy "%prog%\git\senv\gc.bat" "%prgs%\bin" >NUL
