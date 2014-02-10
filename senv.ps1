@@ -856,7 +856,7 @@ if ( -not ( Test-Path "$goimports" ) ) {
 $global:gpg_dir   = ""
 $gpg = {
 # http://www.gpg4win.org/doc/en/gpg4win-compendium_35.html
-$gpg_dir   = installPrg -aprgname     "gpg"                      -url          "http://files.gpg4win.org/Beta/?C=M;O=D/" `
+$gpg_dir   = installPrg -aprgname     "gpg"                      -url          "http://files.gpg4win.org/?C=M;O=D" `
                         -urlmatch     "gpg4win-vanilla-.*.exe(?!.sig)"  -urlmatch_arc "" `
                         -urlmatch_ver "gpg4win-vanilla-.*.exe(?!.sig)"  -test         "gpg2.exe" `
                         -invoke       "@FILE@ /S /D=@DEST@"
