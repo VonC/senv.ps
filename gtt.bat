@@ -1,2 +1,2 @@
 @echo off
-go test|grep -v -e "^\.$"|grep -v -e "^\.\..*"|grep -v "^$"|grep -v "thus far"
+go test|grep -v -e "^\.$"|grep -v -e "^\.\.*$"|grep -v "^$"|grep -v "thus far"
