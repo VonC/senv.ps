@@ -1,4 +1,5 @@
 @echo off
+SETLOCAL ENABLEDELAYEDEXPANSION
 set PATH=%SYSTEMROOT%\System32;%SYSTEMROOT%;%SYSTEMROOT%\System32\Wbem;%prgs%\gpg\latest\pub;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0
 call kpag
 if not exist %prgs%\tmp\t.asc (
