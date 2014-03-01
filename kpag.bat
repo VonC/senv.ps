@@ -1,1 +1,1 @@
-kp gpg-agent.exe
+"%prgs%\bin\kp.bat" gpg-agent.exe
