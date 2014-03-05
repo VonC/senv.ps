@@ -22,3 +22,4 @@ copy "%prog%\git\senv\gt*.bat" "%prgs%\bin" >NUL
 copy "%prog%\git\senv\gc.bat" "%prgs%\bin" >NUL
 copy "%prog%\git\senv\gocov.bat" "%prgs%\bin" >NUL
 copy "%prog%\git\senv\g.bat" "%prgs%\bin" >NUL
+copy "%prog%\git\senv\gi.bat" "%prgs%\bin" >NUL
