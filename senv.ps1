@@ -739,9 +739,11 @@ invoke-expression 'doskey grep=$gow_dir\bin\grep.exe `$* ; doskey /exename=grep 
 
 $global:git_dir = ""
 $git = {
-$git_dir   = installPrg -aprgname     "git"                      -url          "https://code.google.com/p/msysgit/downloads/list?can=2&q=portable&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount" `
-                        -urlmatch     "msysgit.googlecode.com/files/Portable.*.7z"            -urlmatch_arc "" `
-                        -urlmatch_ver "Portable.*.7z"            -test         "git-cmd.bat" `
+$git_dir   = installPrg -aprgname     "git"                      -url          "https://github.com/git-for-windows/git/releases" `
+                        -urlmatch     "git-for-windows/git/releases/download/.*.7z.exe"            -urlmatch_arc "" `
+                        -urlver "https://github.com/git-for-windows/git/releases" `
+                        -urlmatch_ver "Git-([^-]*?)-" -ver_only `
+                                    -test         "git-cmd.exe" `
                         -invoke       ""                         -unzip
 cleanAddPath "git" ""
 invoke-expression 'doskey gl=git lg -20 ; doskey /exename=gl gl=git lg -20'
