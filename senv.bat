@@ -1,7 +1,9 @@
 @echo off
 
+set PATH=C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;%PATH%
 @powershell -NoProfile -ExecutionPolicy unrestricted -Command "& \"%prog%\git\senv\senv.ps1\"" %*
 call %PRGS%\setpath.bat
+set PATH=C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;%PATH%
 
 copy "%prog%\git\senv\senv.bat" "%prgs%\bin" >NUL
 copy "%prog%\git\senv\alias.bat" "%prgs%\bin" >NUL
