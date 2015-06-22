@@ -7,5 +7,6 @@ set GFW="%LOCALAPPDATA%\GitHub\GitHub.appref-ms"
 doskey g4w=%GFW% $*
 
 doskey cdag=cd %PROG%\go\src\github.com\VonC\asciidocgo
+doskey cdgp=cd %PROG%\go\src\github.com\VonC\gopanic
 doskey cdar=cd %PROG%\git\asciidoctor
 doskey /exename=gocov gocov=go test -coverprofile=coverage.out^&^&go tool cover -html=coverage.out
